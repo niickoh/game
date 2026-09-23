@@ -49,7 +49,7 @@ jobs:
           password: ${{ secrets.FTP_PASS }}
           protocol: ftps
           port: 21
-          local-dir: test/
+          local-dir: /
           server-dir: /thegame/
           dangerous-clean-slate: false
           timeout: 120000
