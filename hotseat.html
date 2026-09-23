@@ -1,0 +1,954 @@
+<title>The Game Online</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+  :root{
+    --bg:#E7ECEF;
+    --felt:#DCE3E8;
+    --surface:#FFFFFF;
+    --surface-2:#F4F7F9;
+    --ink:#161B21;
+    --ink-2:#4B5763;
+    --muted:#7D8A97;
+    --line:#C6D0D8;
+    --up:#B84A26;
+    --up-soft:#F6E2D8;
+    --down:#2A6480;
+    --down-soft:#DBE8EF;
+    --jump:#9A7413;
+    --jump-soft:#F7ECCD;
+    --bad:#A8322A;
+    --good:#2F6B47;
+    --shadow:0 1px 0 rgba(22,27,33,.06), 0 6px 18px -8px rgba(22,27,33,.28);
+    --radius:14px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0E1216;
+      --felt:#141A20;
+      --surface:#1B232B;
+      --surface-2:#222C36;
+      --ink:#E9EFF4;
+      --ink-2:#B3C0CC;
+      --muted:#7E8D9B;
+      --line:#2E3A45;
+      --up:#E8825A;
+      --up-soft:#3A2018;
+      --down:#69B2D6;
+      --down-soft:#122C3A;
+      --jump:#E3BE63;
+      --jump-soft:#33280E;
+      --bad:#E2695D;
+      --good:#6FBF8E;
+      --shadow:0 1px 0 rgba(0,0,0,.4), 0 10px 24px -12px rgba(0,0,0,.8);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0E1216;
+    --felt:#141A20;
+    --surface:#1B232B;
+    --surface-2:#222C36;
+    --ink:#E9EFF4;
+    --ink-2:#B3C0CC;
+    --muted:#7E8D9B;
+    --line:#2E3A45;
+    --up:#E8825A;
+    --up-soft:#3A2018;
+    --down:#69B2D6;
+    --down-soft:#122C3A;
+    --jump:#E3BE63;
+    --jump-soft:#33280E;
+    --bad:#E2695D;
+    --good:#6FBF8E;
+    --shadow:0 1px 0 rgba(0,0,0,.4), 0 10px 24px -12px rgba(0,0,0,.8);
+  }
+
+  html,body{height:100%}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:"Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+    font-size:15px;
+    line-height:1.45;
+    -webkit-font-smoothing:antialiased;
+  }
+  *{box-sizing:border-box}
+  button{font:inherit;color:inherit}
+  :focus-visible{outline:2px solid var(--jump);outline-offset:2px}
+
+  .app{
+    display:flex;
+    flex-direction:column;
+    min-height:100%;
+    max-width:1080px;
+    margin:0 auto;
+    padding-inline:16px;
+    padding-block:0 18px;
+    gap:14px;
+  }
+
+  /* ---------- barra superior ---------- */
+  .topbar{
+    position:sticky;
+    top:env(safe-area-inset-top, 0px);
+    z-index:20;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    flex-wrap:wrap;
+    padding-block:12px 10px;
+    background:linear-gradient(var(--bg) 78%, transparent);
+  }
+  .brand{
+    font-family:"Bricolage Grotesque",system-ui,sans-serif;
+    font-weight:800;
+    font-size:19px;
+    letter-spacing:-.02em;
+    margin:0;
+    white-space:nowrap;
+  }
+  .brand span{color:var(--muted);font-weight:600}
+  .counters{display:flex;gap:8px;margin-left:auto;flex-wrap:wrap}
+  .counter{
+    display:flex;
+    flex-direction:column;
+    align-items:flex-end;
+    padding:4px 10px;
+    border-radius:9px;
+    background:var(--surface);
+    border:1px solid var(--line);
+    min-width:74px;
+  }
+  .counter b{
+    font-family:"IBM Plex Mono",ui-monospace,monospace;
+    font-size:17px;
+    font-weight:600;
+    line-height:1.1;
+    font-variant-numeric:tabular-nums;
+  }
+  .counter small{font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+  .topbtns{display:flex;gap:6px}
+  .ghost{
+    background:transparent;
+    border:1px solid var(--line);
+    border-radius:9px;
+    padding:7px 11px;
+    font-size:13px;
+    font-weight:500;
+    cursor:pointer;
+  }
+  .ghost:hover{background:var(--surface)}
+  .ghost[disabled]{opacity:.35;cursor:not-allowed}
+
+  /* ---------- pilas ---------- */
+  .table{
+    background:var(--felt);
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:14px;
+  }
+  .piles{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:12px;
+  }
+  .pile{
+    position:relative;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:8px;
+    padding:12px 10px 10px;
+    border-radius:var(--radius);
+    background:var(--surface);
+    border:1px solid var(--line);
+    box-shadow:var(--shadow);
+    transition:transform .12s ease, border-color .12s ease, box-shadow .12s ease;
+  }
+  .pile.up{border-top:3px solid var(--up)}
+  .pile.down{border-top:3px solid var(--down)}
+  .pile-dir{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-size:11px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    font-weight:600;
+  }
+  .pile.up .pile-dir{color:var(--up)}
+  .pile.down .pile-dir{color:var(--down)}
+  .pile-top{
+    font-family:"Bricolage Grotesque",system-ui,sans-serif;
+    font-weight:800;
+    font-size:clamp(38px,9vw,60px);
+    line-height:1;
+    letter-spacing:-.04em;
+    font-variant-numeric:tabular-nums;
+  }
+  .pile-meta{font-size:11px;color:var(--muted);font-family:"IBM Plex Mono",monospace}
+  .pile-hint{
+    min-height:18px;
+    font-size:11px;
+    font-weight:600;
+    letter-spacing:.04em;
+    color:var(--muted);
+    text-align:center;
+  }
+  .pile.playable{cursor:pointer}
+  .pile.playable:hover{transform:translateY(-3px)}
+  .pile.up.playable{border-color:var(--up);box-shadow:0 0 0 2px var(--up-soft), var(--shadow)}
+  .pile.down.playable{border-color:var(--down);box-shadow:0 0 0 2px var(--down-soft), var(--shadow)}
+  .pile.up.jump,
+  .pile.down.jump{border-color:var(--jump);box-shadow:0 0 0 2px var(--jump-soft), var(--shadow)}
+  .pile.blocked{opacity:.45}
+  .pile.dropping{transform:translateY(-3px) scale(1.02)}
+  .flag{
+    position:absolute;
+    top:6px;
+    right:6px;
+    width:26px;height:26px;
+    display:grid;place-items:center;
+    border-radius:8px;
+    border:1px solid transparent;
+    background:transparent;
+    font-size:13px;
+    opacity:.3;
+    cursor:pointer;
+    padding:0;
+  }
+  .flag:hover{opacity:.85;background:var(--surface-2)}
+  .flag.on{opacity:1;background:var(--jump-soft);border-color:var(--jump)}
+  .pile-played{
+    display:flex;gap:3px;flex-wrap:wrap;justify-content:center;
+    min-height:14px;
+  }
+  .chip{
+    font-family:"IBM Plex Mono",monospace;
+    font-size:10px;
+    padding:1px 5px;
+    border-radius:5px;
+    background:var(--surface-2);
+    color:var(--muted);
+  }
+  .chip.mine{background:var(--jump-soft);color:var(--jump);font-weight:600}
+
+  /* ---------- turno y mano ---------- */
+  .turn{
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .turn h2{
+    font-family:"Bricolage Grotesque",system-ui,sans-serif;
+    font-size:17px;
+    font-weight:700;
+    margin:0;
+    letter-spacing:-.01em;
+  }
+  .req{font-size:13px;color:var(--ink-2)}
+  .req b{font-variant-numeric:tabular-nums}
+  .hand{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    padding-block:2px 4px;
+    min-height:92px;
+    align-items:flex-start;
+  }
+  .card{
+    position:relative;
+    width:64px;height:88px;
+    border-radius:11px;
+    border:1px solid var(--line);
+    background:var(--surface);
+    box-shadow:var(--shadow);
+    display:grid;
+    place-items:center;
+    font-family:"Bricolage Grotesque",system-ui,sans-serif;
+    font-weight:800;
+    font-size:27px;
+    letter-spacing:-.03em;
+    font-variant-numeric:tabular-nums;
+    cursor:pointer;
+    padding:0;
+    transition:transform .12s ease, box-shadow .12s ease;
+  }
+  .card:hover{transform:translateY(-4px)}
+  .card.dead{opacity:.34;cursor:not-allowed}
+  .card.dead:hover{transform:none}
+  .card.sel{
+    border-color:var(--ink);
+    box-shadow:0 0 0 2px var(--ink), var(--shadow);
+    transform:translateY(-8px);
+  }
+  .card::after{
+    content:attr(data-n);
+    position:absolute;
+    bottom:5px;right:7px;
+    font-family:"IBM Plex Mono",monospace;
+    font-size:9px;
+    font-weight:500;
+    color:var(--muted);
+  }
+  .actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .primary{
+    border:none;
+    border-radius:10px;
+    padding:11px 18px;
+    font-weight:600;
+    font-size:14px;
+    background:var(--ink);
+    color:var(--bg);
+    cursor:pointer;
+  }
+  .primary[disabled]{opacity:.35;cursor:not-allowed}
+  .note{font-size:12.5px;color:var(--muted)}
+  .note.warn{color:var(--bad);font-weight:600}
+
+  /* ---------- tabla de jugadores ---------- */
+  .roster{
+    display:flex;
+    gap:6px;
+    flex-wrap:wrap;
+    font-size:12px;
+  }
+  .who{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    padding:3px 9px;
+    border-radius:999px;
+    border:1px solid var(--line);
+    background:var(--surface);
+    color:var(--ink-2);
+  }
+  .who.active{border-color:var(--ink);color:var(--ink);font-weight:600}
+  .who i{
+    font-style:normal;
+    font-family:"IBM Plex Mono",monospace;
+    font-size:11px;
+    color:var(--muted);
+  }
+
+  /* ---------- overlays ---------- */
+  .overlay{
+    position:fixed;inset:0;
+    z-index:60;
+    display:grid;
+    place-items:center;
+    padding:20px;
+    background:color-mix(in srgb, var(--bg) 85%, transparent);
+    backdrop-filter:blur(6px);
+    overflow-y:auto;
+  }
+  .panel{
+    width:100%;
+    max-width:520px;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:18px;
+    box-shadow:var(--shadow);
+    padding:22px;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+  }
+  .panel h2{
+    font-family:"Bricolage Grotesque",system-ui,sans-serif;
+    font-size:24px;
+    font-weight:800;
+    letter-spacing:-.025em;
+    margin:0;
+    text-wrap:balance;
+  }
+  .panel p{margin:0;color:var(--ink-2);font-size:14px}
+  .panel ul{margin:0;padding-left:18px;color:var(--ink-2);font-size:14px;display:grid;gap:6px}
+  .panel li b{color:var(--ink)}
+  .seg{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+  .seg button{
+    padding:10px 0;
+    border-radius:10px;
+    border:1px solid var(--line);
+    background:var(--surface-2);
+    font-weight:600;
+    cursor:pointer;
+  }
+  .seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+  .label{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600}
+  .names{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:8px;
+    max-height:220px;
+    overflow-y:auto;
+  }
+  .names input{
+    padding:9px 11px;
+    border-radius:9px;
+    border:1px solid var(--line);
+    background:var(--surface-2);
+    color:var(--ink);
+    font:inherit;
+    width:100%;
+  }
+  .score{
+    font-family:"Bricolage Grotesque",system-ui,sans-serif;
+    font-size:64px;
+    font-weight:800;
+    line-height:1;
+    letter-spacing:-.04em;
+    font-variant-numeric:tabular-nums;
+  }
+  .score.win{color:var(--good)}
+  .score.lose{color:var(--bad)}
+  .leftover{display:flex;gap:4px;flex-wrap:wrap}
+  .fineprint{font-size:12px;color:var(--muted)}
+
+  @media (max-width:720px){
+    .piles{grid-template-columns:repeat(2,1fr)}
+    .counters{width:100%;margin-left:0;justify-content:space-between}
+    .counter{flex:1;align-items:center}
+    .card{width:56px;height:78px;font-size:23px}
+    .hand{min-height:82px}
+    .names{grid-template-columns:1fr}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{transition:none}
+  }
+</style>
+
+<div class="app">
+  <header class="topbar">
+    <h1 class="brand">The Game <span>&middot; 1 &rarr; 100</span></h1>
+    <div class="counters">
+      <div class="counter"><b id="c-deck">0</b><small>Mazo</small></div>
+      <div class="counter"><b id="c-left">98</b><small>Sin jugar</small></div>
+      <div class="counter"><b id="c-done">0</b><small>Colocadas</small></div>
+    </div>
+    <div class="topbtns">
+      <button class="ghost" id="btn-rules" type="button">Reglas</button>
+      <button class="ghost" id="btn-new" type="button">Nueva</button>
+    </div>
+  </header>
+
+  <section class="table">
+    <div class="piles" id="piles"></div>
+  </section>
+
+  <div class="roster" id="roster"></div>
+
+  <section class="turn">
+    <h2 id="turn-name">&mdash;</h2>
+    <span class="req" id="turn-req"></span>
+  </section>
+
+  <div class="hand" id="hand"></div>
+
+  <div class="actions">
+    <button class="primary" id="btn-end" type="button">Terminar turno</button>
+    <button class="ghost" id="btn-undo" type="button">Deshacer</button>
+    <span class="note" id="note"></span>
+  </div>
+</div>
+
+<div class="overlay" id="ov-setup" hidden>
+  <div class="panel">
+    <h2>The Game</h2>
+    <p>Cooperativo: entre todos hay que colocar las 98 cartas (2 a 99) en cuatro pilas. Se gana o se pierde en equipo.</p>
+    <div>
+      <div class="label" style="margin-bottom:6px">Jugadores</div>
+      <div class="seg" id="seg-players"></div>
+      <p class="fineprint" id="hand-note" style="margin-top:8px"></p>
+    </div>
+    <div>
+      <div class="label" style="margin-bottom:6px">Nombres</div>
+      <div class="names" id="names"></div>
+    </div>
+    <button class="primary" id="btn-start" type="button">Repartir</button>
+  </div>
+</div>
+
+<div class="overlay" id="ov-pass" hidden>
+  <div class="panel" style="text-align:center;align-items:center">
+    <h2 id="pass-name">Pasa el dispositivo</h2>
+    <p>Que nadie m&aacute;s mire la mano. Cuando la tengas t&uacute;, abre tus cartas.</p>
+    <button class="primary" id="btn-reveal" type="button">Ver mi mano</button>
+  </div>
+</div>
+
+<div class="overlay" id="ov-rules" hidden>
+  <div class="panel">
+    <h2>C&oacute;mo se juega</h2>
+    <ul>
+      <li><b>Cuatro pilas.</b> Dos suben desde 1 (solo cartas mayores) y dos bajan desde 100 (solo menores).</li>
+      <li><b>El salto de 10.</b> En una pila ascendente puedes poner una carta exactamente 10 <em>menor</em> que la de arriba; en una descendente, exactamente 10 <em>mayor</em>. Es el truco que salva partidas.</li>
+      <li><b>M&iacute;nimo por turno.</b> Dos cartas mientras quede mazo, una sola cuando el mazo se acaba. Puedes jugar m&aacute;s si te conviene.</li>
+      <li><b>Al terminar el turno</b> robas hasta completar tu mano.</li>
+      <li><b>Comunicaci&oacute;n.</b> Puedes decir &laquo;no juegues en esta pila&raquo; o &laquo;tengo algo bueno ac&aacute;&raquo;, pero <em>nunca</em> n&uacute;meros concretos. Usa la banderita de cada pila para marcarla.</li>
+      <li><b>Se gana</b> colocando las 98 cartas. Se pierde apenas alguien no pueda cumplir el m&iacute;nimo. Quedar bajo 10 cartas ya es un buen resultado.</li>
+    </ul>
+    <p class="fineprint">Juego original de Steffen Benndorf (Nürnberger-Spielkarten-Verlag), pensado para 1 a 5 jugadores. De 6 a 10 es una variante de la casa: manos m&aacute;s chicas para que las 98 cartas alcancen.</p>
+    <button class="primary" id="btn-closerules" type="button">Entendido</button>
+  </div>
+</div>
+
+<div class="overlay" id="ov-over" hidden>
+  <div class="panel" style="align-items:flex-start">
+    <div class="score" id="over-score">0</div>
+    <h2 id="over-title">Fin</h2>
+    <p id="over-msg"></p>
+    <div>
+      <div class="label" style="margin-bottom:6px">Cartas que quedaron fuera</div>
+      <div class="leftover" id="over-left"></div>
+    </div>
+    <button class="primary" id="btn-again" type="button">Jugar otra</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var HAND_SIZE = 6;
+  var MAX_PLAYERS = 10;
+  var KEY = "thegame.v1";
+
+  var S = null;           // estado de la partida
+  var selected = null;    // indice de la carta elegida en la mano
+  var dragIdx = null;
+  var setupCount = 2;
+  var setupNames = [];
+  for(var sn=0; sn<MAX_PLAYERS; sn++) setupNames.push("Jugador " + (sn+1));
+
+  function $(id){ return document.getElementById(id); }
+
+  /* ---------- guardado local (comodidad, nunca critico) ---------- */
+  function save(){
+    try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){}
+  }
+  function load(){
+    try {
+      var raw = localStorage.getItem(KEY);
+      if(!raw) return null;
+      var s = JSON.parse(raw);
+      return (s && s.piles && s.players) ? s : null;
+    } catch(e){ return null; }
+  }
+  function clearSave(){ try { localStorage.removeItem(KEY); } catch(e){} }
+
+  /* ---------- reglas ---------- */
+  function newDeck(){
+    var d = [], n, i, j, t;
+    for(n=2; n<=99; n++) d.push(n);
+    for(i=d.length-1; i>0; i--){
+      j = Math.floor(Math.random()*(i+1));
+      t = d[i]; d[i] = d[j]; d[j] = t;
+    }
+    return d;
+  }
+  function top(p){ return p.cards[p.cards.length-1]; }
+  function isJump(card, p){
+    return p.dir === "up" ? card === top(p) - 10 : card === top(p) + 10;
+  }
+  function canPlay(card, p){
+    if(p.dir === "up") return card > top(p) || card === top(p) - 10;
+    return card < top(p) || card === top(p) + 10;
+  }
+  function minPlay(){ return S.deck.length > 0 ? 2 : 1; }
+  function cur(){ return S.players[S.current]; }
+  function asc(a,b){ return a-b; }
+
+  function playableSomewhere(card){
+    return S.piles.some(function(p){ return canPlay(card, p); });
+  }
+  function anyMove(){
+    return cur().hand.some(playableSomewhere);
+  }
+  function cardsLeft(){
+    return S.players.reduce(function(n,p){ return n + p.hand.length; }, S.deck.length);
+  }
+
+  function startGame(count, names){
+    var deck = newDeck();
+    var size = HAND_SIZE;
+    var players = [], i, k;
+    for(i=0; i<count; i++){
+      players.push({
+        name: (names[i] || "").trim() || ("Jugador " + (i+1)),
+        hand: []
+      });
+    }
+    for(k=0; k<size; k++)
+      for(i=0; i<count; i++)
+        players[i].hand.push(deck.pop());
+    for(i=0; i<count; i++) players[i].hand.sort(asc);
+
+    S = {
+      players: players,
+      current: 0,
+      deck: deck,
+      piles: [
+        {dir:"up",   cards:[1]},
+        {dir:"up",   cards:[1]},
+        {dir:"down", cards:[100]},
+        {dir:"down", cards:[100]}
+      ],
+      turn: [],
+      flags: [false,false,false,false],
+      phase: count > 1 ? "pass" : "play",
+      over: null
+    };
+    selected = null;
+    save();
+    render();
+  }
+
+  function play(cardIdx, pileIdx){
+    if(S.phase !== "play") return;
+    var hand = cur().hand;
+    var card = hand[cardIdx];
+    var pile = S.piles[pileIdx];
+    if(card === undefined || !canPlay(card, pile)) return;
+    hand.splice(cardIdx, 1);
+    pile.cards.push(card);
+    S.turn.push({card:card, pile:pileIdx});
+    selected = null;
+    if(!checkLoss()){ save(); render(); }
+  }
+
+  function undo(){
+    if(S.phase !== "play" || !S.turn.length) return;
+    var last = S.turn.pop();
+    S.piles[last.pile].cards.pop();
+    cur().hand.push(last.card);
+    cur().hand.sort(asc);
+    selected = null;
+    save();
+    render();
+  }
+
+  // Se pierde apenas alguien no puede cumplir el minimo del turno.
+  function checkLoss(){
+    if(S.turn.length >= minPlay()) return false;
+    if(anyMove()) return false;
+    endGame(false);
+    return true;
+  }
+
+  function endTurn(){
+    if(S.phase !== "play" || S.turn.length < minPlay()) return;
+    var hand = cur().hand;
+    var size = HAND_SIZE;
+    while(hand.length < size && S.deck.length) hand.push(S.deck.pop());
+    hand.sort(asc);
+
+    if(cardsLeft() === 0){ endGame(true); return; }
+
+    S.current = (S.current + 1) % S.players.length;
+    S.turn = [];
+    selected = null;
+    S.phase = S.players.length > 1 ? "pass" : "play";
+    if(S.phase === "play" && checkLoss()) return;
+    save();
+    render();
+  }
+
+  function endGame(won){
+    var left = S.deck.slice();
+    S.players.forEach(function(p){ left = left.concat(p.hand); });
+    left.sort(asc);
+    S.over = { won: won, left: left };
+    S.phase = "over";
+    clearSave();
+    render();
+  }
+
+  /* ---------- pintado ---------- */
+  function render(){
+    if(!S){ renderSetup(); return; }
+    $("ov-setup").hidden = true;
+
+    $("c-deck").textContent = S.deck.length;
+    $("c-left").textContent = cardsLeft();
+    $("c-done").textContent = 98 - cardsLeft();
+
+    renderPiles();
+    renderRoster();
+    renderHand();
+    renderTurn();
+
+    $("ov-pass").hidden = S.phase !== "pass";
+    if(S.phase === "pass") $("pass-name").textContent = cur().name + ", te toca";
+
+    $("ov-over").hidden = S.phase !== "over";
+    if(S.phase === "over") renderOver();
+  }
+
+  function renderPiles(){
+    var wrap = $("piles");
+    wrap.innerHTML = "";
+    var live = S.phase === "play";
+
+    S.piles.forEach(function(p, idx){
+      var el = document.createElement("div");
+      el.className = "pile " + p.dir;
+
+      var card = (live && selected !== null) ? cur().hand[selected] : undefined;
+      var playable = card !== undefined && canPlay(card, p);
+      var jump = playable && isJump(card, p);
+      if(playable) el.classList.add("playable");
+      if(jump) el.classList.add("jump");
+      if(card !== undefined && !playable) el.classList.add("blocked");
+
+      var mine = S.turn.filter(function(t){ return t.pile === idx; })
+                       .map(function(t){ return '<span class="chip mine">' + t.card + '</span>'; })
+                       .join("");
+
+      el.innerHTML =
+        '<div class="pile-dir">' + (p.dir === "up" ? "&#9650; Sube" : "&#9660; Baja") + '</div>' +
+        '<div class="pile-top">' + top(p) + '</div>' +
+        '<div class="pile-meta">' + (p.cards.length - 1) + ' cartas</div>' +
+        '<div class="pile-hint">' + (jump ? "&#8617; salto de 10" : (playable ? "colocar aqu&iacute;" : "")) + '</div>' +
+        '<div class="pile-played">' + mine + '</div>';
+
+      var flag = document.createElement("button");
+      flag.type = "button";
+      flag.className = "flag" + (S.flags[idx] ? " on" : "");
+      flag.textContent = "⛔";
+      flag.title = "Marcar: no jueguen en esta pila";
+      flag.setAttribute("aria-label", "Marcar la pila " + (idx+1) + " como bloqueada para el equipo");
+      flag.setAttribute("aria-pressed", S.flags[idx] ? "true" : "false");
+      flag.addEventListener("click", function(ev){
+        ev.stopPropagation();
+        S.flags[idx] = !S.flags[idx];
+        save();
+        render();
+      });
+      el.appendChild(flag);
+
+      if(playable){
+        el.addEventListener("click", function(){ play(selected, idx); });
+      }
+      el.addEventListener("dragover", function(ev){
+        if(!live || dragIdx === null) return;
+        var c = cur().hand[dragIdx];
+        if(c === undefined || !canPlay(c, p)) return;
+        ev.preventDefault();
+        el.classList.add("dropping");
+      });
+      el.addEventListener("dragleave", function(){ el.classList.remove("dropping"); });
+      el.addEventListener("drop", function(ev){
+        ev.preventDefault();
+        el.classList.remove("dropping");
+        if(dragIdx === null) return;
+        var i = dragIdx;
+        dragIdx = null;
+        play(i, idx);
+      });
+
+      wrap.appendChild(el);
+    });
+  }
+
+  function renderRoster(){
+    var wrap = $("roster");
+    wrap.innerHTML = "";
+    if(S.players.length < 2) return;
+    S.players.forEach(function(p, i){
+      var el = document.createElement("span");
+      el.className = "who" + (i === S.current ? " active" : "");
+      el.innerHTML = p.name + ' <i>' + p.hand.length + '</i>';
+      wrap.appendChild(el);
+    });
+  }
+
+  function renderHand(){
+    var wrap = $("hand");
+    wrap.innerHTML = "";
+    if(S.phase !== "play"){
+      wrap.innerHTML = '<span class="note">Mano oculta.</span>';
+      return;
+    }
+    cur().hand.forEach(function(card, i){
+      var ok = playableSomewhere(card);
+      var el = document.createElement("button");
+      el.type = "button";
+      el.className = "card" + (ok ? "" : " dead") + (selected === i ? " sel" : "");
+      el.setAttribute("data-n", card);
+      el.setAttribute("aria-pressed", selected === i ? "true" : "false");
+      el.textContent = card;
+      el.disabled = !ok;
+      el.draggable = ok;
+      el.addEventListener("click", function(){
+        selected = (selected === i) ? null : i;
+        render();
+      });
+      el.addEventListener("dragstart", function(ev){
+        dragIdx = i;
+        selected = i;
+        try { ev.dataTransfer.setData("text/plain", String(card)); } catch(e){}
+        render();
+      });
+      el.addEventListener("dragend", function(){ dragIdx = null; });
+      wrap.appendChild(el);
+    });
+  }
+
+  function renderTurn(){
+    var need = minPlay();
+    var falta = Math.max(0, need - S.turn.length);
+
+    $("turn-name").textContent = S.phase === "play"
+      ? ("Turno de " + cur().name)
+      : cur().name;
+    $("turn-req").innerHTML = S.deck.length
+      ? ('M&iacute;nimo <b>' + need + '</b> cartas &middot; llevas <b>' + S.turn.length + '</b>')
+      : ('Mazo agotado: basta <b>1</b> carta &middot; llevas <b>' + S.turn.length + '</b>');
+
+    $("btn-end").disabled = S.phase !== "play" || falta > 0;
+    $("btn-undo").disabled = S.phase !== "play" || S.turn.length === 0;
+
+    var note = $("note");
+    note.className = "note";
+    if(S.phase !== "play"){ note.textContent = ""; return; }
+
+    if(falta > 0){
+      if(anyMove()){
+        note.textContent = "Te " + (falta === 1 ? "falta 1 carta" : "faltan " + falta + " cartas") +
+                           " para cerrar el turno.";
+      } else {
+        note.textContent = "Sin jugadas posibles.";
+        note.className = "note warn";
+      }
+    } else {
+      note.textContent = "Puedes seguir bajando cartas o terminar el turno.";
+    }
+  }
+
+  function renderOver(){
+    var o = S.over;
+    var n = o.left.length;
+    $("over-score").textContent = n;
+    $("over-score").className = "score " + (o.won ? "win" : "lose");
+    $("over-title").textContent = o.won
+      ? "Las 98 colocadas"
+      : (n <= 10 ? "Buen resultado" : "Se acabaron las jugadas");
+    $("over-msg").textContent = o.won
+      ? "Partida perfecta: no qued&oacute; ninguna carta fuera."
+      : (n <= 10
+          ? "Quedaron " + n + " cartas fuera. Bajo 10 el juego ya lo considera un buen resultado."
+          : "Quedaron " + n + " cartas fuera. La meta es bajar de 10.");
+    $("over-left").innerHTML = o.left.map(function(c){
+      return '<span class="chip">' + c + '</span>';
+    }).join("");
+  }
+
+  /* ---------- pantalla inicial ---------- */
+  function renderSetup(){
+    $("ov-setup").hidden = false;
+    $("ov-pass").hidden = true;
+    $("ov-over").hidden = true;
+
+    var seg = $("seg-players");
+    seg.innerHTML = "";
+    for(var n=1; n<=MAX_PLAYERS; n++){
+      (function(n){
+        var b = document.createElement("button");
+        b.type = "button";
+        b.textContent = n;
+        b.setAttribute("aria-pressed", setupCount === n ? "true" : "false");
+        b.addEventListener("click", function(){ setupCount = n; renderSetup(); });
+        seg.appendChild(b);
+      })(n);
+    }
+
+    var names = $("names");
+    names.innerHTML = "";
+    for(var i=0; i<setupCount; i++){
+      (function(i){
+        var inp = document.createElement("input");
+        inp.type = "text";
+        inp.id = "name-" + i;
+        inp.value = setupNames[i];
+        inp.maxLength = 18;
+        inp.setAttribute("aria-label", "Nombre del jugador " + (i+1));
+        inp.addEventListener("input", function(){ setupNames[i] = inp.value; });
+        names.appendChild(inp);
+      })(i);
+    }
+
+    var hs = HAND_SIZE;
+    $("hand-note").textContent = setupCount <= 5
+      ? hs + " cartas en mano cada uno, como el juego original."
+      : hs + " cartas en mano cada uno: sobre 5 jugadores la mano se achica para que el mazo alcance.";
+    $("btn-start").textContent = "Repartir " + hs + " cartas a cada uno";
+  }
+
+  /* ---------- eventos ---------- */
+  $("btn-end").addEventListener("click", endTurn);
+  $("btn-undo").addEventListener("click", undo);
+  $("btn-reveal").addEventListener("click", function(){
+    S.phase = "play";
+    if(checkLoss()) return;
+    save();
+    render();
+  });
+  $("btn-rules").addEventListener("click", function(){ $("ov-rules").hidden = false; });
+  $("btn-closerules").addEventListener("click", function(){ $("ov-rules").hidden = true; });
+  $("btn-new").addEventListener("click", function(){
+    if(S && S.phase !== "over" && !window.confirm("Abandonar la partida actual?")) return;
+    clearSave();
+    S = null;
+    selected = null;
+    render();
+  });
+  $("btn-again").addEventListener("click", function(){
+    $("ov-over").hidden = true;
+    S = null;
+    selected = null;
+    render();
+  });
+  $("btn-start").addEventListener("click", function(){
+    var names = [], el;
+    for(var i=0; i<setupCount; i++){
+      el = $("name-" + i);
+      names.push(el ? el.value : "");
+    }
+    startGame(setupCount, names);
+  });
+
+  document.addEventListener("keydown", function(ev){
+    if(!S || S.phase !== "play") return;
+    if(ev.key === "Escape"){ selected = null; render(); return; }
+    if(ev.key === "Enter" && !$("btn-end").disabled){ endTurn(); return; }
+    if(selected !== null && ev.key >= "1" && ev.key <= "4"){
+      var idx = parseInt(ev.key, 10) - 1;
+      if(canPlay(cur().hand[selected], S.piles[idx])) play(selected, idx);
+    }
+  });
+
+  /* ---------- arranque ---------- */
+  function start(data){
+    if(data && data.piles && data.players && data.phase !== "over"){
+      S = data;
+      render();
+      return;
+    }
+    var saved = load();
+    if(saved && saved.phase !== "over"){ S = saved; }
+    render();
+  }
+
+  if(window.claude && window.claude.hot){
+    try { window.claude.hot.snapshot(function(){ return S; }); } catch(e){}
+  }
+  if(window.claude && window.claude.hot && window.claude.hot.ready){
+    window.claude.hot.ready(start);
+  } else {
+    start(null);
+  }
+})();
+</script>
