@@ -1,0 +1,68 @@
+{
+  "id": "original",
+  "name": "Original",
+  "assets": {
+    "normal": "card-normal.png",
+    "hard": "card-duro.png",
+    "playmat": "playmat.png"
+  },
+  "card": {
+    "aspectRatio": "2:3",
+    "numberLayer": {
+      "fontFamily": "Arial Black, Impact, Anton, sans-serif",
+      "fontWeight": 900,
+      "fontStyle": "normal",
+      "letterSpacing": "-0.045em",
+      "lineHeight": 0.9,
+      "color": "#f4efe3",
+      "strokeColor": "#17120e",
+      "strokeWidth": "0.018em",
+      "shadow": "0 3px 0 rgba(0,0,0,.75), 0 0 2px rgba(0,0,0,.9)",
+      "blendMode": "normal",
+      "texture": "slight distress mask if available"
+    },
+    "mainNumber": {
+      "anchor": "center",
+      "xPercent": 50,
+      "yPercent": 52,
+      "fontSizePercentOfHeight": 30,
+      "maxWidthPercent": 58,
+      "rotationDeg": 0
+    },
+    "cornerNumbers": [
+      {
+        "anchor": "top-left",
+        "xPercent": 11,
+        "yPercent": 8,
+        "fontSizePercentOfHeight": 8.8,
+        "rotationDeg": 0
+      },
+      {
+        "anchor": "bottom-right",
+        "xPercent": 89,
+        "yPercent": 92,
+        "fontSizePercentOfHeight": 8.8,
+        "rotationDeg": 0
+      }
+    ]
+  },
+  "palette": {
+    "background": "#15120f",
+    "normalPrimary": "#c84624",
+    "normalSecondary": "#2a1811",
+    "hardPrimary": "#008ec3",
+    "hardSecondary": "#f4a300",
+    "number": "#f4efe3",
+    "numberStroke": "#17120e",
+    "edgeWear": "#d6c8af"
+  },
+  "hardCards": [
+    22,
+    33,
+    44,
+    55,
+    66,
+    77,
+    88
+  ]
+}

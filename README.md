@@ -1,6 +1,8 @@
-# The Game — en la red de la oficina
+# ¿Quién chucha revuelve? — en la red de la oficina
 
-Versión para jugar entre varios el juego de cartas cooperativo **The Game** (Steffen Benndorf).
+> El primer juego de cartas donde no revuelves :D
+
+Versión para jugar entre varios un juego de cartas cooperativo, inspirado en **The Game** (Steffen Benndorf).
 Uno levanta el servidor en su computador, el resto entra desde el navegador con la dirección
 que aparece en pantalla. Cada uno ve **solo sus cartas**.
 
@@ -12,7 +14,7 @@ que aparece en pantalla. Cada uno ve **solo sus cartas**.
 2. Se abre una ventana negra con algo así:
 
    ```
-     The Game Online  ·  servidor listo
+     Quien chucha revuelve  ·  servidor listo
      ----------------------------------------
      En este equipo:   http://localhost:8080
 
@@ -89,66 +91,18 @@ suena más agudo mientras más justa fue la jugada.
 
 ---
 
-## Que entre alguien de fuera de la oficina
+## PIN de sala
 
-Doble clic en **`PUBLICAR.bat`**. Levanta el servidor si hace falta, abre un tunel de
-Cloudflare y te deja la direccion lista para pasar:
-
-```
-  ╔══════════════════════════════════════════════════════════════╗
-  ║  Pasale esta direccion a quien esta afuera:                  ║
-  ║                                                              ║
-  ║  https://follow-limitation-structural-jim.trycloudflare.com  ║
-  ║                                                              ║
-  ║  Ya quedo copiada: pegala con Ctrl+V donde quieras.          ║
-  ║  Tambien quedo en URL-PARA-COMPARTIR.txt, aqui al lado.      ║
-  ║                                                              ║
-  ║  Ojo: ponle PIN a la sala antes de compartirla.              ║
-  ║  La direccion muere cuando cierras esta ventana.             ║
-  ╚══════════════════════════════════════════════════════════════╝
-```
-
-**No tienes que copiarla a mano**: queda en el portapapeles sola, lista para pegar en Teams o
-WhatsApp. Si se te fue, escribe `c` y Enter en esa ventana y la copia de nuevo. Tambien queda
-escrita en `URL-PARA-COMPARTIR.txt`, en esta misma carpeta, y ese archivo se borra al cerrar
-para que no te quede una direccion vieja dando vueltas. Con `q` y Enter cierras el tunel.
-
-Si le pasas el nombre de una sala, el enlace ya viene apuntando ahi:
-
-```
-PUBLICAR.bat OFICINA     ->  https://....trycloudflare.com/?sala=OFICINA
-PUBLICAR.bat 3000        ->  usa el puerto 3000
-```
-
-Esa direccion funciona desde cualquier parte del mundo, con HTTPS, sin tocar el router.
-
-La primera vez te va a pedir instalar `cloudflared` (el programa que abre el tunel); dile que
-si y se instala solo con winget. Si lo tienes en una ruta rara, define `CF_BIN` con la ruta
-completa al ejecutable.
-
-### Ponle PIN antes de compartir
-
-Mientras el juego vive solo en la red de la oficina, no hace falta. Apenas lo publicas en
-internet, **cualquiera con el link puede entrar a la sala** — y si llega primero queda de
-administrador, o se pone a apretar los botones de voz, que suenan en voz alta donde ustedes
-estan. Asi que:
+Mientras el juego vive solo en la red de la oficina no hace falta, pero si no quieres que entre
+cualquiera que sepa el nombre de la sala, ponle un PIN:
 
 - Al crear la sala, escribe un **PIN** en la pantalla de entrada. Quien entre despues tendra
   que escribirlo.
-- El PIN se ve en el boton **Sala**, para que lo puedas pasar junto con el link.
+- El PIN se ve en el boton **Sala**, para pasarlo junto con el enlace.
 - El administrador lo puede cambiar o quitar cuando quiera, desde ahi mismo.
 - Si alguien intenta adivinarlo, tras ocho intentos fallidos su conexion queda bloqueada un
   minuto.
 - Volver a tu propio asiento (recargar la pagina) no te vuelve a pedir el PIN.
-
-### Otras formas, si esta se te queda corta
-
-- **Tailscale**: una VPN privada. El de afuera la instala, entra a tu misma red y juega como si
-  estuviera en la oficina. Mas engorroso para el invitado, pero nadie ajeno puede llegar.
-- **Subirlo a un servidor**: el juego es un Node sin dependencias ni base de datos, cabe en
-  cualquier plan gratuito. Queda siempre prendido y nadie tiene que dejar el computador encendido.
-- **Abrir el puerto en el router**: no se recomienda. En Chile la mayoria de las conexiones estan
-  detras de CGNAT y ni siquiera funciona; y cuando funciona, expones el equipo directo a internet.
 
 ---
 
@@ -200,8 +154,6 @@ El botón **Sala** muestra el enlace listo para copiar.
 | Archivo | Qué es |
 |---|---|
 | `INICIAR.bat` | El doble clic que levanta todo |
-| `PUBLICAR.bat` | Abre un tunel para que entre gente de fuera de la oficina |
-| `publicar.js` | Lo que hace el tunel: levanta el servidor y muestra la URL publica |
 | `server.js` | Servidor Node sin dependencias: reglas, turnos, chat, historial y salas |
 | `public/index.html` | La página: estructura y estilos |
 | `public/app.js` | La lógica del cliente: conexión, mesa, chat, historial, administrador |

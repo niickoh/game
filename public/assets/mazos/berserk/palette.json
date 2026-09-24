@@ -1,0 +1,121 @@
+{
+  "id": "berserk",
+  "name": "Berserk",
+  "emoji": "⚔️",
+  "description": "Estilo oscuro inspirado en Berserk con Guts como foco central, la Dragon Slayer, armadura negra, lluvia, eclipse, marca maldita y tinta de manga. La variante dura usa Griffith/Femto centrado, alas negras, eclipse rojo, estética God Hand y aura siniestra.",
+  "assets": {
+    "normal": "card-normal.png",
+    "hard": "card-duro.png",
+    "playmat": "playmat.png"
+  },
+  "card": {
+    "aspectRatio": "2:3",
+    "recommendedRenderSize": {
+      "width": 1024,
+      "height": 1536
+    },
+    "safeArea": {
+      "leftPercent": 6,
+      "topPercent": 5,
+      "rightPercent": 94,
+      "bottomPercent": 95
+    }
+  },
+  "playmat": {
+    "source": "user_reference",
+    "aspectRatio": "16:9-ish",
+    "notes": "Imagen entregada por el usuario para usar como playmat del estilo."
+  },
+  "hardCards": [
+    22,
+    33,
+    44,
+    55,
+    66,
+    77,
+    88
+  ],
+  "numberLayer": {
+    "fontFamily": "Cinzel, Trajan Pro, Georgia, serif",
+    "fontWeight": 900,
+    "fontStyle": "normal",
+    "letterSpacing": "-0.05em",
+    "lineHeight": 0.88,
+    "textTransform": "none",
+    "color": "#e8dfd6",
+    "strokeColor": "#120607",
+    "strokeWidth": "0.016em",
+    "shadow": "0 0 8px rgba(185, 28, 28, 0.9), 0 0 22px rgba(127, 29, 29, 0.72), 0 7px 12px rgba(0, 0, 0, 0.85)",
+    "blendMode": "normal"
+  },
+  "hardNumberLayer": {
+    "fontFamily": "Cinzel, Trajan Pro, Georgia, serif",
+    "fontWeight": 900,
+    "fontStyle": "normal",
+    "letterSpacing": "-0.05em",
+    "lineHeight": 0.88,
+    "textTransform": "none",
+    "color": "#f3eee8",
+    "strokeColor": "#090506",
+    "strokeWidth": "0.017em",
+    "shadow": "0 0 8px rgba(239, 68, 68, 0.88), 0 0 24px rgba(153, 27, 27, 0.78), 0 0 32px rgba(229, 231, 235, 0.28), 0 7px 12px rgba(0, 0, 0, 0.9)",
+    "blendMode": "normal"
+  },
+  "numberPlacement": {
+    "main": {
+      "xPercent": 50,
+      "yPercent": 60,
+      "fontSizePercentOfHeight": 23.5,
+      "maxWidthPercent": 56,
+      "rotationDeg": 0,
+      "align": "center",
+      "baseline": "middle"
+    },
+    "corners": [
+      {
+        "name": "top-left",
+        "xPercent": 10.6,
+        "yPercent": 8.4,
+        "fontSizePercentOfHeight": 7.1,
+        "maxWidthPercent": 15,
+        "rotationDeg": 0,
+        "align": "center",
+        "baseline": "middle"
+      },
+      {
+        "name": "bottom-right",
+        "xPercent": 89.4,
+        "yPercent": 91.6,
+        "fontSizePercentOfHeight": 7.1,
+        "maxWidthPercent": 15,
+        "rotationDeg": 0,
+        "align": "center",
+        "baseline": "middle"
+      }
+    ]
+  },
+  "palette": {
+    "inkBlack": "#050505",
+    "iron": "#3f3f46",
+    "boneWhite": "#e8dfd6",
+    "bloodRed": "#991b1b",
+    "crimsonGlow": "#ef4444",
+    "eclipseRed": "#7f1d1d",
+    "ashGray": "#71717a",
+    "silver": "#d4d4d8",
+    "deepShadow": "#09090b",
+    "brandGlow": "#ff1f1f"
+  },
+  "visualMotifs": [
+    "Guts",
+    "Dragon Slayer sword",
+    "black armor",
+    "cursed brand",
+    "crimson eclipse",
+    "skulls and chains",
+    "manga ink hatching",
+    "Griffith/Femto hard mode",
+    "God Hand nightmare aura"
+  ],
+  "notes": "Para cartas normales usar numberLayer. Para 22,33,44,55,66,77,88 usar hardNumberLayer y card-duro.png. Los números se renderizan sobre la cáscara, no vienen incluidos en la imagen. Cartas actualizadas a la versión v2 aprobada; playmat entregado por el usuario."
+}

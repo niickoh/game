@@ -1,5 +1,5 @@
 /* ==========================================================================
-   FX · capa de efectos visuales de The Game.
+   FX · capa de efectos visuales de ¿Quién chucha revuelve?
    Vive fuera del pintado: sus nodos cuelgan de #fx y de #fx-canvas, así que
    nada de lo que hace acá se pierde cuando el cliente actualiza la mesa.
    El módulo de sonido (fx-sound.js) se cuelga después como FX.sound.
@@ -300,6 +300,61 @@ window.FX = (function(){
         });
       }
       FX.emitir(lista);
+    },
+
+    /* ============================================ carta doble (modo duro)
+       Tiene que pegar distinto que una carta normal: onda expansiva roja,
+       sacudida de la pila y chispas que suben. */
+    dobleImpacto: function(pilaEl, carta){
+      var r = rect(pilaEl);
+      if(!r) return;
+      var cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+
+      if(!reducido() && layer){
+        nodo(div('fx-onda', { left: cx + 'px', top: cy + 'px' }), 900);
+        nodo(div('fx-onda tarde', { left: cx + 'px', top: cy + 'px' }), 1100);
+        var sello = div('fx-sello', { left: cx + 'px', top: cy + 'px' });
+        sello.textContent = carta;
+        nodo(sello, 1000);
+      }
+
+      pilaEl.classList.remove('sacude');
+      void pilaEl.offsetWidth;
+      pilaEl.classList.add('sacude');
+      setTimeout(function(){ pilaEl.classList.remove('sacude'); }, 600);
+
+      var lista = [];
+      for(var i = 0; i < 44; i++){
+        var ang = -Math.PI / 2 + (Math.random() - 0.5) * 2.4;
+        var vel = 170 + Math.random() * 300;
+        lista.push({
+          x: cx + (Math.random() - 0.5) * r.width * 0.7,
+          y: cy + r.height * 0.2,
+          vx: Math.cos(ang) * vel * 0.6,
+          vy: Math.sin(ang) * vel,
+          g: 520, roce: 0.9,
+          r: 2 + Math.random() * 3.2,
+          rot: Math.random() * 6, vrot: (Math.random() - 0.5) * 16,
+          vida: 0.9 + Math.random() * 0.6,
+          forma: i % 3 === 0 ? 'circulo' : 'raya',
+          color: i % 3 === 0 ? '#fecaca' : (i % 3 === 1 ? '#ef4444' : '#f97316')
+        });
+      }
+      FX.emitir(lista);
+    },
+
+    /* El aviso latente mientras la pila siga obligada: una viñeta roja que
+       respira en los bordes, para que no se te olvide que está pendiente. */
+    vineta: function(encendida, urgente){
+      var v = document.getElementById('fx-vineta');
+      if(!v){
+        if(!encendida || !layer) return;
+        v = div('');
+        v.id = 'fx-vineta';
+        layer.appendChild(v);
+      }
+      v.classList.toggle('on', !!encendida);
+      v.classList.toggle('urgente', !!urgente);
     },
 
     /* ============================================ avisos y carteles */

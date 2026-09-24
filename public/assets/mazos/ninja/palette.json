@@ -1,0 +1,117 @@
+{
+  "id": "ninja",
+  "name": "Ninja",
+  "emoji": "🥷",
+  "description": "Estilo ninja/anime con aldea nocturna, chakra naranja, pergaminos, kunai, shuriken, humo e ink brush. La variante dura usa chakra rojo oscuro, sellos rotos y grietas de energía.",
+  "assets": {
+    "normal": "card-normal.png",
+    "hard": "card-duro.png",
+    "playmat": "playmat.png"
+  },
+  "card": {
+    "aspectRatio": "2:3",
+    "recommendedRenderSize": {
+      "width": 1024,
+      "height": 1536
+    },
+    "safeArea": {
+      "leftPercent": 7,
+      "topPercent": 6,
+      "rightPercent": 93,
+      "bottomPercent": 94
+    }
+  },
+  "hardCards": [
+    22,
+    33,
+    44,
+    55,
+    66,
+    77,
+    88
+  ],
+  "numberLayer": {
+    "fontFamily": "Bangers, Komika Axis, Impact, Arial Black, sans-serif",
+    "fontWeight": 900,
+    "fontStyle": "normal",
+    "letterSpacing": "-0.055em",
+    "lineHeight": 0.88,
+    "textTransform": "none",
+    "color": "#ffe7b8",
+    "strokeColor": "#12090a",
+    "strokeWidth": "0.016em",
+    "shadow": "0 0 8px rgba(255, 122, 24, 0.95), 0 0 22px rgba(249, 115, 22, 0.72), 0 6px 8px rgba(0, 0, 0, 0.75)",
+    "blendMode": "normal"
+  },
+  "hardNumberLayer": {
+    "fontFamily": "Bangers, Komika Axis, Impact, Arial Black, sans-serif",
+    "fontWeight": 900,
+    "fontStyle": "normal",
+    "letterSpacing": "-0.055em",
+    "lineHeight": 0.88,
+    "textTransform": "none",
+    "color": "#fff0d6",
+    "strokeColor": "#0b0506",
+    "strokeWidth": "0.018em",
+    "shadow": "0 0 8px rgba(255, 97, 97, 0.95), 0 0 24px rgba(220, 38, 38, 0.82), 0 0 36px rgba(249, 115, 22, 0.55), 0 7px 10px rgba(0, 0, 0, 0.8)",
+    "blendMode": "normal"
+  },
+  "numberPlacement": {
+    "main": {
+      "xPercent": 50,
+      "yPercent": 53,
+      "fontSizePercentOfHeight": 27.5,
+      "maxWidthPercent": 61,
+      "rotationDeg": -4,
+      "align": "center",
+      "baseline": "middle"
+    },
+    "corners": [
+      {
+        "name": "top-left",
+        "xPercent": 10.5,
+        "yPercent": 8.5,
+        "fontSizePercentOfHeight": 7.8,
+        "maxWidthPercent": 16,
+        "rotationDeg": -4,
+        "align": "center",
+        "baseline": "middle"
+      },
+      {
+        "name": "bottom-right",
+        "xPercent": 89.5,
+        "yPercent": 91.5,
+        "fontSizePercentOfHeight": 7.8,
+        "maxWidthPercent": 16,
+        "rotationDeg": -4,
+        "align": "center",
+        "baseline": "middle"
+      }
+    ]
+  },
+  "palette": {
+    "chakraOrange": "#f97316",
+    "ember": "#ffb35c",
+    "inkBlack": "#050507",
+    "deepNavy": "#07172f",
+    "moonBlue": "#93c5fd",
+    "scrollParchment": "#d8b98a",
+    "smokeCream": "#e8dbc2",
+    "metalSilver": "#cbd5e1",
+    "hardCrimson": "#dc2626",
+    "hardRedGlow": "#ff3b30",
+    "hardPurpleShadow": "#1e1235"
+  },
+  "visualMotifs": [
+    "orange chakra swirl",
+    "ink brush circle",
+    "moonlit ninja village",
+    "parchment scrolls",
+    "kunai",
+    "shuriken",
+    "smoke curls",
+    "torn sealing papers",
+    "crimson hard-mode chakra"
+  ],
+  "notes": "Para cartas normales usar numberLayer. Para 22,33,44,55,66,77,88 usar hardNumberLayer y card-duro.png. Los números se renderizan sobre la cáscara, no vienen incluidos en la imagen. El estilo es ninja/anime original y evita personajes, logos o símbolos reconocibles de franquicias existentes."
+}

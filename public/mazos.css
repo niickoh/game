@@ -1,0 +1,1356 @@
+/* ==========================================================================
+   Mazos: cada uno redefine estas variables y con eso cambia toda la mesa,
+   las cartas y el tono de la interfaz. Para agregar uno nuevo basta con
+   copiar un bloque [data-mazo="..."] y registrarlo en mazos.js.
+   ========================================================================== */
+
+:root{
+  /* --- la mesa --- */
+  --mesa-bg:#080c13;
+  --mesa-img:
+    radial-gradient(circle at 50% 12%, rgba(249,115,22,.05) 0%, transparent 45%),
+    radial-gradient(circle at 50% 55%, rgba(6,182,212,.04) 0%, transparent 55%),
+    radial-gradient(rgba(255,255,255,.035) 1px, transparent 1px);
+  --mesa-size:100% 100%, 100% 100%, 28px 28px;
+
+  /* --- interfaz --- */
+  --ui-barra:rgba(11,16,25,.9);
+  --ui-panel:rgba(15,21,34,.95);
+  --ui-panel2:#141d2d;
+  --ui-caja:#121822;
+  --ui-borde:#233247;
+  --ui-borde2:#1e293b;
+  --ui-texto:#e2e8f0;
+  --ui-texto2:#94a3b8;
+  --ui-texto3:#64748b;
+  --ui-campo:#0f172a;
+
+  /* --- acentos del título --- */
+  --acento1:#fbbf24;
+  --acento2:#fb923c;
+  --acento3:#fb7185;
+
+  /* --- montones que suben --- */
+  --sube:#f97316;
+  --sube-claro:#fdba74;
+  --sube-borde:rgba(249,115,22,.5);
+  --sube-tinta:#fdba74;
+  --sube-chapa:rgba(67,20,7,.8);
+  --sube-grupo:rgba(14,20,31,.7);
+  --sube-grupo-borde:rgba(249,115,22,.2);
+  --pila-up-bg:linear-gradient(to bottom,#1c2738,#151f2d 55%,#0f1722);
+
+  /* --- montones que bajan --- */
+  --baja:#06b6d4;
+  --baja-claro:#67e8f9;
+  --baja-borde:rgba(6,182,212,.5);
+  --baja-tinta:#67e8f9;
+  --baja-chapa:rgba(8,51,68,.8);
+  --baja-grupo:rgba(13,22,34,.7);
+  --baja-grupo-borde:rgba(6,182,212,.2);
+  --pila-down-bg:linear-gradient(to bottom,#142838,#10202e 55%,#0a1520);
+
+  --pila-num:#ffffff;
+  --pila-meta:#94a3b8;
+  --motivo-op:.10;
+
+  /* --- cartas de la mano --- */
+  --carta-bg:linear-gradient(to bottom,#1e2a3a,#15202d 55%,#0f1722);
+  --carta-borde:rgba(51,65,85,.8);
+  --carta-borde-hover:#22d3ee;
+  --carta-sel:#38bdf8;
+  --carta-num:#ffffff;
+  --carta-esq:#cbd5e1;
+  --carta-sub:rgba(148,163,184,.7);
+  --carta-sombra:0 18px 30px -8px rgba(0,0,0,.75), inset 0 1px 1px 0 rgba(255,255,255,.12);
+  --carta-brillo:rgba(255,255,255,.10);
+  --carta-grano:radial-gradient(circle at 50% 45%, rgba(255,255,255,.04) 0%, transparent 70%);
+  --carta-radio:16px;
+
+  /* --- verde de "en orden": conectado, se ofrece a partir, turno cumplido --- */
+  --ok:#34d399;
+  --ok-claro:#6ee7b7;
+  --ok-fondo:rgba(6,78,59,.6);
+  --ok-borde:rgba(16,185,129,.4);
+
+  /* --- cian de dato: codigo de sala, PIN, contador de colocadas --- */
+  --dato:#67e8f9;
+  --dato-fondo:#0891b2;
+  --dato-tinta:#ffffff;
+
+  /* --- tinta sobre los botones de accion principal --- */
+  --accion-tinta:#0b0f18;
+  --repartir-tinta:#0b0f18;
+  /* cuanto acento lleva la tinta de las pildoras del chat: el resto es el
+     color de texto del mazo, que ya esta del lado legible */
+  --pildora-mezcla:55%;
+
+  /* --- realce de cifras y etiquetas sueltas --- */
+  --realce:#fcd34d;
+
+  /* --- cartel de turno --- */
+  --banner-bg:linear-gradient(135deg, rgba(245,158,11,.22), rgba(249,115,22,.18));
+  --banner-borde:rgba(251,191,36,.7);
+  --banner-tinta:#fde68a;
+  --banner-glow:rgba(245,158,11,.25);
+
+  /* --- tipografías --- */
+  --tipo-display:'Cinzel',Georgia,serif;
+  --tipo-num:'JetBrains Mono',ui-monospace,monospace;
+  --tipo-texto:'Inter',system-ui,sans-serif;
+}
+
+/* ============================ arcano ============================ */
+/* Warlock: el tapete manda. Magenta de conjuro, cian de chispa y un
+   violeta profundo de fondo; los montones se dejan atravesar por el arte.
+   Los colores salen de assets/mazos/warlock/palette.json. */
+[data-mazo="warlock"]{
+  --mesa-bg:#12041f;
+  --mesa-img:
+    linear-gradient(180deg, rgba(255,51,202,.16) 0%, transparent 38%),
+    radial-gradient(circle at 50% 98%, rgba(255,35,95,.14) 0%, transparent 48%),
+    radial-gradient(rgba(255,155,234,.045) 1px, transparent 1px);
+  --mesa-size:100% 100%, 100% 100%, 30px 30px;
+
+  --ui-barra:rgba(16,4,30,.92);
+  --ui-panel:rgba(23,6,40,.96);
+  --ui-panel2:#241041;
+  --ui-caja:#1a0730;
+  --ui-borde:#5d2a86;
+  --ui-borde2:#3d1a5a;
+  --ui-texto:#f7ebff;
+  --ui-texto2:#c9a5e0;
+  --ui-texto3:#9673b8;
+  --ui-campo:#150429;
+
+  --acento1:#ff33ca;
+  --acento2:#c084fc;
+  --acento3:#22d3ee;
+
+  --sube:#ff33ca;
+  --sube-claro:#ff9bea;
+  --sube-borde:rgba(255,51,202,.55);
+  --sube-tinta:#ff9bea;
+  --sube-chapa:rgba(74,6,58,.85);
+  --sube-grupo:rgba(30,6,48,.72);
+  --sube-grupo-borde:rgba(255,51,202,.28);
+  /* translúcido a propósito: encima del tapete el arte tiñe el montón */
+  --pila-up-bg:linear-gradient(to bottom,rgba(52,11,78,.86),rgba(36,8,56,.9) 55%,rgba(23,5,40,.92));
+
+  --baja:#22d3ee;
+  --baja-claro:#a5f3fc;
+  --baja-borde:rgba(34,211,238,.55);
+  --baja-tinta:#a5f3fc;
+  --baja-chapa:rgba(6,42,58,.85);
+  --baja-grupo:rgba(12,14,46,.72);
+  --baja-grupo-borde:rgba(34,211,238,.28);
+  --pila-down-bg:linear-gradient(to bottom,rgba(28,14,78,.86),rgba(20,10,54,.9) 55%,rgba(14,6,38,.92));
+
+  --pila-num:#fff6ff;
+  --pila-meta:#c9a5e0;
+  --motivo-op:.16;
+
+  --carta-bg:linear-gradient(160deg,#2b0b38,#1c0728 60%,#12041f);
+  --carta-borde:rgba(255,51,202,.45);
+  --carta-borde-hover:#ff33ca;
+  --carta-sel:#22d3ee;
+  --carta-num:#fff6ff;
+  --carta-esq:#ff9bea;
+  --carta-sub:rgba(201,165,224,.8);
+  --carta-sombra:0 18px 30px -8px rgba(0,0,0,.85), 0 0 22px rgba(255,51,202,.22), inset 0 1px 0 rgba(255,255,255,.12);
+  --carta-brillo:rgba(255,51,202,.28);
+  --carta-grano:radial-gradient(circle at 50% 45%, rgba(255,155,234,.05) 0%, transparent 70%);
+  --carta-radio:14px;
+
+  --tipo-display:'Cinzel',Georgia,serif;
+  --tipo-num:'Cinzel',Georgia,serif;
+
+  --banner-bg:linear-gradient(135deg, rgba(255,51,202,.24), rgba(192,38,211,.18));
+  --banner-borde:rgba(255,155,234,.75);
+  --banner-tinta:#ffd9f7;
+  --banner-glow:rgba(255,51,202,.32);
+
+  --realce:#ff9bea;
+
+  --grupo-placa:rgba(18,4,31,.55);
+
+  --dato:#22d3ee;
+  --dato-fondo:#0e7490;
+  --accion-tinta:#12041f;
+}
+
+/* ============================ clásico ============================ */
+/* La baraja real del juego: cartón claro, número grande y nada más. */
+[data-mazo="original"]{
+  /* El tapete y las cartas de este mazo son oscuros (lo dice su palette.json:
+     background #15120f), asi que la interfaz tambien. Los colores salen del
+     arte: rojo de la izquierda, azul de la derecha, amarillo de las salpicaduras. */
+  --mesa-bg:#15120f;
+  --mesa-img:
+    linear-gradient(180deg, rgba(200,70,36,.10) 0%, transparent 40%),
+    radial-gradient(circle at 50% 98%, rgba(0,142,195,.10) 0%, transparent 45%),
+    radial-gradient(rgba(244,239,227,.035) 1px, transparent 1px);
+  --mesa-size:100% 100%, 100% 100%, 30px 30px;
+
+  --ui-barra:rgba(16,14,11,.92);
+  --ui-panel:rgba(25,21,17,.96);
+  --ui-panel2:#241e18;
+  --ui-caja:#1b1712;
+  --ui-borde:#4a3d30;
+  --ui-borde2:#332a21;
+  --ui-texto:#f4efe3;
+  --ui-texto2:#bdb3a2;
+  --ui-texto3:#8a8071;
+  --ui-campo:#141110;
+
+  --acento1:#c84624;
+  --acento2:#f4a300;
+  --acento3:#008ec3;
+
+  --sube:#c84624;
+  --sube-claro:#e8734f;
+  --sube-borde:rgba(200,70,36,.55);
+  --sube-tinta:#eb8a68;
+  --sube-chapa:rgba(58,18,10,.85);
+  --sube-grupo:rgba(26,19,15,.72);
+  --sube-grupo-borde:rgba(200,70,36,.28);
+  /* el monton se ve como la carta de este mazo: carton oscuro y gastado */
+  --pila-up-bg:linear-gradient(to bottom,rgba(50,30,22,.88),rgba(38,23,16,.91) 55%,rgba(27,16,11,.93));
+
+  --baja:#008ec3;
+  --baja-claro:#5bc0e8;
+  --baja-borde:rgba(0,142,195,.55);
+  --baja-tinta:#6ecbee;
+  --baja-chapa:rgba(6,36,50,.85);
+  --baja-grupo:rgba(15,20,25,.72);
+  --baja-grupo-borde:rgba(0,142,195,.28);
+  --pila-down-bg:linear-gradient(to bottom,rgba(24,36,45,.88),rgba(18,27,34,.91) 55%,rgba(13,19,24,.93));
+
+  --pila-num:#f4efe3;
+  --pila-meta:#a89b88;
+  --motivo-op:.13;
+
+  --carta-bg:linear-gradient(to bottom,#2f1c14,#241610 55%,#1a100c);
+  --carta-borde:rgba(214,200,175,.45);
+  --carta-borde-hover:#c84624;
+  --carta-sel:#008ec3;
+  --carta-num:#f4efe3;
+  --carta-esq:#d6c8af;
+  --carta-sub:rgba(189,179,162,.8);
+  --carta-sombra:0 18px 30px -8px rgba(0,0,0,.85), inset 0 1px 0 rgba(255,255,255,.10);
+  --carta-brillo:rgba(244,163,0,.20);
+  --carta-grano:repeating-linear-gradient(0deg, rgba(255,255,255,.035) 0 1px, transparent 1px 3px);
+  --carta-radio:12px;
+
+  --banner-bg:linear-gradient(135deg, rgba(200,70,36,.26), rgba(244,163,0,.16));
+  --banner-borde:rgba(232,115,79,.75);
+  --banner-tinta:#f7d9c5;
+  --banner-glow:rgba(200,70,36,.3);
+
+  --tipo-display:'Cinzel',Georgia,serif;
+  --tipo-num:'Inter',system-ui,sans-serif;
+
+  --realce:#f4a300;
+
+  --grupo-placa:rgba(21,18,15,.58);
+
+  --dato:#5bc0e8;
+  --dato-fondo:#0d6e96;
+  --accion-tinta:#15120f;
+  --repartir-tinta:#fff6ec;
+}
+
+/* ============================ español ============================ */
+/* Baraja española: pergamino, oro viejo y bermellón. */
+[data-mazo="espanol"]{
+  /* Aca pasa al reves: el tapete es pergamino claro (palette.json background
+     #f1d9a8), asi que la interfaz es clara y la tinta oscura. Los colores son
+     los del naipe espanol: oro de oros, rojo de copas, verde de la patina. */
+  --mesa-bg:#f1d9a8;
+  --mesa-img:
+    radial-gradient(circle at 50% 8%, rgba(192,57,43,.07) 0%, transparent 42%),
+    radial-gradient(circle at 50% 96%, rgba(36,80,68,.07) 0%, transparent 45%),
+    radial-gradient(rgba(107,74,12,.06) 1px, transparent 1px);
+  --mesa-size:100% 100%, 100% 100%, 26px 26px;
+
+  --ui-barra:rgba(238,221,180,.94);
+  --ui-panel:rgba(247,237,213,.97);
+  --ui-panel2:#ead9ae;
+  --ui-caja:#f3e5c2;
+  --ui-borde:#bfa068;
+  --ui-borde2:#d6bf93;
+  --ui-texto:#3b2410;
+  --ui-texto2:#7a5a2e;
+  --ui-texto3:#7d5f2f;
+  --ui-campo:#f7eed6;
+
+  --acento1:#c0392b;
+  --acento2:#d4a017;
+  --acento3:#245044;
+
+  --sube:#a87a12;
+  --sube-claro:#d4a017;
+  --sube-borde:rgba(168,122,18,.6);
+  --sube-tinta:#6b4a0c;
+  --sube-chapa:rgba(212,160,23,.22);
+  --sube-grupo:rgba(243,223,181,.5);
+  --sube-grupo-borde:rgba(168,122,18,.35);
+  --pila-up-bg:linear-gradient(to bottom,rgba(253,244,222,.9),rgba(245,232,198,.92) 60%,rgba(237,220,176,.94));
+
+  --baja:#a8322a;
+  --baja-claro:#c0392b;
+  --baja-borde:rgba(168,50,42,.6);
+  --baja-tinta:#7f0704;
+  --baja-chapa:rgba(192,57,43,.18);
+  --baja-grupo:rgba(243,223,181,.5);
+  --baja-grupo-borde:rgba(168,50,42,.35);
+  --pila-down-bg:linear-gradient(to bottom,rgba(253,244,222,.9),rgba(245,232,198,.92) 60%,rgba(237,220,176,.94));
+
+  --pila-num:#3b2410;
+  --pila-meta:#7a5a2e;
+  --motivo-op:.12;
+
+  --carta-bg:linear-gradient(to bottom,#faf0d8,#efdfb8 55%,#e2cd9c);
+  --carta-borde:rgba(160,120,40,.65);
+  --carta-borde-hover:#c0392b;
+  --carta-sel:#245044;
+  --carta-num:#3b2410;
+  --carta-esq:#7f0704;
+  --carta-sub:rgba(122,90,46,.8);
+  --carta-sombra:0 16px 26px -10px rgba(74,50,20,.5), inset 0 1px 0 rgba(255,255,255,.6);
+  --carta-brillo:rgba(212,160,23,.28);
+  --carta-grano:radial-gradient(circle at 50% 45%, rgba(107,74,12,.05) 0%, transparent 70%);
+  --carta-radio:12px;
+
+  --banner-bg:linear-gradient(135deg, rgba(212,160,23,.4), rgba(192,57,43,.2));
+  --banner-borde:rgba(127,7,4,.6);
+  --banner-tinta:#5c3a10;
+  --banner-glow:rgba(212,160,23,.4);
+
+  --tipo-display:'Cinzel',Georgia,serif;
+  --tipo-num:'Cinzel',Georgia,serif;
+
+  --realce:#8a4b10;
+
+  --grupo-placa:rgba(247,238,214,.72);
+
+  --ok:#2a6b53;
+  --ok-claro:#245044;
+  --ok-fondo:rgba(36,80,68,.16);
+  --ok-borde:rgba(36,80,68,.5);
+  --dato:#8a5a12;
+  --dato-fondo:#a87a12;
+  --dato-tinta:#fdf4de;
+  --accion-tinta:#f7eed6;
+  --repartir-tinta:#f7eed6;
+  --pildora-mezcla:40%;   /* el oro sobre pergamino necesita mas tinta */
+}
+
+/* ============================ atardecer ============================ */
+/* Neon: synthwave. Sol naranja, rejilla rosada y cian sobre indigo casi negro.
+   Los colores salen de assets/mazos/neon/palette.json. */
+[data-mazo="neon"]{
+  --mesa-bg:#08031f;
+  --mesa-img:
+    linear-gradient(180deg, rgba(255,159,28,.14) 0%, transparent 32%),
+    radial-gradient(circle at 50% 100%, rgba(236,72,153,.20) 0%, transparent 52%),
+    repeating-linear-gradient(0deg, rgba(192,38,211,.07) 0 1px, transparent 1px 30px),
+    repeating-linear-gradient(90deg, rgba(34,211,238,.05) 0 1px, transparent 1px 30px);
+  --mesa-size:100% 100%, 100% 100%, auto, auto;
+
+  --ui-barra:rgba(10,4,32,.92);
+  --ui-panel:rgba(16,6,44,.96);
+  --ui-panel2:#1b0a45;
+  --ui-caja:#120544;
+  --ui-borde:#4b2a92;
+  --ui-borde2:#311a63;
+  --ui-texto:#eef2ff;
+  --ui-texto2:#b7a6e8;
+  --ui-texto3:#8a77c2;
+  --ui-campo:#0d0430;
+
+  /* el degradado del titulo es el atardecer: naranja, rosa y cian */
+  /* mazos.js pisa --acento1 con normalPrimary del palette.json (#ec4899):
+     se declara igual para que el archivo no mienta, y el naranja del sol
+     entra por --acento2 y --realce. */
+  --acento1:#ec4899;
+  --acento2:#ff9f1c;
+  --acento3:#22d3ee;
+  --realce:#ff9f1c;
+  --grupo-placa:rgba(8,3,31,.55);
+
+  --sube:#ec4899;
+  --sube-claro:#f9a8d4;
+  --sube-borde:rgba(236,72,153,.6);
+  --sube-tinta:#f9a8d4;
+  --sube-chapa:rgba(74,8,48,.85);
+  --sube-grupo:rgba(22,7,52,.72);
+  --sube-grupo-borde:rgba(236,72,153,.28);
+  --pila-up-bg:linear-gradient(to bottom,rgba(40,10,72,.86),rgba(26,7,52,.9) 55%,rgba(15,4,36,.92));
+
+  --baja:#22d3ee;
+  --baja-claro:#a5f3fc;
+  --baja-borde:rgba(34,211,238,.6);
+  --baja-tinta:#a5f3fc;
+  --baja-chapa:rgba(6,44,60,.85);
+  --baja-grupo:rgba(10,14,52,.72);
+  --baja-grupo-borde:rgba(34,211,238,.28);
+  --pila-down-bg:linear-gradient(to bottom,rgba(14,32,78,.86),rgba(10,22,56,.9) 55%,rgba(7,13,38,.92));
+
+  --pila-num:#f8fbff;
+  --pila-meta:#b7a6e8;
+  --motivo-op:.16;
+
+  --carta-bg:linear-gradient(160deg,#2a0b55,#180640 60%,#08031f);
+  --carta-borde:rgba(34,211,238,.5);
+  --carta-borde-hover:#ec4899;
+  --carta-sel:#22d3ee;
+  --carta-num:#f8fbff;
+  --carta-esq:#a5f3fc;
+  --carta-sub:rgba(183,166,232,.8);
+  --carta-sombra:0 18px 30px -8px rgba(0,0,0,.85), 0 0 22px rgba(236,72,153,.24), inset 0 1px 0 rgba(255,255,255,.14);
+  --carta-brillo:rgba(34,211,238,.28);
+  --carta-grano:repeating-linear-gradient(0deg, rgba(255,255,255,.05) 0 1px, transparent 1px 4px);
+  --carta-radio:14px;
+
+  --banner-bg:linear-gradient(135deg, rgba(255,159,28,.28), rgba(236,72,153,.2));
+  --banner-borde:rgba(255,159,28,.75);
+  --banner-tinta:#ffe3bf;
+  --banner-glow:rgba(255,159,28,.34);
+
+  --tipo-display:'Bricolage Grotesque','Inter',system-ui,sans-serif;
+  --tipo-num:'Bricolage Grotesque','Inter',system-ui,sans-serif;
+
+  --dato:#22d3ee;
+  --dato-fondo:#0e7490;
+  --accion-tinta:#08031f;
+}
+
+/* ============================ sagrado ============================ */
+/* Paladin: catedral, marmol y oro sobre marmol azul noche. El oro manda en
+   los montones que suben y la plata en los que bajan.
+   Los colores salen de assets/mazos/paladin/palette.json. */
+[data-mazo="paladin"]{
+  --mesa-bg:#07152f;
+  --mesa-img:
+    linear-gradient(180deg, rgba(255,241,168,.14) 0%, transparent 36%),
+    radial-gradient(circle at 50% 96%, rgba(245,196,81,.12) 0%, transparent 48%),
+    radial-gradient(rgba(219,228,239,.04) 1px, transparent 1px);
+  --mesa-size:100% 100%, 100% 100%, 30px 30px;
+
+  --ui-barra:rgba(7,17,38,.92);
+  --ui-panel:rgba(11,24,50,.96);
+  --ui-panel2:#12294f;
+  --ui-caja:#0c1d3d;
+  --ui-borde:#2c4e8a;
+  --ui-borde2:#1b3560;
+  --ui-texto:#fff8e7;
+  --ui-texto2:#c3d2e8;
+  --ui-texto3:#8ea3c2;
+  --ui-campo:#061229;
+
+  --acento1:#f5c451;
+  --acento2:#fff1a8;
+  --acento3:#8fb6ee;
+  --realce:#f5c451;
+  --grupo-placa:rgba(7,21,47,.58);
+
+  --sube:#f5c451;
+  --sube-claro:#fff1a8;
+  --sube-borde:rgba(245,196,81,.6);
+  --sube-tinta:#ffe9a8;
+  --sube-chapa:rgba(78,52,6,.85);
+  --sube-grupo:rgba(14,26,52,.72);
+  --sube-grupo-borde:rgba(245,196,81,.3);
+  /* translucido: el marmol del tapete tine el monton */
+  --pila-up-bg:linear-gradient(to bottom,rgba(23,44,86,.86),rgba(15,31,64,.9) 55%,rgba(9,20,44,.92));
+
+  --baja:#8fb6ee;
+  --baja-claro:#dbe4ef;
+  --baja-borde:rgba(143,182,238,.6);
+  --baja-tinta:#cfe0f5;
+  --baja-chapa:rgba(10,30,64,.85);
+  --baja-grupo:rgba(12,22,48,.72);
+  --baja-grupo-borde:rgba(143,182,238,.3);
+  --pila-down-bg:linear-gradient(to bottom,rgba(16,34,72,.86),rgba(11,25,55,.9) 55%,rgba(7,17,40,.92));
+
+  --pila-num:#fff8e7;
+  --pila-meta:#b9c9e0;
+  --motivo-op:.15;
+
+  --carta-bg:linear-gradient(160deg,#173c78,#102a56 60%,#07152f);
+  --carta-borde:rgba(245,196,81,.5);
+  --carta-borde-hover:#f5c451;
+  --carta-sel:#8fb6ee;
+  --carta-num:#fff8e7;
+  --carta-esq:#f5c451;
+  --carta-sub:rgba(195,210,232,.8);
+  --carta-sombra:0 18px 30px -8px rgba(0,0,0,.8), 0 0 22px rgba(245,196,81,.2), inset 0 1px 0 rgba(255,255,255,.14);
+  --carta-brillo:rgba(255,241,168,.28);
+  --carta-grano:radial-gradient(circle at 50% 40%, rgba(255,241,168,.06) 0%, transparent 70%);
+  --carta-radio:14px;
+
+  --banner-bg:linear-gradient(135deg, rgba(245,196,81,.28), rgba(23,60,120,.22));
+  --banner-borde:rgba(255,241,168,.75);
+  --banner-tinta:#fff1a8;
+  --banner-glow:rgba(245,196,81,.32);
+
+  --tipo-display:'Cinzel',Georgia,serif;
+  --tipo-num:'Cinzel',Georgia,serif;
+
+  --dato:#8fb6ee;
+  --dato-fondo:#1d4576;
+  --accion-tinta:#07152f;
+}
+
+/* ============================ sombra ============================ */
+/* Ninja: aldea de noche. Azul profundo de fondo, naranja de chakra para los
+   montones que suben y azul de luna para los que bajan.
+   Los colores salen de assets/mazos/ninja/palette.json. */
+/* --------------------------------------------------------------------------
+   Berserk: tinta de manga. Negro puro, rojo de sangre para lo que sube y el
+   acero de la Dragon Slayer para lo que baja.
+   -------------------------------------------------------------------------- */
+[data-mazo="berserk"]{
+  --mesa-bg:#050505;
+  --mesa-img:
+    linear-gradient(180deg, rgba(153,27,27,.16) 0%, transparent 38%),
+    radial-gradient(circle at 50% 100%, rgba(255,31,31,.12) 0%, transparent 48%),
+    radial-gradient(rgba(232,223,214,.045) 1px, transparent 1px);
+  --mesa-size:100% 100%, 100% 100%, 26px 26px;
+
+  --ui-barra:rgba(5,5,5,.94);
+  --ui-panel:rgba(13,13,15,.97);
+  --ui-panel2:#1c1c20;
+  --ui-caja:#121214;
+  --ui-borde:#3f3f46;
+  --ui-borde2:#27272a;
+  --ui-texto:#e8dfd6;
+  --ui-texto2:#b8b0a8;
+  --ui-texto3:#8b8580;
+  --ui-campo:#09090b;
+
+  --acento1:#ef4444;
+  --acento2:#ff6b6b;
+  --acento3:#d4d4d8;
+  --realce:#ff6b6b;
+  --grupo-placa:rgba(5,5,5,.62);
+
+  --sube:#ef4444;
+  --sube-claro:#ff6b6b;
+  --sube-borde:rgba(239,68,68,.6);
+  --sube-tinta:#ffb3b3;
+  --sube-chapa:rgba(60,8,8,.88);
+  --sube-grupo:rgba(30,10,10,.74);
+  --sube-grupo-borde:rgba(239,68,68,.3);
+  --pila-up-bg:linear-gradient(to bottom,rgba(42,12,12,.88),rgba(28,9,9,.92) 55%,rgba(14,5,5,.94));
+
+  --baja:#d4d4d8;
+  --baja-claro:#f4f4f5;
+  --baja-borde:rgba(212,212,216,.55);
+  --baja-tinta:#e8dfd6;
+  --baja-chapa:rgba(35,35,40,.88);
+  --baja-grupo:rgba(24,24,27,.74);
+  --baja-grupo-borde:rgba(212,212,216,.26);
+  --pila-down-bg:linear-gradient(to bottom,rgba(34,34,38,.88),rgba(24,24,27,.92) 55%,rgba(12,12,14,.94));
+
+  --pila-num:#e8dfd6;
+  --pila-meta:#b8b0a8;
+  --motivo-op:.14;
+
+  --carta-bg:linear-gradient(160deg,#2a1010,#141416 60%,#050505);
+  --carta-borde:rgba(239,68,68,.42);
+  --carta-borde-hover:#ff6b6b;
+  --carta-sel:#ff1f1f;
+  --carta-num:#e8dfd6;
+  --carta-esq:#d4d4d8;
+  --carta-sub:rgba(184,176,168,.8);
+  --carta-sombra:0 18px 30px -8px rgba(0,0,0,.92), 0 0 22px rgba(239,68,68,.22), inset 0 1px 0 rgba(255,255,255,.08);
+  --carta-brillo:rgba(232,223,214,.2);
+  --carta-grano:repeating-linear-gradient(0deg, rgba(232,223,214,.035) 0 1px, transparent 1px 4px);
+  --carta-radio:8px;
+
+  --banner-bg:linear-gradient(135deg, rgba(239,68,68,.28), rgba(212,212,216,.14));
+  --banner-borde:rgba(255,107,107,.7);
+  --banner-tinta:#e8dfd6;
+  --banner-glow:rgba(255,31,31,.34);
+
+  --tipo-display:'Cinzel','Georgia',serif;
+  --tipo-num:'Cinzel','Georgia',serif;
+
+  --ok:#4ade80;
+  --ok-claro:#86efac;
+  --ok-fondo:rgba(8,46,24,.62);
+  --ok-borde:rgba(74,222,128,.4);
+  --dato:#d4d4d8;
+  --dato-fondo:#3f3f46;
+  --accion-tinta:#062012;
+  --repartir-tinta:#1a0303;
+}
+
+/* --------------------------------------------------------------------------
+   Dragon Ball: ki naranja y dorado para lo que sube, el verde de Shenron para
+   lo que baja. El "en orden" se va al turquesa para no confundirse con Shenron.
+   -------------------------------------------------------------------------- */
+[data-mazo="dragonball"]{
+  --mesa-bg:#0d0906;
+  --mesa-img:
+    linear-gradient(180deg, rgba(250,204,21,.12) 0%, transparent 36%),
+    radial-gradient(circle at 50% 100%, rgba(249,115,22,.16) 0%, transparent 50%),
+    radial-gradient(rgba(255,242,207,.05) 1px, transparent 1px);
+  --mesa-size:100% 100%, 100% 100%, 30px 30px;
+
+  --ui-barra:rgba(10,7,4,.93);
+  --ui-panel:rgba(20,14,8,.96);
+  --ui-panel2:#2a1d0e;
+  --ui-caja:#1c1409;
+  --ui-borde:#5b4118;
+  --ui-borde2:#3a2a10;
+  --ui-texto:#fff2cf;
+  --ui-texto2:#d9c49a;
+  --ui-texto3:#a89373;
+  --ui-campo:#150e06;
+
+  --acento1:#f59e0b;
+  --acento2:#facc15;
+  --acento3:#84cc16;
+  --realce:#facc15;
+  --grupo-placa:rgba(13,9,6,.6);
+
+  --sube:#f97316;
+  --sube-claro:#facc15;
+  --sube-borde:rgba(249,115,22,.6);
+  --sube-tinta:#fcd34d;
+  --sube-chapa:rgba(69,26,3,.85);
+  --sube-grupo:rgba(40,22,8,.72);
+  --sube-grupo-borde:rgba(249,115,22,.3);
+  --pila-up-bg:linear-gradient(to bottom,rgba(58,32,10,.86),rgba(40,22,8,.9) 55%,rgba(22,13,5,.92));
+
+  --baja:#84cc16;
+  --baja-claro:#bef264;
+  --baja-borde:rgba(132,204,22,.6);
+  --baja-tinta:#cdf58a;
+  --baja-chapa:rgba(28,48,6,.85);
+  --baja-grupo:rgba(22,34,10,.72);
+  --baja-grupo-borde:rgba(132,204,22,.3);
+  --pila-down-bg:linear-gradient(to bottom,rgba(30,46,12,.86),rgba(22,34,10,.9) 55%,rgba(12,20,6,.92));
+
+  --pila-num:#fff2cf;
+  --pila-meta:#d9c49a;
+  --motivo-op:.16;
+
+  --carta-bg:linear-gradient(160deg,#3a2510,#1d1207 60%,#090807);
+  --carta-borde:rgba(245,158,11,.45);
+  --carta-borde-hover:#facc15;
+  --carta-sel:#84cc16;
+  --carta-num:#fff2cf;
+  --carta-esq:#fcd34d;
+  --carta-sub:rgba(217,196,154,.8);
+  --carta-sombra:0 18px 30px -8px rgba(0,0,0,.85), 0 0 24px rgba(249,115,22,.24), inset 0 1px 0 rgba(255,255,255,.12);
+  --carta-brillo:rgba(250,204,21,.28);
+  --carta-grano:repeating-linear-gradient(0deg, rgba(255,242,207,.04) 0 1px, transparent 1px 4px);
+  --carta-radio:12px;
+
+  --banner-bg:linear-gradient(135deg, rgba(249,115,22,.28), rgba(132,204,22,.18));
+  --banner-borde:rgba(250,204,21,.75);
+  --banner-tinta:#fff2cf;
+  --banner-glow:rgba(249,115,22,.36);
+
+  --tipo-display:'Bangers','Impact','Arial Black',sans-serif;
+  --tipo-num:'Bangers','Impact','Arial Black',sans-serif;
+
+  --ok:#2dd4bf;
+  --ok-claro:#7ff0e2;
+  --ok-fondo:rgba(4,54,50,.6);
+  --ok-borde:rgba(45,212,191,.4);
+  --dato:#bef264;
+  --dato-fondo:#3f6212;
+  --accion-tinta:#0d0906;
+  --repartir-tinta:#1c1002;
+}
+
+/* --------------------------------------------------------------------------
+   Miku: escenario de concierto. Turquesa de ella para lo que baja, magenta de
+   las luces para lo que sube; el fondo es el negro cristal del estadio.
+   -------------------------------------------------------------------------- */
+[data-mazo="miku"]{
+  --mesa-bg:#061014;
+  --mesa-img:
+    linear-gradient(180deg, rgba(34,211,238,.10) 0%, transparent 38%),
+    radial-gradient(circle at 50% 100%, rgba(236,72,153,.16) 0%, transparent 52%),
+    radial-gradient(rgba(167,255,255,.05) 1px, transparent 1px);
+  --mesa-size:100% 100%, 100% 100%, 28px 28px;
+
+  --ui-barra:rgba(4,12,16,.93);
+  --ui-panel:rgba(6,20,26,.96);
+  --ui-panel2:#0b2630;
+  --ui-caja:#071a22;
+  --ui-borde:#1d4e5c;
+  --ui-borde2:#123441;
+  --ui-texto:#e6feff;
+  --ui-texto2:#9fd4dc;
+  --ui-texto3:#79a8b2;
+  --ui-campo:#04121a;
+
+  --acento1:#39d6d8;
+  --acento2:#a7ffff;
+  --acento3:#ff2fb3;
+  --realce:#a7ffff;
+  --grupo-placa:rgba(6,16,20,.6);
+
+  --sube:#ff2fb3;
+  --sube-claro:#ff8fd6;
+  --sube-borde:rgba(255,47,179,.6);
+  --sube-tinta:#ffb3e0;
+  --sube-chapa:rgba(76,7,47,.85);
+  --sube-grupo:rgba(30,10,26,.7);
+  --sube-grupo-borde:rgba(255,47,179,.3);
+  --pila-up-bg:linear-gradient(to bottom,rgba(44,14,36,.86),rgba(28,10,26,.9) 55%,rgba(14,6,16,.92));
+
+  --baja:#22d3ee;
+  --baja-claro:#a7ffff;
+  --baja-borde:rgba(34,211,238,.6);
+  --baja-tinta:#a7ffff;
+  --baja-chapa:rgba(6,50,60,.85);
+  --baja-grupo:rgba(8,28,36,.7);
+  --baja-grupo-borde:rgba(34,211,238,.3);
+  --pila-down-bg:linear-gradient(to bottom,rgba(10,44,54,.86),rgba(7,32,40,.9) 55%,rgba(4,18,24,.92));
+
+  --pila-num:#f8ffff;
+  --pila-meta:#9fd4dc;
+  --motivo-op:.16;
+
+  --carta-bg:linear-gradient(160deg,#0d2c38,#08111f 60%,#04080d);
+  --carta-borde:rgba(57,214,216,.45);
+  --carta-borde-hover:#39d6d8;
+  --carta-sel:#ff2fb3;
+  --carta-num:#f8ffff;
+  --carta-esq:#a7ffff;
+  --carta-sub:rgba(159,212,220,.8);
+  --carta-sombra:0 18px 30px -8px rgba(0,0,0,.85), 0 0 24px rgba(34,211,238,.24), inset 0 1px 0 rgba(255,255,255,.12);
+  --carta-brillo:rgba(167,255,255,.28);
+  --carta-grano:repeating-linear-gradient(0deg, rgba(167,255,255,.04) 0 1px, transparent 1px 4px);
+  --carta-radio:12px;
+
+  --banner-bg:linear-gradient(135deg, rgba(34,211,238,.26), rgba(236,72,153,.2));
+  --banner-borde:rgba(167,255,255,.75);
+  --banner-tinta:#f8ffff;
+  --banner-glow:rgba(34,211,238,.36);
+
+  --tipo-display:'Orbitron','Bricolage Grotesque','Arial Black',sans-serif;
+  --tipo-num:'Orbitron','Bricolage Grotesque','Arial Black',sans-serif;
+
+  --ok:#2ee6a6;
+  --ok-claro:#8ffdd6;
+  --ok-fondo:rgba(4,58,48,.6);
+  --ok-borde:rgba(46,230,166,.4);
+  --dato:#a7ffff;
+  --dato-fondo:#0e7490;
+  --accion-tinta:#04161b;
+  --repartir-tinta:#04161b;
+}
+
+[data-mazo="ninja"]{
+  --mesa-bg:#07172f;
+  --mesa-img:
+    linear-gradient(180deg, rgba(249,115,22,.12) 0%, transparent 34%),
+    radial-gradient(circle at 50% 98%, rgba(255,179,92,.12) 0%, transparent 46%),
+    radial-gradient(rgba(147,197,253,.04) 1px, transparent 1px);
+  --mesa-size:100% 100%, 100% 100%, 30px 30px;
+
+  --ui-barra:rgba(5,12,26,.92);
+  --ui-panel:rgba(8,20,40,.96);
+  --ui-panel2:#0e2444;
+  --ui-caja:#091a35;
+  --ui-borde:#2b4a75;
+  --ui-borde2:#1a3055;
+  --ui-texto:#e8dbc2;
+  --ui-texto2:#b3c2d6;
+  --ui-texto3:#8494ab;
+  --ui-campo:#051325;
+
+  --acento1:#f97316;
+  --acento2:#ffb35c;
+  --acento3:#93c5fd;
+  --realce:#ffb35c;
+  --grupo-placa:rgba(7,23,47,.58);
+
+  --sube:#f97316;
+  --sube-claro:#ffb35c;
+  --sube-borde:rgba(249,115,22,.6);
+  --sube-tinta:#ffb35c;
+  --sube-chapa:rgba(74,30,6,.85);
+  --sube-grupo:rgba(16,26,46,.72);
+  --sube-grupo-borde:rgba(249,115,22,.3);
+  --pila-up-bg:linear-gradient(to bottom,rgba(26,38,64,.86),rgba(17,28,50,.9) 55%,rgba(10,20,38,.92));
+
+  --baja:#93c5fd;
+  --baja-claro:#cbd5e1;
+  --baja-borde:rgba(147,197,253,.6);
+  --baja-tinta:#cbd5e1;
+  --baja-chapa:rgba(10,30,58,.85);
+  --baja-grupo:rgba(12,24,46,.72);
+  --baja-grupo-borde:rgba(147,197,253,.3);
+  --pila-down-bg:linear-gradient(to bottom,rgba(18,34,62,.86),rgba(12,25,48,.9) 55%,rgba(8,17,36,.92));
+
+  --pila-num:#ffe7b8;
+  --pila-meta:#b3c2d6;
+  --motivo-op:.15;
+
+  --carta-bg:linear-gradient(160deg,#12294a,#0b1c36 60%,#050507);
+  --carta-borde:rgba(249,115,22,.45);
+  --carta-borde-hover:#f97316;
+  --carta-sel:#93c5fd;
+  --carta-num:#ffe7b8;
+  --carta-esq:#ffb35c;
+  --carta-sub:rgba(179,194,214,.8);
+  --carta-sombra:0 18px 30px -8px rgba(0,0,0,.85), 0 0 22px rgba(249,115,22,.22), inset 0 1px 0 rgba(255,255,255,.12);
+  --carta-brillo:rgba(255,179,92,.26);
+  --carta-grano:repeating-linear-gradient(0deg, rgba(255,255,255,.04) 0 1px, transparent 1px 4px);
+  --carta-radio:14px;
+
+  --banner-bg:linear-gradient(135deg, rgba(249,115,22,.28), rgba(147,197,253,.16));
+  --banner-borde:rgba(255,179,92,.75);
+  --banner-tinta:#ffe7b8;
+  --banner-glow:rgba(249,115,22,.34);
+
+  --tipo-display:'Bangers','Impact','Arial Black',sans-serif;
+  --tipo-num:'Bangers','Impact','Arial Black',sans-serif;
+
+  --dato:#93c5fd;
+  --dato-fondo:#2b5ea8;
+  --accion-tinta:#07172f;
+}
+
+/* ==========================================================================
+   Componentes que leen las variables. Acá ya no hay colores sueltos.
+   ========================================================================== */
+
+body{ background-color:var(--mesa-bg); color:var(--ui-texto); }
+.board-grid-pattern{
+  background-color:var(--mesa-bg);
+  background-image:var(--mesa-img);
+  background-size:var(--mesa-size);
+}
+.font-cinzel{ font-family:var(--tipo-display); }
+
+/* --- barra superior y superficies --- */
+.ui-barra{ background:var(--ui-barra); border-color:var(--ui-borde2); }
+.ui-panel{ background:var(--ui-panel); border-color:var(--ui-borde); }
+.ui-panel2{ background:var(--ui-panel2); border-color:var(--ui-borde2); }
+.ui-caja{ background:var(--ui-caja); border-color:var(--ui-borde); color:var(--ui-texto); }
+.ui-campo{ background:var(--ui-campo); border-color:var(--ui-borde); color:var(--ui-texto); }
+.ui-txt{ color:var(--ui-texto); }
+.ui-txt2{ color:var(--ui-texto2); }
+.ui-txt3{ color:var(--ui-texto3); }
+.ui-borde{ border-color:var(--ui-borde); }
+.titulo-juego{
+  background-image:linear-gradient(90deg,var(--acento1),var(--acento2) 55%,var(--acento3));
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+
+/* --- grupos de montones --- */
+.grupo-up{ background:var(--sube-grupo); border-color:var(--sube-grupo-borde); }
+.grupo-down{ background:var(--baja-grupo); border-color:var(--baja-grupo-borde); }
+.grupo-up .grupo-tinta{ color:var(--sube-tinta); }
+.grupo-down .grupo-tinta{ color:var(--baja-tinta); }
+.grupo-up .grupo-marca{ background:linear-gradient(135deg,var(--sube),var(--sube-claro)); }
+.grupo-down .grupo-marca{ background:linear-gradient(135deg,var(--baja),var(--baja-claro)); }
+.grupo-up .grupo-rango{ color:var(--sube-tinta); background:var(--sube-chapa); border-color:var(--sube-borde); }
+.grupo-down .grupo-rango{ color:var(--baja-tinta); background:var(--baja-chapa); border-color:var(--baja-borde); }
+
+/* --- montones --- */
+.pile-target.up{ background:var(--pila-up-bg); border-color:var(--sube-borde); }
+.pile-target.down{ background:var(--pila-down-bg); border-color:var(--baja-borde); }
+.pile-target .chapa{ border:1px solid; }
+.pile-target.up .chapa{ color:var(--sube-tinta); background:var(--sube-chapa); border-color:var(--sube-borde); }
+.pile-target.down .chapa{ color:var(--baja-tinta); background:var(--baja-chapa); border-color:var(--baja-borde); }
+.pile-target .pile-num{ color:var(--pila-num); font-family:var(--tipo-num); }
+.pile-target .pile-meta,
+.pile-target .cuenta{ color:var(--pila-meta); }
+.pile-target .motivo{ opacity:var(--motivo-op); }
+.pile-target.up .motivo{ color:var(--sube); }
+.pile-target.down .motivo{ color:var(--baja); }
+.pile-target .pie{ border-top:1px solid; }
+.pile-target.up .pie{ border-color:var(--sube-grupo-borde); }
+.pile-target.down .pie{ border-color:var(--baja-grupo-borde); }
+.pile-target.up.jugable{ border-color:var(--sube); }
+.pile-target.down.jugable{ border-color:var(--baja); }
+
+/* --- como cada uno acomoda su mano: orden y disposicion --- */
+.mano-seg{
+  display:inline-flex; align-items:stretch; gap:1px; padding:2px;
+  border-radius:9px; background:var(--ui-panel2); border:1px solid var(--ui-borde);
+}
+.mano-btn{
+  font:800 10px/1 inherit; letter-spacing:.06em; text-transform:uppercase;
+  padding:4px 7px; border-radius:7px; cursor:pointer;
+  color:var(--ui-texto3); background:transparent; border:0;
+  transition:background-color .15s ease, color .15s ease;
+}
+.mano-btn:hover{ color:var(--ui-texto); }
+.mano-btn[aria-pressed="true"]{
+  background:color-mix(in srgb, var(--acento1) 24%, var(--ui-panel2));
+  color:var(--ui-texto);
+}
+.mano-btn:focus-visible{ outline:2px solid var(--acento1); outline-offset:1px; }
+
+/* en fila: las cartas se abren hacia los lados y, si no caben, se corren */
+.mano-fila{
+  display:flex; align-items:flex-end; gap:8px;
+  overflow-x:auto; overscroll-behavior-x:contain;
+  padding-bottom:6px; scrollbar-width:thin;
+}
+.mano-fila > .card-hand{ flex:1 1 0; min-width:76px; max-width:150px; }
+
+/* en abanico: estilo yugi, montadas una sobre otra y en arco */
+.mano-abanico{
+  display:flex; justify-content:center; align-items:flex-end;
+  padding:26px 4px 10px; min-height:14rem;
+}
+.mano-abanico > .card-hand{
+  flex:0 0 auto; width:clamp(78px, 17vw, 132px);
+  z-index:var(--i,1);
+  transform-origin:50% 135%;
+  transform:rotate(var(--giro-ab,0deg)) translateY(var(--sube-ab,0px));
+  transition:transform .18s cubic-bezier(.3,.8,.4,1);
+}
+.mano-abanico > .card-hand + .card-hand{ margin-left:calc(-1 * var(--solape, 30px)); }
+.mano-abanico > .card-hand:hover,
+.mano-abanico > .card-hand:focus-visible,
+.mano-abanico > .card-hand.sel{
+  z-index:60;
+  transform:rotate(var(--giro-ab,0deg)) translateY(calc(var(--sube-ab,0px) - 22px)) scale(1.05);
+}
+.mano-abanico > .card-hand.arrastrando{ z-index:70; }
+@media (max-width:640px){
+  .mano-abanico{ padding-top:20px; min-height:12rem; }
+}
+
+/* --- cartas de la mano --- */
+.card-hand{
+  background:var(--carta-bg);
+  border:2px solid var(--carta-borde);
+  border-radius:var(--carta-radio);
+  box-shadow:var(--carta-sombra);
+  color:var(--carta-num);
+}
+.card-hand:hover{ border-color:var(--carta-borde-hover); }
+.card-hand.sel{ border-color:var(--carta-sel); box-shadow:0 0 28px 4px var(--carta-sel), var(--carta-sombra); }
+.card-hand .num{ color:var(--carta-num); font-family:var(--tipo-num); }
+.card-hand .esq{ color:var(--carta-esq); font-family:var(--tipo-num); }
+.card-hand .sub{ color:var(--carta-sub); }
+.card-rune-bg{ background:var(--carta-grano); }
+.card-hand .brillo{
+  background:linear-gradient(105deg, transparent 35%, var(--carta-brillo) 48%, transparent 62%);
+}
+.fx-carta, .fx-arrastre{
+  background:var(--carta-bg);
+  border-color:var(--carta-sel);
+  border-radius:var(--carta-radio);
+  color:var(--carta-num);
+  font-family:var(--tipo-num);
+}
+.fx-carta .esq, .fx-arrastre .esq{ color:var(--carta-esq); }
+
+/* ==========================================================================
+   Las utilidades de color de Tailwind que ya estaban en el HTML pasan a
+   respetar el tema. Así un mazo claro no deja texto gris sobre fondo claro.
+   ========================================================================== */
+[data-mazo] .text-white{ color:var(--ui-texto) }
+[data-mazo] .text-slate-200,
+[data-mazo] .text-slate-300{ color:var(--ui-texto) }
+[data-mazo] .text-slate-400{ color:var(--ui-texto2) }
+[data-mazo] .text-slate-500,
+[data-mazo] .text-slate-600{ color:var(--ui-texto3) }
+[data-mazo] .border-slate-700,
+[data-mazo] .border-slate-800,
+[data-mazo] .border-slate-700\/80,
+[data-mazo] .border-slate-800\/80,
+[data-mazo] .border-slate-800\/90,
+[data-mazo] .border-slate-800\/60,
+[data-mazo] .border-slate-700\/60{ border-color:var(--ui-borde) }
+[data-mazo] .bg-slate-900\/90,
+[data-mazo] .bg-slate-900\/80,
+[data-mazo] .bg-slate-900\/60,
+[data-mazo] .bg-slate-900\/40,
+[data-mazo] .bg-slate-900{ background-color:var(--ui-campo) }
+[data-mazo] .bg-slate-800,
+[data-mazo] .bg-slate-800\/80,
+[data-mazo] .bg-slate-800\/90,
+[data-mazo] .bg-board-surface,
+[data-mazo] .bg-board-surface\/90{ background-color:var(--ui-caja) }
+[data-mazo] .hover\:bg-slate-800:hover,
+[data-mazo] .hover\:bg-slate-700:hover{ background-color:var(--ui-panel2) }
+
+/* bg-slate-700 se usa suelto en pestanas, campos y modales: era el unico
+   gris que quedaba sin mapear y en el mazo claro salia como un parche negro. */
+[data-mazo] .bg-slate-700{ background-color:var(--ui-panel2) }
+[data-mazo] .border-slate-600{ border-color:var(--ui-borde) }
+/* la pestana activa del panel lateral se tine con el acento del mazo */
+[data-mazo] .tab-btn.bg-slate-700{
+  background-color:color-mix(in srgb, var(--acento1) 20%, var(--ui-panel2));
+  color:var(--ui-texto);
+}
+[data-mazo] .placeholder-slate-500::placeholder,
+[data-mazo] .placeholder-slate-600::placeholder{ color:var(--ui-texto3) }
+
+/* ==========================================================================
+   Selector de mazo
+   ========================================================================== */
+.mazos-grid{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px }
+@media (max-width:520px){ .mazos-grid{ grid-template-columns:1fr } }
+
+/* Ficha compacta: de un vistazo se ve el tapete, la carta normal, la dura y
+   los tonos del mazo. Cada ficha se pinta con la paleta del mazo que muestra,
+   nunca con la del mazo activo: si no, la mitad quedaría ilegible. */
+.mazo-op{
+  position:relative; overflow:hidden; isolation:isolate;
+  display:flex; align-items:center; gap:10px;
+  padding:9px 10px; border-radius:14px; cursor:pointer; text-align:left;
+  border:2px solid var(--ui-borde);
+  background:var(--pv-bg,var(--ui-campo));
+  transition:transform .15s ease, border-color .15s ease, box-shadow .15s ease;
+}
+.mazo-op:hover{ transform:translateY(-2px) }
+.mazo-op.elegido{ border-color:var(--acento1); box-shadow:0 0 0 3px color-mix(in srgb, var(--acento1) 25%, transparent) }
+
+.mazo-tapete{ position:absolute; inset:0; z-index:-2; background-size:cover; background-position:center }
+/* velo del color del mazo: el arte se intuye y el texto se sigue leyendo */
+.mazo-velo{
+  position:absolute; inset:0; z-index:-1;
+  background:linear-gradient(90deg,
+    var(--pv-bg,var(--ui-campo)) 34%,
+    color-mix(in srgb, var(--pv-bg,var(--ui-campo)) 62%, transparent) 100%);
+}
+
+.mazo-caras{ display:flex; gap:4px; flex:none }
+.mazo-cara{
+  width:36px; aspect-ratio:2/3; border-radius:5px; overflow:hidden;
+  display:grid; place-items:center;
+  border:1.5px solid var(--pv-borde,rgba(148,163,184,.55));
+  background:var(--pv-carta,#1e2a3a);
+  color:var(--pv-num,#fff);
+  font-family:var(--pv-tipo,inherit); font-weight:800; font-size:12px; line-height:1;
+  box-shadow:0 5px 12px -5px rgba(0,0,0,.8);
+}
+.mazo-cara.dura{ border-color:var(--pv-dura,var(--pv-borde,rgba(148,163,184,.55))) }
+.mazo-cara img{ width:100%; height:100%; object-fit:cover; display:block }
+
+.mazo-txt{ display:flex; flex-direction:column; gap:2px; min-width:0; padding-right:12px }
+.mazo-nombre{
+  font-weight:800; font-size:13px; line-height:1.2; color:var(--pv-texto,var(--ui-texto));
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+/* dos lineas como maximo: la ficha no puede crecer por el texto */
+.mazo-desc{
+  font-size:10.5px; line-height:1.25; color:var(--pv-texto2,var(--ui-texto2));
+  display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden;
+}
+.mazo-tonos{ display:flex; gap:3px; margin-top:3px }
+.mazo-tonos i{ width:15px; height:5px; border-radius:999px; box-shadow:inset 0 0 0 1px rgba(0,0,0,.25) }
+.mazo-tonos .t1{ background:var(--pv-t1,#f97316) }
+.mazo-tonos .t2{ background:var(--pv-t2,#06b6d4) }
+.mazo-tonos .t3{ background:var(--pv-t3,#ef4444) }
+
+.mazo-tick{
+  position:absolute; top:5px; right:8px; font-size:12px; font-weight:900;
+  color:var(--acento1); opacity:0; transition:opacity .15s ease;
+}
+.mazo-op.elegido .mazo-tick{ opacity:1 }
+
+/* Fondo y tinta de cada ficha: pareja elegida contra su propio arte, no
+   contra su tema de interfaz (el tapete de Original es oscuro aunque su
+   mesa sea clara, y el Espanol al reves). */
+.mazo-op[data-mazo="warlock"]{ --pv-bg:#12041f; --pv-texto:#f7ebff; --pv-texto2:#c9a5e0;
+  --pv-t1:#ff33ca; --pv-t2:#22d3ee; --pv-t3:#ff235f }
+.mazo-op[data-mazo="original"]{ --pv-bg:#15120f; --pv-texto:#f4efe3; --pv-texto2:#bdb3a2;
+  --pv-t1:#c0392b; --pv-t2:#2471a3; --pv-t3:#f4a300 }
+.mazo-op[data-mazo="espanol"]{ --pv-bg:#f1d9a8; --pv-texto:#3b2410; --pv-texto2:#7a5a2e;
+  --pv-t1:#c0392b; --pv-t2:#245044; --pv-t3:#d4a017 }
+.mazo-op[data-mazo="ninja"]{ --pv-bg:#07172f; --pv-texto:#e8dbc2; --pv-texto2:#b3c2d6;
+  --pv-t1:#f97316; --pv-t2:#93c5fd; --pv-t3:#dc2626 }
+.mazo-op[data-mazo="paladin"]{ --pv-bg:#07152f; --pv-texto:#fff8e7; --pv-texto2:#c3d2e8;
+  --pv-t1:#f5c451; --pv-t2:#8fb6ee; --pv-t3:#e11d1d }
+.mazo-op[data-mazo="neon"]{ --pv-bg:#08031f; --pv-texto:#eef2ff; --pv-texto2:#b7a6e8;
+  --pv-t1:#ec4899; --pv-t2:#22d3ee; --pv-t3:#ff174f }
+/* ningun panel debe pasarse de la pantalla: si no cabe, se desplaza */
+.modal-panel{ max-height:calc(100vh - 2rem); overflow-y:auto; overscroll-behavior:contain }
+@supports (height:100dvh){ .modal-panel{ max-height:calc(100dvh - 2rem) } }
+
+/* ==========================================================================
+   Selector de dificultad, arriba y a la vista
+   ========================================================================== */
+.modo-sel{
+  display:flex; align-items:center; gap:2px;
+  padding:2px; border-radius:999px;
+  border:1px solid var(--ui-borde); background:var(--ui-campo);
+}
+.modo-pill{
+  display:flex; align-items:center; gap:4px;
+  padding:3px 9px; border-radius:999px;
+  font-size:10px; font-weight:800; letter-spacing:.04em; text-transform:uppercase;
+  color:var(--ui-texto3); background:transparent; border:1px solid transparent;
+  transition:all .15s ease; white-space:nowrap;
+}
+.modo-sel.editable .modo-pill{ cursor:pointer }
+.modo-sel.editable .modo-pill:hover{ color:var(--ui-texto) }
+.modo-pill.on{ color:#fff; background:var(--ui-panel2); border-color:var(--ui-borde) }
+.modo-pill.on[data-modo="duro"]{
+  background:linear-gradient(135deg,#9f1239,#be123c); border-color:#fb7185; color:#fff;
+}
+.modo-pill.on[data-modo="clasico"]{
+  background:var(--ui-panel2); border-color:var(--acento1); color:var(--ui-texto);
+}
+.modo-sel:not(.editable) .modo-pill:not(.on){ display:none }
+@media (max-width:640px){ .modo-pill .larga{ display:none } }
+
+/* ==========================================================================
+   Cartas con imagen propia (public/assets/mazos/<id>/cards/NNN.png)
+   ========================================================================== */
+.card-hand .carta-img,
+.mini-carta .carta-img{
+  position:absolute; inset:0; width:100%; height:100%;
+  object-fit:cover; border-radius:inherit;
+  pointer-events:none; user-select:none;
+  z-index:20;                      /* tapa la cara del mazo que va debajo */
+}
+.card-hand{ container-type:size }
+.card-hand .carta-capa{ position:absolute; inset:0; z-index:21; pointer-events:none }
+.card-hand .carta-capa .num,
+.card-hand .carta-capa .esq{
+  position:absolute;
+  white-space:nowrap;
+  font-variant-numeric:tabular-nums;
+  text-rendering:geometricPrecision;
+}
+
+
+/* Sobre un tapete ilustrado el encabezado del grupo se pierde: se le pone
+   una placa del color del grupo para que el texto tenga donde apoyarse. */
+#mesa-tapete.con-tapete .grupo-cab{
+  padding:4px 8px; margin:-2px -2px 0; border-radius:12px;
+  background:var(--grupo-placa, rgba(0,0,0,.42));
+  backdrop-filter:blur(3px);
+}
+
+/* las dos pistas de salto tambien estaban en color fijo */
+[data-mazo] .text-orange-400{ color:var(--sube-claro) }
+[data-mazo] .text-cyan-400{ color:var(--baja-claro) }
+
+/* Boton principal: toma el acento del mazo en vez de un ambar fijo. El acento
+   ya esta elegido para contrastar contra su propio panel, asi que sirve de
+   fondo tenue, de filo y de tinta a la vez. */
+.btn-primario{
+  background:color-mix(in srgb, var(--acento1) 22%, transparent);
+  border:1.5px solid var(--acento1);
+  color:var(--acento1);
+  font-weight:800;
+}
+.btn-primario:hover{ background:color-mix(in srgb, var(--acento1) 34%, transparent) }
+
+/* El verde de estado y el cian de dato estaban fijos en el HTML: en un mazo
+   claro como el espanol gritaban, y en los oscuros no eran de nadie. */
+[data-mazo] .text-emerald-300,
+[data-mazo] .text-emerald-400{ color:var(--ok-claro) }
+[data-mazo] .bg-emerald-400,
+[data-mazo] .bg-emerald-500\/70{ background-color:var(--ok) }
+[data-mazo] .bg-emerald-950\/60{ background-color:var(--ok-fondo) }
+[data-mazo] .border-emerald-500\/40{ border-color:var(--ok-borde) }
+[data-mazo] .text-cyan-300{ color:var(--dato) }
+[data-mazo] .bg-cyan-600{ background-color:var(--dato-fondo); color:var(--dato-tinta) }
+
+/* "¿Quien parte?" se pinta con un degradado sobre el propio texto */
+[data-mazo] #turn-name .bg-gradient-to-r{
+  background-image:linear-gradient(90deg, var(--ok-claro), var(--ok));
+}
+
+/* Los botones de accion traian degradados fijos (esmeralda y ambar).
+   Terminar turno y ofrecerse son "en orden"; repartir es del mazo. */
+[data-mazo] #btn-end,
+[data-mazo] #btn-partir,
+[data-mazo] #btn-partir-si{
+  background-image:linear-gradient(90deg, var(--ok), var(--ok-claro));
+  color:var(--accion-tinta);
+  border-color:transparent;
+}
+[data-mazo] #btn-deal,
+[data-mazo] #btn-deal2{
+  background-image:linear-gradient(90deg, var(--acento1), var(--acento2));
+  color:var(--repartir-tinta);
+}
+
+/* Pildoras de frases del chat: sus tres tonos ahora son los del mazo */
+[data-mazo] .bg-amber-950\/60{ background-color:color-mix(in srgb, var(--acento1) 15%, var(--ui-caja)) }
+[data-mazo] .bg-orange-950\/60{ background-color:color-mix(in srgb, var(--acento2) 15%, var(--ui-caja)) }
+[data-mazo] .bg-cyan-950\/60{ background-color:color-mix(in srgb, var(--acento3) 15%, var(--ui-caja)) }
+[data-mazo] .text-amber-200{ color:color-mix(in srgb, var(--acento1) var(--pildora-mezcla), var(--ui-texto)) }
+[data-mazo] .text-orange-200{ color:color-mix(in srgb, var(--acento2) var(--pildora-mezcla), var(--ui-texto)) }
+[data-mazo] .text-cyan-200{ color:color-mix(in srgb, var(--acento3) var(--pildora-mezcla), var(--ui-texto)) }
+[data-mazo] .border-amber-600\/50{ border-color:color-mix(in srgb, var(--acento1) 45%, transparent) }
+[data-mazo] .border-orange-600\/50{ border-color:color-mix(in srgb, var(--acento2) 45%, transparent) }
+[data-mazo] .border-cyan-700\/50{ border-color:color-mix(in srgb, var(--acento3) 45%, transparent) }
+
+/* cifras y etiquetas que el HTML dejo en ambar fijo */
+/* --- la familia ambar: lo tuyo, el turno y lo que hay que mirar ---
+   Venia fija de Tailwind, asi que todos los mazos mostraban el mismo dorado. */
+[data-mazo] .text-amber-400,
+[data-mazo] .text-amber-400\/70{ color:var(--realce) }
+[data-mazo] .text-amber-100{ color:color-mix(in srgb, var(--acento1) 28%, var(--ui-texto)) }
+
+[data-mazo] .bg-amber-400,
+[data-mazo] .bg-amber-500,
+[data-mazo] .bg-amber-600{ background-color:var(--acento1) }
+[data-mazo] .bg-amber-400.text-slate-950,
+[data-mazo] .bg-amber-500.text-slate-950,
+[data-mazo] .bg-amber-600.text-slate-950{ color:var(--repartir-tinta) }
+[data-mazo] .bg-amber-500\/20{ background-color:color-mix(in srgb, var(--acento1) 20%, transparent) }
+[data-mazo] .bg-amber-500\/30{ background-color:color-mix(in srgb, var(--acento1) 30%, transparent) }
+[data-mazo] .bg-amber-950\/80{ background-color:color-mix(in srgb, var(--acento1) 18%, var(--ui-caja)) }
+[data-mazo] .bg-amber-950\/40{ background-color:color-mix(in srgb, var(--acento1) 12%, var(--ui-caja)) }
+
+[data-mazo] .border-amber-400,
+[data-mazo] .border-amber-400\/70{ border-color:var(--acento1) }
+[data-mazo] .border-amber-500\/20{ border-color:color-mix(in srgb, var(--acento1) 22%, transparent) }
+[data-mazo] .border-amber-500\/30{ border-color:color-mix(in srgb, var(--acento1) 32%, transparent) }
+[data-mazo] .border-amber-500\/40{ border-color:color-mix(in srgb, var(--acento1) 42%, transparent) }
+[data-mazo] .border-amber-500\/50{ border-color:color-mix(in srgb, var(--acento1) 52%, transparent) }
+[data-mazo] .border-amber-500\/60{ border-color:color-mix(in srgb, var(--acento1) 62%, transparent) }
+[data-mazo] .focus-visible\:ring-amber-400:focus-visible{ --tw-ring-color:var(--acento1) }
+[data-mazo] .focus\:border-amber-400:focus{ border-color:var(--acento1) }
+
+/* botones y textos con degradado dorado */
+[data-mazo] .bg-gradient-to-r.from-amber-500.to-orange-600{
+  background-image:linear-gradient(90deg, var(--acento1), var(--acento2));
+  color:var(--repartir-tinta);
+}
+[data-mazo] .bg-gradient-to-r.from-amber-500.to-orange-600:hover{
+  background-image:linear-gradient(90deg, var(--acento2), var(--acento1));
+}
+[data-mazo] .bg-gradient-to-r.from-amber-300.to-orange-400{
+  background-image:linear-gradient(90deg, var(--acento1), var(--acento2));
+}
+[data-mazo] .turno.bg-gradient-to-r{
+  background-image:linear-gradient(90deg,
+    color-mix(in srgb, var(--acento1) 22%, transparent),
+    color-mix(in srgb, var(--acento2) 22%, transparent));
+}
+[data-mazo] .hover\:bg-amber-600:hover,
+[data-mazo] .hover\:bg-amber-500:hover,
+[data-mazo] .hover\:bg-amber-400:hover{ background-color:var(--acento2); color:var(--repartir-tinta) }
+[data-mazo] .hover\:bg-amber-900:hover{ background-color:color-mix(in srgb, var(--acento1) 30%, var(--ui-caja)) }
+
+[data-mazo] .text-amber-300,
+[data-mazo] .text-amber-300\/90,
+[data-mazo] .text-amber-400\/90{ color:var(--realce) }
+
+/* el cartel de turno toma el color del mazo */
+.fx-banner{
+  background:var(--banner-bg);
+  border-color:var(--banner-borde);
+  color:var(--banner-tinta);
+  box-shadow:0 20px 60px -20px rgba(0,0,0,.95), 0 0 40px var(--banner-glow);
+}
+
+/* tapete propio bajo los montones */
+#mesa-tapete{
+  background-image:var(--tapete, none);
+  background-size:cover; background-position:center;
+  border-radius:20px;
+}
+#mesa-tapete.con-tapete{ padding:10px; box-shadow:inset 0 0 60px rgba(0,0,0,.45) }
+
+/* ==========================================================================
+   Modo duro: la carta doble tiene que notarse
+   ========================================================================== */
+@keyframes fx-onda{
+  from{ transform:translate(-50%,-50%) scale(.2); opacity:.95; border-width:5px }
+  to{ transform:translate(-50%,-50%) scale(3.2); opacity:0; border-width:1px }
+}
+.fx-onda{
+  width:170px; height:170px; border-radius:50%;
+  border:5px solid #ef4444;
+  box-shadow:0 0 40px rgba(239,68,68,.6), inset 0 0 30px rgba(239,68,68,.35);
+  animation:fx-onda .8s cubic-bezier(.15,.7,.3,1) forwards;
+}
+.fx-onda.tarde{ animation-delay:.16s; border-color:#fb923c }
+
+@keyframes fx-sello{
+  0%{ transform:translate(-50%,-50%) scale(2.4) rotate(-14deg); opacity:0 }
+  22%{ transform:translate(-50%,-50%) scale(1) rotate(-6deg); opacity:1 }
+  68%{ opacity:1 }
+  100%{ transform:translate(-50%,-50%) scale(1.15) rotate(-4deg); opacity:0 }
+}
+.fx-sello{
+  font-family:var(--tipo-num); font-weight:900; font-size:64px; line-height:1;
+  color:#fff; -webkit-text-stroke:3px #b91c1c;
+  text-shadow:0 0 26px rgba(239,68,68,.95), 0 6px 20px rgba(0,0,0,.8);
+  animation:fx-sello .95s cubic-bezier(.2,1,.3,1) forwards;
+}
+
+@keyframes fx-sacude{
+  0%,100%{ transform:translate(0,0) }
+  15%{ transform:translate(-5px,3px) }
+  30%{ transform:translate(5px,-3px) }
+  45%{ transform:translate(-4px,-2px) }
+  60%{ transform:translate(4px,2px) }
+  80%{ transform:translate(-2px,1px) }
+}
+.pile-target.sacude{ animation:fx-sacude .55s ease-out }
+
+/* viñeta latente: los bordes de la pantalla respiran mientras haya pila obligada */
+#fx-vineta{
+  position:absolute; inset:0; pointer-events:none; opacity:0;
+  transition:opacity .5s ease;
+  background:radial-gradient(ellipse at center, transparent 52%, rgba(239,68,68,.30) 100%);
+}
+#fx-vineta.on{ opacity:1; animation:fx-vineta-respira 2.6s ease-in-out infinite }
+#fx-vineta.on.urgente{ animation-duration:1.1s;
+  background:radial-gradient(ellipse at center, transparent 44%, rgba(239,68,68,.52) 100%) }
+@keyframes fx-vineta-respira{ 0%,100%{ opacity:.55 } 50%{ opacity:1 } }
+
+/* la pila obligada, más presente */
+.pile-target.obligada .pile-num{ animation:fx-num-late 1.6s ease-in-out infinite }
+.pile-target.obligada.ya .pile-num{ animation-duration:.8s; color:#fecaca }
+@keyframes fx-num-late{ 0%,100%{ transform:scale(1) } 50%{ transform:scale(1.06) } }
+
+@media (prefers-reduced-motion: reduce){
+  #fx-vineta.on, .pile-target.obligada .pile-num, .pile-target.sacude{ animation:none }
+}
+
+/* la cáscara del mazo: el marco entero, sin deformarlo. Lo que sobra a los
+   lados se rellena con el fondo de la paleta. */
+.card-hand .carta-img.cascara{ object-fit:contain; object-position:center }
+
+
+/* Cuando el mazo trae tapete, los grupos dejan de tener fondo propio para que
+   se vea la imagen: queda solo el filo y el resplandor. */
+#mesa-tapete.con-tapete .grupo-up,
+#mesa-tapete.con-tapete .grupo-down{
+  background:transparent;
+  border-color:rgba(255,255,255,.10);
+  box-shadow:none;
+}
+#mesa-tapete.con-tapete{ padding:14px }
+
+/* ==========================================================================
+   Cartas con cáscara: la proporción y el marco los manda el palette.json
+   ========================================================================== */
+.con-cascara .card-hand{
+  aspect-ratio:var(--carta-ratio, 2/3);
+  width:auto;
+  justify-self:center;
+  padding:0;
+  border-width:2px;
+  border-color:transparent;
+  background:var(--carta-bg, transparent);
+}
+.con-cascara .card-hand:hover{ border-color:var(--carta-borde-hover) }
+.con-cascara .card-hand.sel{ border-color:var(--carta-sel) }
+.con-cascara .card-hand .carta-img.cascara{ object-fit:fill }
+/* El diseño dibujado queda debajo como respaldo. Mientras la cáscara cargue
+   se esconde; si la imagen falla, el manejador marca .fallo y reaparece. */
+.con-cascara .card-hand:not(.fallo) > *:not(.carta-img):not(.carta-capa):not(.brillo){
+  opacity:0;
+  transition:opacity .15s ease;
+}
