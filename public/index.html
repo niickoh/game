@@ -416,6 +416,11 @@
   @keyframes aviso-entra{ from{ opacity:0; transform:translateY(-14px) scale(.96) } }
   @keyframes aviso-sale{ to{ opacity:0; transform:translateY(-10px) } }
 
+  /* aviso de que cerrar el turno hace perder: late en rojo para que no pase piola */
+  .aviso-perder{ box-shadow:0 0 0 1px rgba(244,63,94,.25), 0 0 44px -6px rgba(244,63,94,.55) }
+  @keyframes fx-alerta{ 0%,100%{ transform:none } 20%{ transform:translateX(-6px) } 40%{ transform:translateX(6px) } 60%{ transform:translateX(-3px) } 80%{ transform:translateX(3px) } }
+  #modal-perder:not(.hidden) .aviso-perder{ animation:fx-panel .28s cubic-bezier(.2,.9,.3,1), fx-alerta .45s ease .3s }
+
   /* aviso de versión nueva (lo pone el service worker a mitad de partida) */
   #aviso-version{
     position:fixed; left:50%; bottom:calc(92px + var(--safe-b)); z-index:80;
@@ -689,7 +694,7 @@
   </div>
 </div>
 
-<div id="modal-rules" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 modal-fondo">
+<div id="modal-rules" data-cierra-fuera class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 modal-fondo">
   <div class="ui-panel border max-w-lg w-full rounded-2xl shadow-2xl p-6 modal-panel">
     <div class="flex items-center justify-between border-b border-slate-700/60 pb-3 mb-4">
       <h3 class="text-lg font-bold text-white flex items-center gap-2 font-cinzel"><span>📜</span> Cómo se juega</h3>
@@ -721,7 +726,7 @@
   </div>
 </div>
 
-<div id="modal-room" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 modal-fondo">
+<div id="modal-room" data-cierra-fuera class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 modal-fondo">
   <div class="ui-panel border max-w-md w-full rounded-2xl shadow-2xl p-6 modal-panel">
     <div class="flex items-center justify-between border-b border-slate-700/60 pb-3 mb-4">
       <h3 class="text-lg font-bold text-white flex items-center gap-2 font-cinzel"><span>🌐</span> Sala de partida</h3>
@@ -775,6 +780,25 @@
 </div>
 
 <!-- Antes de la primera jugada cada uno mira sus cartas y decide si parte. -->
+<!-- aviso importante: cerrar el turno ahora hace perder la partida (modo duro).
+     No se cierra tocando afuera; Escape y "Volver" son la salida segura. -->
+<div id="modal-perder" role="alertdialog" aria-modal="true" aria-labelledby="perder-titulo" aria-describedby="perder-msg"
+  class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 modal-fondo">
+  <div class="ui-panel border-2 border-rose-500/70 max-w-md w-full rounded-2xl shadow-2xl p-5 sm:p-6 modal-panel aviso-perder">
+    <h3 id="perder-titulo" class="text-lg sm:text-xl font-black text-rose-200 flex items-center gap-2 font-cinzel mb-2">
+      <span class="text-2xl leading-none">⚠️</span> Si cierras ahora, pierden
+    </h3>
+    <p id="perder-msg" class="ui-txt text-sm leading-relaxed mb-3"></p>
+    <div id="perder-cartas" class="mb-4"></div>
+    <div class="flex flex-wrap justify-end gap-2">
+      <button id="btn-perder-volver" type="button"
+        class="btn-primario px-5 py-2 rounded-xl text-sm transition active:scale-95">Volver y cubrirla</button>
+      <button id="btn-perder-igual" type="button"
+        class="px-5 py-2 rounded-xl text-sm font-bold transition active:scale-95 bg-rose-950/70 border border-rose-500/60 text-rose-200 hover:bg-rose-900">Terminar igual</button>
+    </div>
+  </div>
+</div>
+
 <div id="modal-partir" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 modal-fondo">
   <div class="ui-panel border max-w-xl w-full rounded-2xl shadow-2xl p-6 modal-panel">
     <div class="border-b ui-borde pb-3 mb-4">
@@ -793,7 +817,7 @@
   </div>
 </div>
 
-<div id="modal-mazo" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 modal-fondo">
+<div id="modal-mazo" data-cierra-fuera class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 modal-fondo">
   <div class="ui-panel border max-w-2xl w-full rounded-2xl shadow-2xl p-3.5 sm:p-5 modal-panel">
     <div class="flex items-center justify-between gap-3 mb-3">
       <div class="min-w-0">

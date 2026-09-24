@@ -848,6 +848,11 @@
           ' dejó obligada la ' + cual;
       }
     }
+
+    // el aviso de "si cierras, pierden" solo vale mientras siga siendo cierto
+    if(!(enJuego && estado.yourTurn && estado.obligada && estado.obligada.ultima)){
+      cerrarModal('modal-perder');
+    }
   }
 
   function pintarSala(){
@@ -1168,6 +1173,22 @@
   };
   window.cerrarModal = function(id){ $(id).classList.add('hidden'); };
 
+  /* Tocar fuera del panel cierra los que son solo consulta (reglas, sala,
+     mazo: los marcados con data-cierra-fuera). Los que esperan algo de uno
+     —entrar, decidir si partes, ver cómo terminó— no se van por un toque
+     perdido. Cuenta solo si el toque empieza y termina en el fondo: así
+     seleccionar texto adentro y soltar afuera no cierra nada. */
+  var toqueEnFondo = null;
+  document.addEventListener('pointerdown', function(ev){
+    var m = ev.target;
+    toqueEnFondo = (m && m.classList && m.classList.contains('modal-fondo') && m.hasAttribute('data-cierra-fuera')) ? m : null;
+  });
+  document.addEventListener('click', function(ev){
+    var m = toqueEnFondo;
+    toqueEnFondo = null;
+    if(m && ev.target === m) cerrarModal(m.id);
+  });
+
   // abre o cierra la hoja del chat en celular; sin argumento, alterna
   window.togglePanel = function(abrir){
     var p = $('side-panel');
@@ -1301,7 +1322,42 @@
   });
   pintarOpsMano();
 
-  $('btn-end').onclick = function(){ elegida = null; enviar('end'); };
+  /* Cerrar el turno. En modo duro, si queda una pila obligada en su último
+     turno y es el mío, cerrar ahora es perder: antes se pregunta. */
+  function terminarTurno(){
+    elegida = null;
+    var o = estado && estado.obligada;
+    if(estado && estado.yourTurn && o && o.ultima){ avisarPerder(o); return; }
+    enviar('end');
+  }
+
+  function avisarPerder(o){
+    var p = estado.piles[o.pila];
+    var cual = 'la ' + (o.pila % 2 === 0 ? 'izquierda' : 'derecha') + ' de ' +
+               (p.dir === 'up' ? 'las que suben ▲' : 'las que bajan ▼');
+    var sirven = estado.hand.filter(function(c){ return puedeJugar(c, p); })
+                            .sort(function(a, b){ return a - b; });
+    $('perder-msg').innerHTML = 'El <strong class="font-mono">' + o.carta + '</strong>' +
+      (o.nombre ? ' de <strong>' + esc(o.nombre) + '</strong>' : '') +
+      ' dejó obligada ' + cual + ', y este es el último turno para cubrirla. ' +
+      'Si terminas sin poner una carta ahí, <strong class="text-rose-300">se acaba la partida</strong>.';
+    // las propias cartas se pueden mostrar: la regla de no decir números es para el chat
+    $('perder-cartas').innerHTML = sirven.length
+      ? '<p class="text-xs font-bold text-emerald-300 mb-1.5">Tienes ' + sirven.length +
+          (sirven.length === 1 ? ' carta que cabe' : ' cartas que caben') + ' ahí:</p>' +
+        '<div class="flex flex-wrap gap-1.5">' + sirven.map(function(c){
+          return '<span class="font-mono font-black text-sm px-2 py-0.5 rounded-md bg-emerald-950/60 border border-emerald-500/50 text-emerald-200">' + c + '</span>';
+        }).join('') + '</div>'
+      : '<p class="text-xs font-bold text-rose-300">No tienes ninguna carta que quepa ahí.</p>';
+    $('btn-perder-volver').textContent = sirven.length ? 'Volver y cubrirla' : 'Volver';
+    abrirModal('modal-perder');
+    $('btn-perder-volver').focus();
+  }
+
+  $('btn-perder-volver').onclick = function(){ cerrarModal('modal-perder'); };
+  $('btn-perder-igual').onclick = function(){ cerrarModal('modal-perder'); enviar('end'); };
+
+  $('btn-end').onclick = terminarTurno;
   $('btn-undo').onclick = function(){ elegida = null; enviar('undo'); };
   $('btn-deal').onclick = function(){ elegida = null; enviar('start'); };
   $('btn-deal2').onclick = function(){ elegida = null; cerrarModal('modal-room'); enviar('start'); };
@@ -1396,7 +1452,7 @@
   document.addEventListener('keydown', function(ev){
     if(ev.target && /^(INPUT|TEXTAREA)$/.test(ev.target.tagName)) return;
     if(ev.key === 'Escape'){
-      ['modal-rules','modal-room','modal-mazo'].forEach(cerrarModal);
+      ['modal-rules','modal-room','modal-mazo','modal-perder'].forEach(cerrarModal);
       if(elegida !== null){ elegida = null; pintarMano(); pintarPilas(); }
       return;
     }
@@ -1408,7 +1464,8 @@
       return;
     }
     if(!estado || !estado.yourTurn) return;
-    if(ev.key === 'Enter' && !$('btn-end').disabled){ elegida = null; enviar('end'); return; }
+    if(!$('modal-perder').classList.contains('hidden')) return;
+    if(ev.key === 'Enter' && !$('btn-end').disabled){ terminarTurno(); return; }
     if(elegida !== null && ev.key >= '1' && ev.key <= '4'){
       var i = Number(ev.key) - 1;
       if(puedeJugar(elegida, estado.piles[i])){
