@@ -1,6 +1,14 @@
 {
   "id": "miku",
   "name": "Miku",
+  "tagline": "Concierto idol en turquesa y rosa",
+  "swatches": [
+    { "color": "#0f223f", "nombre": "Escenario" },
+    { "color": "#1f6298", "nombre": "Azul foco" },
+    { "color": "#39d6d8", "nombre": "Turquesa" },
+    { "color": "#ff2fb3", "nombre": "Rosa idol" },
+    { "color": "#ff174d", "nombre": "Láser", "duro": true }
+  ],
   "emoji": "🎤",
   "description": "Estilo Hatsune Miku con escenario idol virtual, twin-tails turquesa, equalizer holográfico, notas musicales, luces cyan/magenta y marco cyber. La variante dura usa expresión seria, glitch, lasers rojos y sobrecarga de concierto.",
   "assets": {

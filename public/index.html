@@ -6,6 +6,24 @@
 <meta name="color-scheme" content="dark">
 <title>¿Quién chucha revuelve?</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>%F0%9F%94%A5</text></svg>">
+<script>
+  /* Adelanta el arte del mazo de este jugador. Sin esto el navegador recién
+     lo pide cuando llegan mazos.js y /api/assets y se pinta la mesa. Solo el
+     elegido: precargar los nueve serían ~10 MB compitiendo con la página;
+     los demás los guarda el service worker la primera vez que se ven. */
+  (function(){
+    var id = 'warlock';
+    try { id = localStorage.getItem('thegame.mazo') || id; } catch(e){}
+    if(!/^[a-z0-9_-]+$/.test(id)) return;
+    ['playmat.webp', 'card-normal.webp'].forEach(function(f){
+      var l = document.createElement('link');
+      l.rel = 'preload'; l.as = 'image'; l.href = '/assets/mazos/' + id + '/' + f;
+      l.setAttribute('fetchpriority', 'high');
+      document.head.appendChild(l);
+    });
+  })();
+</script>
+<link rel="preload" href="/api/assets" as="fetch" crossorigin>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bangers&family=Bricolage+Grotesque:wght@700;800&family=Cinzel:wght@700;900&family=Orbitron:wght@700;900&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700;800&display=swap">
 <script src="/vendor/tailwind.js"></script>
@@ -302,6 +320,129 @@
   @keyframes fx-fondo{from{opacity:0}to{opacity:1}}
   .modal-fondo{animation:fx-fondo .22s ease-out}
 
+  /* ---------------- escritorio con poco alto ----------------
+     En 1080x1150 (menos las barras del navegador) o en 1920x1080, los dos
+     grupos de montones apilados empujan la mano fuera de la pantalla. Ahí
+     los grupos se ponen lado a lado: una sola fila de cuatro montones. */
+  @media (min-width:1024px) and (max-height:1100px){
+    #mesa-tapete{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    #mesa-tapete > * + *{margin-top:0 !important}
+    #mesa-tapete .grupo-cab > span:last-child{display:none !important}
+    #mesa-tapete .grupo-up,#mesa-tapete .grupo-down{padding:10px}
+    #piles-up,#piles-down{gap:10px}
+    .pile-target{min-height:0 !important;padding:10px 12px !important}
+    .pile-target .pile-num{font-size:3.4rem}
+    .pile-target .motivo{width:7rem;height:7rem}
+    /* montones angostos: el rango ya lo dice la cabecera y el signo ▲▼ */
+    .pile-target .chapa > span:last-child{display:none}
+    .pile-target .pie{flex-direction:column;align-items:flex-start;gap:3px}
+    #mesa-tapete .grupo-cab{flex-wrap:nowrap}
+    #mesa-tapete .grupo-cab .grupo-tinta{white-space:nowrap}
+  }
+  @media (min-width:1024px) and (max-width:1279px) and (max-height:1100px){
+    #mesa-tapete .grupo-rango{display:none}
+  }
+  @media (min-width:1024px) and (max-height:820px){
+    .pile-target .pile-num{font-size:2.8rem}
+    #hand{min-height:0}
+  }
+  /* ---------------- chat en celular: hoja que sube desde abajo ----------------
+     Antes el panel se abría dentro de la página, debajo de la mano, y había
+     que bajar hasta el fondo para leerlo. Ahora sube encima de la mesa. */
+  @media (max-width:1023px){
+    #side-panel{
+      display:flex !important; position:fixed; left:0; right:0; bottom:0; top:auto;
+      width:100%; height:min(78dvh,640px); z-index:60; margin:0;
+      border-radius:22px 22px 0 0; border-bottom:0;
+      padding-bottom:var(--safe-b);
+      transform:translateY(102%); visibility:hidden;
+      transition:transform .32s cubic-bezier(.2,.9,.3,1), visibility 0s linear .32s;
+    }
+    #side-panel.abierto{ transform:none; visibility:visible; transition:transform .32s cubic-bezier(.2,.9,.3,1) }
+    .hoja-asa{ flex:none; width:44px; height:5px; margin:8px auto 0; border-radius:999px; background:var(--ui-texto3); opacity:.7 }
+
+    #chat-velo{
+      position:fixed; inset:0; z-index:55; background:rgba(0,0,0,.55);
+      opacity:0; pointer-events:none; transition:opacity .25s ease;
+    }
+    body.chat-abierto #chat-velo{ opacity:1; pointer-events:auto }
+    body.chat-abierto{ overflow:hidden }
+
+    #chat-fab{
+      position:fixed; right:14px; bottom:calc(86px + var(--safe-b)); z-index:45;
+      width:54px; height:54px; border-radius:999px; display:grid; place-items:center;
+      font-size:23px; line-height:1;
+      background:var(--acento1); color:var(--accion-tinta);
+      box-shadow:0 12px 26px -8px rgba(0,0,0,.85), 0 0 0 3px color-mix(in srgb, var(--acento1) 28%, transparent);
+      transition:transform .2s ease;
+    }
+    #chat-fab:active{ transform:scale(.92) }
+    #chat-fab.nuevo{ animation:fab-pulso 1s ease-in-out 3 }
+    body.chat-abierto #chat-fab{ opacity:0; pointer-events:none }
+    #chat-badge{
+      position:absolute; top:-3px; right:-3px; min-width:21px; height:21px; padding:0 5px;
+      border-radius:999px; display:grid; place-items:center;
+      background:#f43f5e; color:#fff; font-size:11px; font-weight:800;
+      box-shadow:0 0 0 2px var(--mesa-bg);
+    }
+    #chat-badge.hidden{ display:none }
+
+    #chat-avisos{
+      position:fixed; left:50%; top:calc(10px + var(--safe-t)); z-index:70;
+      width:min(92vw,420px); transform:translateX(-50%);
+      display:flex; flex-direction:column; gap:6px; pointer-events:none;
+    }
+    .chat-aviso{
+      pointer-events:auto; width:100%; text-align:left; cursor:pointer;
+      display:flex; align-items:flex-start; gap:10px; padding:10px 12px; border-radius:16px;
+      background:var(--ui-panel); color:var(--ui-texto);
+      border:1px solid color-mix(in srgb, var(--acento1) 45%, var(--ui-borde));
+      box-shadow:0 14px 30px -10px rgba(0,0,0,.9);
+      animation:aviso-entra .3s cubic-bezier(.2,.9,.3,1.2) both;
+    }
+    .chat-aviso.sale{ animation:aviso-sale .25s ease-in forwards }
+    .chat-aviso .ini{
+      flex:none; width:30px; height:30px; border-radius:999px; display:grid; place-items:center;
+      font-size:11px; font-weight:800; background:color-mix(in srgb, var(--acento1) 25%, transparent);
+      color:var(--acento1); border:1px solid color-mix(in srgb, var(--acento1) 55%, transparent);
+    }
+    .chat-aviso .quien{ display:block; font-size:12px; font-weight:800; color:var(--acento1) }
+    .chat-aviso .que{
+      display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden;
+      font-size:13px; line-height:1.3; color:var(--ui-texto); word-break:break-word;
+    }
+  }
+  @keyframes fab-pulso{ 50%{ transform:scale(1.14) } }
+  @keyframes aviso-entra{ from{ opacity:0; transform:translateY(-14px) scale(.96) } }
+  @keyframes aviso-sale{ to{ opacity:0; transform:translateY(-10px) } }
+
+  /* aviso de que cerrar el turno hace perder: late en rojo para que no pase piola */
+  .aviso-perder{ box-shadow:0 0 0 1px rgba(244,63,94,.25), 0 0 44px -6px rgba(244,63,94,.55) }
+  @keyframes fx-alerta{ 0%,100%{ transform:none } 20%{ transform:translateX(-6px) } 40%{ transform:translateX(6px) } 60%{ transform:translateX(-3px) } 80%{ transform:translateX(3px) } }
+  #modal-perder:not(.hidden) .aviso-perder{ animation:fx-panel .28s cubic-bezier(.2,.9,.3,1), fx-alerta .45s ease .3s }
+
+  /* aviso de versión nueva (lo pone el service worker a mitad de partida) */
+  #aviso-version{
+    position:fixed; left:50%; bottom:calc(92px + var(--safe-b)); z-index:80;
+    transform:translateX(-50%); width:max-content; max-width:calc(100vw - 24px);
+    display:flex; align-items:center; gap:12px; padding:9px 10px 9px 14px; border-radius:14px;
+    background:var(--ui-panel); color:var(--ui-texto); font-size:13px; font-weight:600;
+    border:1px solid color-mix(in srgb, var(--acento1) 50%, var(--ui-borde));
+    box-shadow:0 14px 30px -10px rgba(0,0,0,.9);
+    animation:aviso-entra .3s cubic-bezier(.2,.9,.3,1.2) both;
+  }
+  #aviso-version button{
+    padding:6px 12px; border-radius:10px; font-weight:800;
+    background:var(--acento1); color:var(--accion-tinta);
+  }
+
+  /* panel lateral angosto (lg, antes de xl): el sonido queda solo con el
+     ícono para que Chat e Historial no se partan en dos líneas */
+  .tab-btn{white-space:nowrap}
+  @media (min-width:1024px) and (max-width:1279px){
+    #btn-sound .txt{display:none}
+  }
+
   @media (prefers-reduced-motion: reduce){
     *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important}
     .card-hand:hover,.pile-target.jugable:hover{transform:none}
@@ -363,10 +504,6 @@
       class="px-3.5 py-1.5 rounded-lg bg-board-surface hover:bg-slate-800 border border-slate-700 text-xs sm:text-sm font-semibold text-slate-200 transition active:scale-95 flex items-center gap-1.5">
       <span>🌐</span><span class="hidden sm:inline">Sala</span>
     </button>
-    <button onclick="togglePanel()" type="button"
-      class="lg:hidden relative px-3 py-1.5 rounded-lg bg-board-surface hover:bg-slate-800 border border-cyan-500/40 text-cyan-400 text-xs font-semibold active:scale-95">
-      💬<span id="chat-badge" class="hidden absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-rose-500 text-white text-[10px] font-bold grid place-items-center">0</span>
-    </button>
   </div>
 </header>
 
@@ -421,18 +558,27 @@
           <span id="turn-req" class="text-slate-400 font-medium text-xs sm:text-sm bg-slate-900/80 px-2.5 py-1 rounded-md border border-slate-800"></span>
         </div>
         <div class="flex items-center gap-2 flex-wrap">
-          <span id="hand-label" class="text-xs font-semibold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
-            <span class="w-2 h-2 rounded-full bg-amber-400"></span> Tu mano
-          </span>
-          <div id="mano-ops" class="flex items-center gap-1.5">
+          <span id="hand-label" class="mano-cuenta" title="Cartas en tu mano"></span>
+          <!-- íconos en vez de palabras: el título y el aria-label dicen qué hace cada uno -->
+          <div id="mano-ops" class="flex items-center gap-1">
             <div class="mano-seg" role="group" aria-label="Orden de tu mano">
-              <button type="button" class="mano-btn" data-orden="asc"  title="De menor a mayor" aria-pressed="true">▲</button>
-              <button type="button" class="mano-btn" data-orden="desc" title="De mayor a menor" aria-pressed="false">▼</button>
+              <button type="button" class="mano-btn" data-orden="asc" title="De menor a mayor" aria-label="De menor a mayor" aria-pressed="true">
+                <svg viewBox="0 0 16 16" aria-hidden="true"><rect x="1.5" y="10" width="3" height="4.5" rx=".8"/><rect x="6.5" y="6.5" width="3" height="8" rx=".8"/><rect x="11.5" y="2" width="3" height="12.5" rx=".8"/></svg>
+              </button>
+              <button type="button" class="mano-btn" data-orden="desc" title="De mayor a menor" aria-label="De mayor a menor" aria-pressed="false">
+                <svg viewBox="0 0 16 16" aria-hidden="true"><rect x="1.5" y="2" width="3" height="12.5" rx=".8"/><rect x="6.5" y="6.5" width="3" height="8" rx=".8"/><rect x="11.5" y="10" width="3" height="4.5" rx=".8"/></svg>
+              </button>
             </div>
             <div class="mano-seg" role="group" aria-label="Cómo se acomodan tus cartas">
-              <button type="button" class="mano-btn" data-vista="rejilla" title="En rejilla" aria-pressed="true">Rejilla</button>
-              <button type="button" class="mano-btn" data-vista="fila"    title="En una fila, hacia los lados" aria-pressed="false">Fila</button>
-              <button type="button" class="mano-btn" data-vista="abanico" title="En abanico, estilo yugi" aria-pressed="false">Abanico</button>
+              <button type="button" class="mano-btn" data-vista="rejilla" title="En rejilla" aria-label="En rejilla" aria-pressed="true">
+                <svg viewBox="0 0 16 16" aria-hidden="true"><rect x="1.5" y="1.5" width="3.6" height="5.4" rx=".8"/><rect x="6.2" y="1.5" width="3.6" height="5.4" rx=".8"/><rect x="10.9" y="1.5" width="3.6" height="5.4" rx=".8"/><rect x="1.5" y="9.1" width="3.6" height="5.4" rx=".8"/><rect x="6.2" y="9.1" width="3.6" height="5.4" rx=".8"/><rect x="10.9" y="9.1" width="3.6" height="5.4" rx=".8"/></svg>
+              </button>
+              <button type="button" class="mano-btn" data-vista="fila" title="En una fila, hacia los lados" aria-label="En una fila" aria-pressed="false">
+                <svg viewBox="0 0 16 16" aria-hidden="true"><rect x=".8" y="4" width="4.6" height="7.5" rx=".9"/><rect x="5.7" y="4" width="4.6" height="7.5" rx=".9"/><rect x="10.6" y="4" width="4.6" height="7.5" rx=".9"/></svg>
+              </button>
+              <button type="button" class="mano-btn" data-vista="abanico" title="En abanico, estilo yugi" aria-label="En abanico" aria-pressed="false">
+                <svg viewBox="0 0 16 16" aria-hidden="true"><rect x="5.7" y="3" width="4.6" height="7.5" rx=".9" transform="rotate(-28 8 14)"/><rect x="5.7" y="3" width="4.6" height="7.5" rx=".9"/><rect x="5.7" y="3" width="4.6" height="7.5" rx=".9" transform="rotate(28 8 14)"/></svg>
+              </button>
             </div>
           </div>
         </div>
@@ -468,7 +614,8 @@
 
   <!-- ======================= panel lateral: chat e historial ======================= -->
   <aside id="side-panel"
-    class="hidden lg:flex w-full lg:w-80 xl:w-96 flex-col ui-panel border rounded-2xl shadow-2xl h-[540px] lg:h-[calc(100vh-130px)] lg:sticky lg:top-24 overflow-hidden shrink-0">
+    class="hidden lg:flex w-full lg:w-80 xl:w-96 flex-col ui-panel border rounded-2xl shadow-2xl h-[540px] lg:h-[calc(100vh-130px)] lg:sticky lg:top-24 overflow-hidden shrink-0" aria-label="Chat e historial">
+    <div class="hoja-asa lg:hidden" aria-hidden="true"></div>
     <div class="p-3 border-b ui-panel2 flex items-center justify-between gap-2">
       <div class="flex gap-1 bg-slate-900/80 p-1 rounded-xl border border-slate-800">
         <button type="button" data-tab="chat" class="tab-btn px-3 py-1.5 rounded-lg text-xs font-bold transition">💬 Chat</button>
@@ -479,7 +626,7 @@
           class="px-2.5 py-1.5 rounded-lg border text-[11px] font-bold transition active:scale-95 flex items-center gap-1.5 whitespace-nowrap">
           <span class="ico text-sm leading-none">🔇</span><span class="txt">Activar sonido</span>
         </button>
-        <button onclick="togglePanel()" type="button" class="lg:hidden text-slate-400 hover:text-white text-base leading-none p-1">✕</button>
+        <button onclick="togglePanel(false)" type="button" aria-label="Cerrar chat" class="lg:hidden text-slate-400 hover:text-white text-lg leading-none p-1.5">✕</button>
       </div>
     </div>
 
@@ -512,6 +659,14 @@
   </aside>
 </main>
 
+<!-- chat en celular: botón flotante, velo detrás de la hoja y avisos de mensajes -->
+<button id="chat-fab" onclick="togglePanel()" type="button" class="lg:hidden"
+  aria-label="Abrir chat" aria-controls="side-panel" aria-expanded="false">
+  <span aria-hidden="true">💬</span><span id="chat-badge" class="hidden">0</span>
+</button>
+<div id="chat-velo" class="lg:hidden" onclick="togglePanel(false)" aria-hidden="true"></div>
+<div id="chat-avisos" class="lg:hidden" aria-live="polite"></div>
+
 <!-- ======================= modales ======================= -->
 <div id="modal-join" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 modal-fondo">
   <div class="ui-panel border max-w-md w-full rounded-2xl shadow-2xl p-6 modal-panel">
@@ -539,7 +694,7 @@
   </div>
 </div>
 
-<div id="modal-rules" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 modal-fondo">
+<div id="modal-rules" data-cierra-fuera class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 modal-fondo">
   <div class="ui-panel border max-w-lg w-full rounded-2xl shadow-2xl p-6 modal-panel">
     <div class="flex items-center justify-between border-b border-slate-700/60 pb-3 mb-4">
       <h3 class="text-lg font-bold text-white flex items-center gap-2 font-cinzel"><span>📜</span> Cómo se juega</h3>
@@ -571,7 +726,7 @@
   </div>
 </div>
 
-<div id="modal-room" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 modal-fondo">
+<div id="modal-room" data-cierra-fuera class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 modal-fondo">
   <div class="ui-panel border max-w-md w-full rounded-2xl shadow-2xl p-6 modal-panel">
     <div class="flex items-center justify-between border-b border-slate-700/60 pb-3 mb-4">
       <h3 class="text-lg font-bold text-white flex items-center gap-2 font-cinzel"><span>🌐</span> Sala de partida</h3>
@@ -625,6 +780,25 @@
 </div>
 
 <!-- Antes de la primera jugada cada uno mira sus cartas y decide si parte. -->
+<!-- aviso importante: cerrar el turno ahora hace perder la partida (modo duro).
+     No se cierra tocando afuera; Escape y "Volver" son la salida segura. -->
+<div id="modal-perder" role="alertdialog" aria-modal="true" aria-labelledby="perder-titulo" aria-describedby="perder-msg"
+  class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 modal-fondo">
+  <div class="ui-panel border-2 border-rose-500/70 max-w-md w-full rounded-2xl shadow-2xl p-5 sm:p-6 modal-panel aviso-perder">
+    <h3 id="perder-titulo" class="text-lg sm:text-xl font-black text-rose-200 flex items-center gap-2 font-cinzel mb-2">
+      <span class="text-2xl leading-none">⚠️</span> Si cierras ahora, pierden
+    </h3>
+    <p id="perder-msg" class="ui-txt text-sm leading-relaxed mb-3"></p>
+    <div id="perder-cartas" class="mb-4"></div>
+    <div class="flex flex-wrap justify-end gap-2">
+      <button id="btn-perder-volver" type="button"
+        class="btn-primario px-5 py-2 rounded-xl text-sm transition active:scale-95">Volver y cubrirla</button>
+      <button id="btn-perder-igual" type="button"
+        class="px-5 py-2 rounded-xl text-sm font-bold transition active:scale-95 bg-rose-950/70 border border-rose-500/60 text-rose-200 hover:bg-rose-900">Terminar igual</button>
+    </div>
+  </div>
+</div>
+
 <div id="modal-partir" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 modal-fondo">
   <div class="ui-panel border max-w-xl w-full rounded-2xl shadow-2xl p-6 modal-panel">
     <div class="border-b ui-borde pb-3 mb-4">
@@ -643,18 +817,18 @@
   </div>
 </div>
 
-<div id="modal-mazo" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 modal-fondo">
-  <div class="ui-panel border max-w-lg w-full rounded-2xl shadow-2xl p-6 modal-panel">
-    <div class="flex items-center justify-between border-b ui-borde pb-3 mb-4">
-      <h3 class="text-lg font-bold ui-txt flex items-center gap-2 font-cinzel"><span>🎴</span> Elige tu mazo</h3>
-      <button onclick="cerrarModal('modal-mazo')" type="button" class="ui-txt2 hover:opacity-70 text-xl leading-none p-1">×</button>
+<div id="modal-mazo" data-cierra-fuera class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 modal-fondo">
+  <div class="ui-panel border max-w-2xl w-full rounded-2xl shadow-2xl p-3.5 sm:p-5 modal-panel">
+    <div class="flex items-center justify-between gap-3 mb-3">
+      <div class="min-w-0">
+        <h3 class="text-base sm:text-lg font-bold ui-txt flex items-center gap-2 font-cinzel leading-tight"><span>🎴</span> Elige tu mazo</h3>
+        <p class="ui-txt2 text-[11px] sm:text-xs leading-snug">Solo lo ves tú, y lo cambias cuando quieras.</p>
+      </div>
+      <button onclick="cerrarModal('modal-mazo')" type="button" class="shrink-0 px-4 py-1.5 ui-caja border rounded-xl text-sm font-semibold transition active:scale-95">Listo</button>
     </div>
-    <p class="ui-txt2 text-sm mb-4">Cambia las cartas, la mesa y el tono de todo. <strong class="ui-txt">Es solo tuyo</strong>:
-      cada jugador ve el que eligió, y lo puedes cambiar cuando quieras, incluso a mitad de partida.</p>
     <div id="mazos" class="mazos-grid"></div>
-    <div class="mt-5 pt-3 border-t ui-borde flex justify-end">
-      <button onclick="cerrarModal('modal-mazo')" type="button" class="px-5 py-2 ui-caja border rounded-xl text-sm font-semibold transition active:scale-95">Listo</button>
-    </div>
+    <!-- la descripción del mazo que se apunta o se elige: una línea para todos -->
+    <p id="mazos-leyenda" class="mazos-leyenda" aria-live="polite"></p>
   </div>
 </div>
 
@@ -664,7 +838,18 @@
     <h3 id="over-title" class="text-2xl font-black text-white font-cinzel mb-1">Fin</h3>
     <p id="over-msg" class="text-slate-400 text-sm mb-4"></p>
     <span class="block text-[11px] uppercase font-bold text-slate-400 mb-1.5">Cartas que quedaron fuera</span>
-    <div id="over-left" class="flex flex-wrap gap-1 mb-5 max-h-32 overflow-y-auto custom-scrollbar"></div>
+    <div id="over-left" class="flex flex-wrap gap-1 mb-4 max-h-32 overflow-y-auto custom-scrollbar"></div>
+    <div id="over-resumen" class="hidden mb-4">
+      <span class="block text-[11px] uppercase font-bold text-slate-400 mb-1.5">Resumen</span>
+      <ul id="over-resumen-list" class="space-y-1.5 text-sm"></ul>
+    </div>
+    <div id="over-stats" class="hidden mb-5">
+      <span class="block text-[11px] uppercase font-bold text-slate-400 mb-1.5">Esta sala</span>
+      <div id="over-stats-grid" class="grid grid-cols-3 gap-2"></div>
+    </div>
+    <button id="btn-revancha" type="button" hidden
+      class="w-full mb-2 px-5 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-sm transition active:scale-95">Revancha</button>
+    <p id="over-espera" class="hidden text-center text-xs text-slate-500 mb-2">Esperando que el administrador pida revancha</p>
     <button id="btn-again" type="button"
       class="w-full px-5 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm transition active:scale-95">Volver a la sala</button>
   </div>

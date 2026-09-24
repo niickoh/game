@@ -1,6 +1,14 @@
 {
   "id": "neon",
   "name": "Neón",
+  "tagline": "Synthwave: sol poniente y cuadrícula",
+  "swatches": [
+    { "color": "#150232", "nombre": "Noche violeta" },
+    { "color": "#c309a6", "nombre": "Magenta" },
+    { "color": "#ff8a3d", "nombre": "Sol poniente" },
+    { "color": "#22d3ee", "nombre": "Cian de rejilla" },
+    { "color": "#e00845", "nombre": "Rojo glitch", "duro": true }
+  ],
   "emoji": "🌆",
   "assets": {
     "normal": "card-normal.webp",

@@ -19,6 +19,9 @@
   var vistoChat = 0, vistoLog = 0;
   var pestana = 'chat';
   var sinLeer = 0;
+  var chatListo = false;      // la primera pintada trae el historial: eso no avisa
+  // en celular el chat es una hoja que se abre encima de la mesa
+  var movil = window.matchMedia('(max-width: 1023px)');
 
   /* ------------------------------------------------------------ sesión
      El asiento va en sessionStorage, que es POR PESTAÑA: así dos personas en
@@ -601,6 +604,8 @@
     var cont = $('chat-messages');
     var abajo = cerca(cont);
     var yo = estado.you ? estado.you.id : null;
+    var avisa = chatListo;
+    chatListo = true;
 
     estado.chat.forEach(function(m){
       if(m.id <= vistoChat) return;
@@ -633,7 +638,10 @@
               '<span class="text-[9px] text-slate-500">' + hora + '</span></div>' +
               '<div class="bg-slate-800/80 rounded-2xl rounded-tl-none px-3 py-1.5 text-slate-200 border border-slate-700/60 leading-relaxed break-words">' + esc(m.texto) + '</div>' +
             '</div>';
-        if(!mio && pestana !== 'chat') marcarSinLeer();
+        if(!mio && avisa && !chatALaVista()){
+          marcarSinLeer();
+          avisarMensaje(m);
+        }
       }
       cont.appendChild(el);
     });
@@ -648,6 +656,7 @@
     };
     switch(e.tipo){
       case 'inicio':   return ['🎴', '<strong>' + esc(e.jugador) + '</strong> repartió · ' + e.jugadores + ' jugadores', 'text-amber-300'];
+      case 'revancha': return ['🔁', '<strong>' + esc(e.jugador) + '</strong> pidió revancha · ' + e.jugadores + ' jugadores', 'text-amber-300'];
       case 'jugada':   return [e.salto ? '⚡' : '▪',
                                '<strong>' + esc(e.jugador) + '</strong> puso <span class="font-mono font-bold">' + e.carta + '</span> en ' + pilaTxt(e.pila, e.dir) +
                                (e.salto ? ' <span class="text-amber-300 font-bold">salto de 10</span>' : ''),
@@ -667,6 +676,7 @@
                                '</span>: hay que cubrir ' + pilaTxt(e.pila, e.pila < 2 ? 'up' : 'down'), 'text-amber-300'];
       case 'cubre':    return ['✔', '<strong>' + esc(e.jugador) + '</strong> cubrió con el <span class="font-mono font-bold">' + e.carta + '</span>', 'text-emerald-300'];
       case 'desaviso': return ['⛔', '<strong>' + esc(e.jugador) + '</strong> sacó su aviso de ' + pilaTxt(e.pila, e.pila < 2 ? 'up' : 'down'), 'text-slate-500'];
+      case 'salta':    return ['⏭', '<strong>' + esc(e.jugador) + '</strong> no estaba: el turno pasó a ' + esc(e.siguiente || 'el siguiente'), 'text-slate-400'];
       case 'devuelve': return ['↩', '<strong>' + esc(e.jugador) + '</strong> dejó la mesa: ' + e.cartas + ' cartas vuelven al mazo', 'text-slate-400'];
       case 'fin':      return [e.won ? '🏆' : '🏁',
                                e.won ? '<strong>Las 98 colocadas</strong>'
@@ -699,6 +709,38 @@
     var b = $('chat-badge');
     b.textContent = sinLeer > 9 ? '9+' : sinLeer;
     b.classList.remove('hidden');
+    var fab = $('chat-fab');
+    fab.classList.remove('nuevo'); void fab.offsetWidth; fab.classList.add('nuevo');
+    fab.setAttribute('aria-label', 'Abrir chat, ' + sinLeer + ' sin leer');
+  }
+
+  function leido(){
+    sinLeer = 0;
+    $('chat-badge').classList.add('hidden');
+    $('chat-fab').setAttribute('aria-label', 'Abrir chat');
+  }
+
+  function chatAbierto(){ return !movil.matches || $('side-panel').classList.contains('abierto'); }
+  function chatALaVista(){ return pestana === 'chat' && chatAbierto(); }
+
+  /* En celular, con la hoja cerrada, cada mensaje asoma arriba unos segundos.
+     Tocarlo abre el chat. Nunca más de tres a la vez. */
+  function avisarMensaje(m){
+    if(chatAbierto()) return;
+    var cont = $('chat-avisos');
+    var el = document.createElement('button');
+    el.type = 'button';
+    el.className = 'chat-aviso';
+    el.innerHTML = '<span class="ini">' + esc(m.nombre).slice(0, 2).toUpperCase() + '</span>' +
+      '<span class="min-w-0"><span class="quien">' + esc(m.nombre) + '</span>' +
+      '<span class="que">' + esc(m.texto) + '</span></span>';
+    el.onclick = function(){ verPestana('chat'); togglePanel(true); };
+    cont.appendChild(el);
+    while(cont.children.length > 3) cont.removeChild(cont.firstChild);
+    setTimeout(function(){
+      el.classList.add('sale');
+      setTimeout(function(){ if(el.parentNode) el.parentNode.removeChild(el); }, 260);
+    }, 4500);
   }
 
   /* ============================================================ cabecera y controles */
@@ -745,9 +787,12 @@
         : 'Mazo agotado: basta <strong class="text-white">1</strong> · llevas <strong class="text-cyan-400 font-mono">' + estado.turn.length + '</strong>';
     }
 
-    $('hand-label').innerHTML = estado.hand.length
-      ? '<span class="w-2 h-2 rounded-full bg-amber-400"></span> Tu mano (' + estado.hand.length + ')'
-      : '<span class="w-2 h-2 rounded-full bg-slate-600"></span> Sin cartas';
+    var etq = $('hand-label');
+    etq.innerHTML = '<svg viewBox="0 0 12 15" aria-hidden="true"><rect x=".75" y=".75" width="10.5" height="13.5" rx="2" ' +
+      'fill="color-mix(in srgb, var(--acento1) 25%, transparent)" stroke="var(--acento1)" stroke-width="1.5"/></svg>' +
+      estado.hand.length;
+    etq.classList.toggle('vacia', !estado.hand.length);
+    etq.setAttribute('aria-label', estado.hand.length ? 'Tu mano: ' + estado.hand.length + ' cartas' : 'Sin cartas');
 
     $('btn-end').disabled = !estado.yourTurn || falta > 0;
     $('btn-undo').disabled = !estado.yourTurn || estado.turn.length === 0;
@@ -802,6 +847,11 @@
         nota.innerHTML = '<span class="w-2 h-2 rounded-full bg-amber-400"></span> El ' + o.carta +
           ' dejó obligada la ' + cual;
       }
+    }
+
+    // el aviso de "si cierras, pierden" solo vale mientras siga siendo cierto
+    if(!(enJuego && estado.yourTurn && estado.obligada && estado.obligada.ultima)){
+      cerrarModal('modal-perder');
     }
   }
 
@@ -878,6 +928,80 @@
     $('over-left').innerHTML = o.left.map(function(c){
       return '<span class="font-mono text-[11px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">' + c + '</span>';
     }).join('');
+    pintarResumen(o);
+    pintarStats(estado.stats, o.record);
+    pintarBotonesFin();
+  }
+
+  function nombrePila(i, dir){
+    return (dir === 'up' ? '▲' : '▼') + ' ' + (i % 2 === 0 ? 'izq' : 'der');
+  }
+
+  // Lo que dejó la partida: lo calcula el servidor con el historial completo.
+  function pintarResumen(o){
+    var r = o.resumen;
+    var caja = $('over-resumen');
+    caja.classList.toggle('hidden', !r || !r.turnos);
+    if(!r || !r.turnos) return;
+    var fila = function(icono, html, color){
+      return '<li class="flex items-start gap-2 ' + color + '"><span class="w-5 shrink-0 text-center">' + icono +
+        '</span><span class="leading-snug min-w-0">' + html + '</span></li>';
+    };
+    var num = function(n){ return '<span class="font-mono font-bold">' + n + '</span>'; };
+    var html = '';
+
+    var s = r.mejorSalto;
+    html += s
+      ? fila('⚡', 'Mejor salto: <strong>' + esc(s.jugador) + '</strong> llevó el ' + nombrePila(s.pila, s.dir) +
+          ' de ' + num(s.desde) + ' a ' + num(s.carta) + ' <span class="text-slate-500">(turno ' + s.turno +
+          (r.saltos > 1 ? ' · ' + r.saltos + ' saltos en total' : '') + ')</span>', 'text-amber-300')
+      : fila('⚡', 'Ningún salto de 10 esta vez', 'text-slate-500');
+
+    var m = r.masCartas;
+    if(m){
+      var quienes = m.jugadores.map(function(n){ return '<strong>' + esc(n) + '</strong>'; });
+      html += fila('🃏', 'Más cartas: ' + (quienes.length > 1
+        ? quienes.slice(0, -1).join(', ') + ' y ' + quienes[quienes.length - 1] + ', ' + num(m.cartas) + ' cada uno'
+        : quienes[0] + ' con ' + num(m.cartas)), 'text-slate-300');
+    }
+
+    var t = r.peorTurno;
+    if(o.won){
+      html += fila('🏆', 'No hubo turno que la echara a perder', 'text-emerald-300');
+    } else if(t){
+      var cartas = t.cartas.map(function(c){ return num(c.carta) + ' en ' + nombrePila(c.pila, c.dir); }).join(', ');
+      html += fila('💥', 'Se echó a perder en el turno ' + t.n + ' de <strong>' + esc(t.jugador) + '</strong>: quemó ' +
+        num(t.quemado) + ' de espacio <span class="text-slate-500">(' + cartas + ')</span>', 'text-rose-300');
+    }
+    $('over-resumen-list').innerHTML = html;
+  }
+
+  function pintarStats(st, record){
+    var caja = $('over-stats');
+    caja.classList.toggle('hidden', !st);
+    if(!st) return;
+    var ficha = function(valor, etiqueta, nota, color){
+      return '<div class="rounded-xl bg-slate-900/70 border border-slate-800 px-2 py-2 text-center">' +
+        '<div class="font-mono font-black text-2xl leading-none tabular-nums ' + color + '">' + valor + '</div>' +
+        '<div class="text-[11px] font-bold text-slate-300 mt-1">' + etiqueta + '</div>' +
+        '<div class="text-[10px] text-slate-500 leading-tight">' + nota + '</div></div>';
+    };
+    var mejor = st.mejor ? st.mejor.fuera : '—';
+    $('over-stats-grid').innerHTML =
+      ficha(mejor, record ? '¡Récord!' : 'Mejor', 'cartas fuera', record ? 'text-amber-300' : 'text-emerald-400') +
+      ficha(String(st.promedio).replace('.', ','), 'Promedio', 'en ' + st.partidas + (st.partidas === 1 ? ' partida' : ' partidas'), 'text-slate-200') +
+      ficha(st.racha, 'Racha', 'hasta ' + st.umbral + ' fuera · récord ' + st.mejorRacha, st.racha ? 'text-cyan-300' : 'text-slate-500');
+  }
+
+  // Los botones dependen de quién manda y de quién sigue conectado, que puede
+  // cambiar con el modal abierto: se repintan en cada estado.
+  function pintarBotonesFin(){
+    var conectados = estado.players.filter(function(p){ return p.online; }).length;
+    var rev = $('btn-revancha');
+    rev.hidden = !estado.soyAdmin;
+    rev.disabled = !conectados;
+    rev.textContent = 'Revancha · ' + conectados + (conectados === 1 ? ' conectado' : ' conectados');
+    $('over-espera').classList.toggle('hidden', !!estado.soyAdmin);
     $('btn-again').textContent = estado.soyAdmin ? 'Volver a la sala' : 'Cerrar';
   }
 
@@ -1025,6 +1149,7 @@
 
     var fin = estado.phase === 'over';
     if(fin && (!prev || prev.phase !== 'over')){ pintarFin(); abrirModal('modal-over'); }
+    else if(fin) pintarBotonesFin();
     if(!fin) cerrarModal('modal-over');
 
     // mientras se elige quien parte, el popup manda; se cierra solo al decidir.
@@ -1048,13 +1173,42 @@
   };
   window.cerrarModal = function(id){ $(id).classList.add('hidden'); };
 
-  window.togglePanel = function(){
+  /* Tocar fuera del panel cierra los que son solo consulta (reglas, sala,
+     mazo: los marcados con data-cierra-fuera). Los que esperan algo de uno
+     —entrar, decidir si partes, ver cómo terminó— no se van por un toque
+     perdido. Cuenta solo si el toque empieza y termina en el fondo: así
+     seleccionar texto adentro y soltar afuera no cierra nada. */
+  var toqueEnFondo = null;
+  document.addEventListener('pointerdown', function(ev){
+    var m = ev.target;
+    toqueEnFondo = (m && m.classList && m.classList.contains('modal-fondo') && m.hasAttribute('data-cierra-fuera')) ? m : null;
+  });
+  document.addEventListener('click', function(ev){
+    var m = toqueEnFondo;
+    toqueEnFondo = null;
+    if(m && ev.target === m) cerrarModal(m.id);
+  });
+
+  // abre o cierra la hoja del chat en celular; sin argumento, alterna
+  window.togglePanel = function(abrir){
     var p = $('side-panel');
-    var oculto = p.classList.contains('hidden');
-    p.classList.toggle('hidden', !oculto);
-    p.classList.toggle('flex', oculto);
-    if(oculto){ sinLeer = 0; $('chat-badge').classList.add('hidden'); }
+    if(typeof abrir !== 'boolean') abrir = !p.classList.contains('abierto');
+    p.classList.toggle('abierto', abrir);
+    document.body.classList.toggle('chat-abierto', abrir);
+    $('chat-fab').setAttribute('aria-expanded', abrir ? 'true' : 'false');
+    if(!abrir) return;
+    $('chat-avisos').innerHTML = '';
+    if(pestana === 'chat'){
+      leido();
+      var c = $('chat-messages'); c.scrollTop = c.scrollHeight;
+    }
   };
+  document.addEventListener('keydown', function(ev){
+    if(ev.key === 'Escape' && $('side-panel').classList.contains('abierto')) togglePanel(false);
+  });
+  // si la ventana crece a escritorio con la hoja abierta, se suelta el bloqueo del scroll
+  var alCambiarAncho = function(){ if(!movil.matches) togglePanel(false); };
+  if(movil.addEventListener) movil.addEventListener('change', alCambiarAncho);
 
   function verPestana(cual){
     pestana = cual;
@@ -1068,7 +1222,7 @@
         (on ? 'bg-slate-700 text-white' : 'text-slate-400 hover:text-slate-200');
     });
     if(cual === 'chat'){
-      sinLeer = 0; $('chat-badge').classList.add('hidden');
+      if(chatAbierto()) leido();
       var c = $('chat-messages'); c.scrollTop = c.scrollHeight;
     } else {
       var l = $('log-list'); l.scrollTop = l.scrollHeight;
@@ -1168,7 +1322,42 @@
   });
   pintarOpsMano();
 
-  $('btn-end').onclick = function(){ elegida = null; enviar('end'); };
+  /* Cerrar el turno. En modo duro, si queda una pila obligada en su último
+     turno y es el mío, cerrar ahora es perder: antes se pregunta. */
+  function terminarTurno(){
+    elegida = null;
+    var o = estado && estado.obligada;
+    if(estado && estado.yourTurn && o && o.ultima){ avisarPerder(o); return; }
+    enviar('end');
+  }
+
+  function avisarPerder(o){
+    var p = estado.piles[o.pila];
+    var cual = 'la ' + (o.pila % 2 === 0 ? 'izquierda' : 'derecha') + ' de ' +
+               (p.dir === 'up' ? 'las que suben ▲' : 'las que bajan ▼');
+    var sirven = estado.hand.filter(function(c){ return puedeJugar(c, p); })
+                            .sort(function(a, b){ return a - b; });
+    $('perder-msg').innerHTML = 'El <strong class="font-mono">' + o.carta + '</strong>' +
+      (o.nombre ? ' de <strong>' + esc(o.nombre) + '</strong>' : '') +
+      ' dejó obligada ' + cual + ', y este es el último turno para cubrirla. ' +
+      'Si terminas sin poner una carta ahí, <strong class="text-rose-300">se acaba la partida</strong>.';
+    // las propias cartas se pueden mostrar: la regla de no decir números es para el chat
+    $('perder-cartas').innerHTML = sirven.length
+      ? '<p class="text-xs font-bold text-emerald-300 mb-1.5">Tienes ' + sirven.length +
+          (sirven.length === 1 ? ' carta que cabe' : ' cartas que caben') + ' ahí:</p>' +
+        '<div class="flex flex-wrap gap-1.5">' + sirven.map(function(c){
+          return '<span class="font-mono font-black text-sm px-2 py-0.5 rounded-md bg-emerald-950/60 border border-emerald-500/50 text-emerald-200">' + c + '</span>';
+        }).join('') + '</div>'
+      : '<p class="text-xs font-bold text-rose-300">No tienes ninguna carta que quepa ahí.</p>';
+    $('btn-perder-volver').textContent = sirven.length ? 'Volver y cubrirla' : 'Volver';
+    abrirModal('modal-perder');
+    $('btn-perder-volver').focus();
+  }
+
+  $('btn-perder-volver').onclick = function(){ cerrarModal('modal-perder'); };
+  $('btn-perder-igual').onclick = function(){ cerrarModal('modal-perder'); enviar('end'); };
+
+  $('btn-end').onclick = terminarTurno;
   $('btn-undo').onclick = function(){ elegida = null; enviar('undo'); };
   $('btn-deal').onclick = function(){ elegida = null; enviar('start'); };
   $('btn-deal2').onclick = function(){ elegida = null; cerrarModal('modal-room'); enviar('start'); };
@@ -1182,6 +1371,8 @@
     cerrarModal('modal-over');
     if(estado && estado.soyAdmin) enviar('reset');
   };
+  // el modal se cierra solo cuando llega el reparto nuevo
+  $('btn-revancha').onclick = function(){ elegida = null; enviar('revancha'); };
 
   Array.prototype.forEach.call(document.querySelectorAll('.modo-pill'), function(b){
     b.onclick = function(){
@@ -1261,7 +1452,7 @@
   document.addEventListener('keydown', function(ev){
     if(ev.target && /^(INPUT|TEXTAREA)$/.test(ev.target.tagName)) return;
     if(ev.key === 'Escape'){
-      ['modal-rules','modal-room'].forEach(cerrarModal);
+      ['modal-rules','modal-room','modal-mazo','modal-perder'].forEach(cerrarModal);
       if(elegida !== null){ elegida = null; pintarMano(); pintarPilas(); }
       return;
     }
@@ -1273,7 +1464,8 @@
       return;
     }
     if(!estado || !estado.yourTurn) return;
-    if(ev.key === 'Enter' && !$('btn-end').disabled){ elegida = null; enviar('end'); return; }
+    if(!$('modal-perder').classList.contains('hidden')) return;
+    if(ev.key === 'Enter' && !$('btn-end').disabled){ terminarTurno(); return; }
     if(elegida !== null && ev.key >= '1' && ev.key <= '4'){
       var i = Number(ev.key) - 1;
       if(puedeJugar(elegida, estado.piles[i])){
@@ -1376,6 +1568,42 @@
     if(!$('modal-partir').classList.contains('hidden')) pintarPartir();
   };
 
+  /* ============================================================ service worker
+     Guarda la app y el arte para que abra al tiro. Solo corre en https o en
+     localhost: por la IP de la oficina (http) el navegador no lo permite, y
+     el juego anda igual, sin caché propia. */
+  function registrarSW(){
+    if(!('serviceWorker' in navigator)) return;
+    var seguro = location.protocol === 'https:' ||
+                 location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+    if(!seguro) return;
+
+    var habiaUno = !!navigator.serviceWorker.controller;
+    navigator.serviceWorker.addEventListener('controllerchange', function(){
+      if(!habiaUno){ habiaUno = true; return; }    // primera instalación: nada que avisar
+      // sin partida andando se recarga solo; jugando, se pregunta
+      if(!sesion || !estado || estado.phase !== 'play'){ location.reload(); return; }
+      avisarVersion();
+    });
+
+    navigator.serviceWorker.register('/sw.js').then(function(reg){
+      // las partidas son largas: cada media hora se mira si hay versión nueva
+      setInterval(function(){ reg.update().catch(function(){}); }, 30 * 60 * 1000);
+    }).catch(function(){ /* sin service worker se juega igual */ });
+  }
+
+  function avisarVersion(){
+    if($('aviso-version')) return;
+    var el = document.createElement('div');
+    el.id = 'aviso-version';
+    el.setAttribute('role', 'status');
+    el.innerHTML = '<span>✨ Hay una versión nueva del juego.</span>' +
+      '<button type="button">Actualizar</button>';
+    el.querySelector('button').onclick = function(){ location.reload(); };
+    document.body.appendChild(el);
+  }
+
+  registrarSW();
   crearPilas();
   montarFrases();
   MAZOS.construirSelector($('mazos'));

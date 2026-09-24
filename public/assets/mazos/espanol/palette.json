@@ -1,6 +1,14 @@
 {
   "id": "espanol",
   "name": "Espa\u00f1ol",
+  "tagline": "Oros, copas, espadas y bastos",
+  "swatches": [
+    { "color": "#f1d9a8", "nombre": "Pergamino" },
+    { "color": "#c0392b", "nombre": "Rojo copa" },
+    { "color": "#d4a017", "nombre": "Oro" },
+    { "color": "#245044", "nombre": "Pátina" },
+    { "color": "#7f0704", "nombre": "Sangre", "duro": true }
+  ],
   "assets": {
     "normal": "card-normal.webp",
     "hard": "card-duro.webp",

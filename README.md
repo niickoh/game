@@ -69,6 +69,24 @@ avisa, no bloquea: la regla la hacen cumplir ustedes.
 quién hizo un salto de 10 (en dorado), quién cerró turno y con cuántas cartas, cuándo se agotó
 el mazo. Sirve para reconstruir en qué momento se echó a perder la partida.
 
+**Resumen al final.** La pantalla de fin muestra, sacado del historial:
+- **el mejor salto de 10**: el que se hizo con el montón más avanzado, que es cuando más espacio
+  devuelve (un 87 → 77 vale más que un 15 → 5);
+- **quién colocó más cartas**, descontando las que deshizo;
+- **el turno donde se echó a perder**: el que más espacio quemó. Lo ideal es que cada carta avance
+  1 su montón; lo que avanza de más es espacio perdido, y un salto de 10 lo devuelve. Si ganan, no
+  aparece.
+
+**Estadísticas por sala.** También en la pantalla final: el **mejor resultado** (menos cartas
+fuera), el **promedio** de cartas que quedaron y la **racha** de partidas buenas seguidas (hasta
+10 cartas fuera), con su récord. Se guardan en `data/estadisticas.json`, así que no se pierden al
+reiniciar el servidor. Para empezar de cero, borra ese archivo con el servidor apagado. Las
+partidas en que se fueron todos no cuentan.
+
+**Revancha.** Al terminar, el administrador tiene el botón **Revancha**: reparte de inmediato, en
+el mismo modo, a todos los que siguen conectados, sin pasar por el lobby. Los desconectados quedan
+mirando y entran en la siguiente. **Volver a la sala** sigue llevando al lobby, como antes.
+
 **Aviso de «no jueguen acá».** El botón ⛔ de cada montón le manda un **popup a todos** diciendo
 quién lo pidió y en qué montón. El montón parpadea un momento y vuelve a la normalidad: **no
 queda bloqueado ni marcado**, es solo un aviso. Queda registrado en el chat y en el historial.
@@ -142,8 +160,9 @@ El botón **Sala** muestra el enlace listo para copiar.
 - **El que llega tarde** entra como espectador: ve la mesa y el chat, y juega desde la partida
   siguiente.
 - **Caben 10 jugadores** por sala. Con más de 5 el juego original no está pensado, pero funciona.
-- El estado vive en la memoria del servidor: si cierras la ventana negra, se pierden las partidas
-  en curso. No hay base de datos ni nada que instalar.
+- Las partidas viven en la memoria del servidor: si cierras la ventana negra, se pierden las que
+  están en curso. Lo único que queda en disco son las estadísticas de cada sala
+  (`data/estadisticas.json`). No hay base de datos ni nada que instalar.
 - Nadie ve las cartas de nadie: el servidor manda a cada jugador solo su propia mano; del resto
   viaja únicamente cuántas cartas tiene.
 - **Funciona sin internet.** Tailwind está guardado en `public/vendor/`. Lo único que se baja de
@@ -163,6 +182,7 @@ El botón **Sala** muestra el enlace listo para copiar.
 | `public/fx-sound.js` | El sonido sintetizado y la vibración |
 | `public/vendor/tailwind.js` | Tailwind local, para no depender de internet |
 | `hotseat.html` | Versión suelta para jugar varios en un mismo computador, sin servidor. Doble clic |
+| `data/estadisticas.json` | Estadísticas por sala. Se crea sola y no va al repositorio |
 
 El juego original es de Steffen Benndorf, editado por Nürnberger-Spielkarten-Verlag. Esto es una
 implementación casera para jugar en la oficina, no un producto.

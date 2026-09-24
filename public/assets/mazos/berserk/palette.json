@@ -1,6 +1,14 @@
 {
   "id": "berserk",
   "name": "Berserk",
+  "tagline": "Guts, el eclipse y tinta de manga",
+  "swatches": [
+    { "color": "#0a0a0a", "nombre": "Tinta" },
+    { "color": "#5f5855", "nombre": "Hierro" },
+    { "color": "#e8dfd6", "nombre": "Hueso" },
+    { "color": "#991b1b", "nombre": "Sangre" },
+    { "color": "#e0413a", "nombre": "Eclipse", "duro": true }
+  ],
   "emoji": "⚔️",
   "description": "Estilo oscuro inspirado en Berserk con Guts como foco central, la Dragon Slayer, armadura negra, lluvia, eclipse, marca maldita y tinta de manga. La variante dura usa Griffith/Femto centrado, alas negras, eclipse rojo, estética God Hand y aura siniestra.",
   "assets": {

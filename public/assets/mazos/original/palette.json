@@ -1,6 +1,14 @@
 {
   "id": "original",
   "name": "Original",
+  "tagline": "Cartón gastado: óxido, azul y oro",
+  "swatches": [
+    { "color": "#15120f", "nombre": "Negro cartón" },
+    { "color": "#d6c8af", "nombre": "Hueso" },
+    { "color": "#c84624", "nombre": "Óxido" },
+    { "color": "#0465a4", "nombre": "Azul" },
+    { "color": "#fbb704", "nombre": "Amarillo", "duro": true }
+  ],
   "assets": {
     "normal": "card-normal.webp",
     "hard": "card-duro.webp",

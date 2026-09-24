@@ -1,6 +1,14 @@
 {
   "id": "dragonball",
   "name": "Dragon Ball",
+  "tagline": "Shenron, las esferas y aura dorada",
+  "swatches": [
+    { "color": "#f8d473", "nombre": "Ki dorado" },
+    { "color": "#cc8a46", "nombre": "Esfera" },
+    { "color": "#3f8f3a", "nombre": "Shenron" },
+    { "color": "#2563eb", "nombre": "Aura azul" },
+    { "color": "#8b2fc9", "nombre": "Energía villana", "duro": true }
+  ],
   "emoji": "🐉",
   "description": "Estilo Dragon Ball con Shenron, esferas del dragón, guerreros Z, aura dorada y energía de batalla. La variante dura usa villanos, dragón corrupto, esferas quebradas y energía púrpura/crimson.",
   "assets": {
