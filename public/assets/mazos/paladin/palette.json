@@ -1,0 +1,117 @@
+{
+  "id": "paladin",
+  "name": "Paladin",
+  "emoji": "🛡️",
+  "description": "Estilo sagrado con escudo, martillo divino, catedral, mármol, oro, azul real y luz intensa. La variante dura usa escudo quebrado, grietas rojas y fuego sagrado crimson.",
+  "assets": {
+    "normal": "card-normal.png",
+    "hard": "card-duro.png",
+    "playmat": "playmat.png"
+  },
+  "card": {
+    "aspectRatio": "2:3",
+    "recommendedRenderSize": {
+      "width": 1024,
+      "height": 1536
+    },
+    "safeArea": {
+      "leftPercent": 8,
+      "topPercent": 6,
+      "rightPercent": 92,
+      "bottomPercent": 94
+    }
+  },
+  "hardCards": [
+    22,
+    33,
+    44,
+    55,
+    66,
+    77,
+    88
+  ],
+  "numberLayer": {
+    "fontFamily": "Cinzel, Georgia, serif",
+    "fontWeight": 900,
+    "fontStyle": "normal",
+    "letterSpacing": "-0.045em",
+    "lineHeight": 0.9,
+    "textTransform": "none",
+    "color": "#fff8e7",
+    "strokeColor": "#c8912a",
+    "strokeWidth": "0.009em",
+    "shadow": "0 0 8px rgba(255, 236, 176, 0.95), 0 0 22px rgba(245, 158, 11, 0.65), 0 5px 10px rgba(20, 31, 64, 0.55)",
+    "blendMode": "normal"
+  },
+  "hardNumberLayer": {
+    "fontFamily": "Cinzel, Georgia, serif",
+    "fontWeight": 900,
+    "fontStyle": "normal",
+    "letterSpacing": "-0.045em",
+    "lineHeight": 0.9,
+    "textTransform": "none",
+    "color": "#fff2df",
+    "strokeColor": "#8f1d12",
+    "strokeWidth": "0.01em",
+    "shadow": "0 0 8px rgba(255, 220, 150, 0.9), 0 0 20px rgba(239, 68, 68, 0.75), 0 0 34px rgba(245, 158, 11, 0.5), 0 5px 10px rgba(15, 23, 42, 0.7)",
+    "blendMode": "normal"
+  },
+  "numberPlacement": {
+    "main": {
+      "xPercent": 50,
+      "yPercent": 53,
+      "fontSizePercentOfHeight": 27.5,
+      "maxWidthPercent": 58,
+      "rotationDeg": 0,
+      "align": "center",
+      "baseline": "middle"
+    },
+    "corners": [
+      {
+        "name": "top-left",
+        "xPercent": 11.5,
+        "yPercent": 8.5,
+        "fontSizePercentOfHeight": 7.6,
+        "maxWidthPercent": 16,
+        "rotationDeg": 0,
+        "align": "center",
+        "baseline": "middle"
+      },
+      {
+        "name": "bottom-right",
+        "xPercent": 88.5,
+        "yPercent": 91.5,
+        "fontSizePercentOfHeight": 7.6,
+        "maxWidthPercent": 16,
+        "rotationDeg": 0,
+        "align": "center",
+        "baseline": "middle"
+      }
+    ]
+  },
+  "palette": {
+    "ivory": "#fff8e7",
+    "marble": "#e9dfca",
+    "holyGold": "#f5c451",
+    "deepGold": "#c8912a",
+    "royalBlue": "#173c78",
+    "deepNavy": "#07152f",
+    "silver": "#dbe4ef",
+    "lightBeam": "#fff1a8",
+    "hardCrimson": "#e11d1d",
+    "hardBlood": "#7f1d1d",
+    "hardEmber": "#f97316",
+    "shadow": "#0f172a"
+  },
+  "visualMotifs": [
+    "holy shield",
+    "divine warhammer",
+    "sacred light beams",
+    "cathedral stained glass",
+    "ivory marble",
+    "royal blue enamel",
+    "gold trim",
+    "crimson cracked hard mode"
+  ],
+  "notes": "Para cartas normales usar numberLayer. Para 22,33,44,55,66,77,88 usar hardNumberLayer y card-duro.png. Los números se renderizan sobre la cáscara, no vienen incluidos en la imagen."
+}

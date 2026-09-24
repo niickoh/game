@@ -1,0 +1,117 @@
+{
+  "id": "dragonball",
+  "name": "Dragon Ball",
+  "emoji": "🐉",
+  "description": "Estilo Dragon Ball con Shenron, esferas del dragón, guerreros Z, aura dorada y energía de batalla. La variante dura usa villanos, dragón corrupto, esferas quebradas y energía púrpura/crimson.",
+  "assets": {
+    "normal": "card-normal.png",
+    "hard": "card-duro.png",
+    "playmat": "playmat.png"
+  },
+  "card": {
+    "aspectRatio": "2:3",
+    "recommendedRenderSize": {
+      "width": 1024,
+      "height": 1536
+    },
+    "safeArea": {
+      "leftPercent": 6,
+      "topPercent": 5,
+      "rightPercent": 94,
+      "bottomPercent": 95
+    }
+  },
+  "hardCards": [
+    22,
+    33,
+    44,
+    55,
+    66,
+    77,
+    88
+  ],
+  "numberLayer": {
+    "fontFamily": "Bangers, Impact, Arial Black, sans-serif",
+    "fontWeight": 900,
+    "fontStyle": "normal",
+    "letterSpacing": "-0.055em",
+    "lineHeight": 0.88,
+    "textTransform": "none",
+    "color": "#fff8df",
+    "strokeColor": "#17100a",
+    "strokeWidth": "0.016em",
+    "shadow": "0 0 8px rgba(255, 214, 102, 0.95), 0 0 24px rgba(249, 115, 22, 0.75), 0 0 38px rgba(250, 204, 21, 0.45), 0 7px 12px rgba(0, 0, 0, 0.75)",
+    "blendMode": "normal"
+  },
+  "hardNumberLayer": {
+    "fontFamily": "Bangers, Impact, Arial Black, sans-serif",
+    "fontWeight": 900,
+    "fontStyle": "normal",
+    "letterSpacing": "-0.055em",
+    "lineHeight": 0.88,
+    "textTransform": "none",
+    "color": "#fff3e6",
+    "strokeColor": "#13070b",
+    "strokeWidth": "0.018em",
+    "shadow": "0 0 8px rgba(255, 197, 87, 0.9), 0 0 24px rgba(239, 68, 68, 0.78), 0 0 38px rgba(168, 85, 247, 0.65), 0 7px 12px rgba(0, 0, 0, 0.82)",
+    "blendMode": "normal"
+  },
+  "numberPlacement": {
+    "main": {
+      "xPercent": 50,
+      "yPercent": 60,
+      "fontSizePercentOfHeight": 23.5,
+      "maxWidthPercent": 58,
+      "rotationDeg": -2,
+      "align": "center",
+      "baseline": "middle"
+    },
+    "corners": [
+      {
+        "name": "top-left",
+        "xPercent": 10.6,
+        "yPercent": 8.2,
+        "fontSizePercentOfHeight": 7.2,
+        "maxWidthPercent": 15,
+        "rotationDeg": -2,
+        "align": "center",
+        "baseline": "middle"
+      },
+      {
+        "name": "bottom-right",
+        "xPercent": 89.4,
+        "yPercent": 91.7,
+        "fontSizePercentOfHeight": 7.2,
+        "maxWidthPercent": 15,
+        "rotationDeg": -2,
+        "align": "center",
+        "baseline": "middle"
+      }
+    ]
+  },
+  "palette": {
+    "dragonGreen": "#2f7d32",
+    "dragonBallOrange": "#f59e0b",
+    "kiGold": "#facc15",
+    "energyOrange": "#f97316",
+    "heroBlue": "#2563eb",
+    "frameBlack": "#090807",
+    "cloudIvory": "#fff2cf",
+    "hardPurple": "#7e22ce",
+    "hardCrimson": "#dc2626",
+    "villainGreen": "#84cc16",
+    "corruptBlack": "#08040b"
+  },
+  "visualMotifs": [
+    "Shenron",
+    "Dragon Balls",
+    "Z warriors",
+    "golden ki aura",
+    "orange and blue battle energy",
+    "villains hard mode",
+    "corrupted dragon",
+    "cracked Dragon Balls",
+    "banquet playmat"
+  ],
+  "notes": "Para cartas normales usar numberLayer. Para 22,33,44,55,66,77,88 usar hardNumberLayer y card-duro.png. Los números se renderizan sobre la cáscara, no vienen incluidos en la imagen. El playmat usa la escena de todos comiendo en una mesa larga, sin espacios marcados para cartas."
+}

@@ -1,0 +1,84 @@
+{
+  "id": "neon",
+  "name": "Neón",
+  "emoji": "🌆",
+  "assets": {
+    "normal": "card-normal.png",
+    "hard": "card-duro.png",
+    "playmat": "playmat.png"
+  },
+  "card": {
+    "aspectRatio": "2:3",
+    "numberLayer": {
+      "fontFamily": "Bricolage Grotesque, Impact, Arial Black, sans-serif",
+      "fontWeight": 900,
+      "fontStyle": "italic",
+      "letterSpacing": "-0.055em",
+      "lineHeight": 0.88,
+      "color": "#f8fbff",
+      "strokeColor": "#22d3ee",
+      "strokeWidth": "0.01em",
+      "shadow": "0 0 8px #22d3ee, 0 0 18px #ec4899, 0 0 40px rgba(236,72,153,.8)",
+      "blendMode": "normal"
+    },
+    "hardNumberLayer": {
+      "color": "#ffffff",
+      "strokeColor": "#ff174f",
+      "strokeWidth": "0.012em",
+      "shadow": "0 0 8px #ff174f, 0 0 20px #22d3ee, 0 0 45px rgba(255,23,79,.85)",
+      "blendMode": "normal"
+    },
+    "mainNumber": {
+      "anchor": "center",
+      "xPercent": 50,
+      "yPercent": 52,
+      "fontSizePercentOfHeight": 27,
+      "maxWidthPercent": 62,
+      "rotationDeg": -4
+    },
+    "cornerNumbers": [
+      {
+        "anchor": "top-left",
+        "xPercent": 12,
+        "yPercent": 8,
+        "fontSizePercentOfHeight": 7.4,
+        "rotationDeg": -4
+      },
+      {
+        "anchor": "bottom-right",
+        "xPercent": 88,
+        "yPercent": 92,
+        "fontSizePercentOfHeight": 7.4,
+        "rotationDeg": -4
+      }
+    ]
+  },
+  "palette": {
+    "background": "#08031f",
+    "normalPrimary": "#ec4899",
+    "normalSecondary": "#22d3ee",
+    "hardPrimary": "#ff174f",
+    "hardSecondary": "#22d3ee",
+    "number": "#f8fbff",
+    "numberStroke": "#22d3ee",
+    "numberGlow": "#ec4899",
+    "hardNumberGlow": "#ff174f",
+    "sunset": "#ff9f1c",
+    "grid": "#c026d3"
+  },
+  "motifs": [
+    "synthwave sun",
+    "city skyline",
+    "neon grid",
+    "glitch hazard"
+  ],
+  "hardCards": [
+    22,
+    33,
+    44,
+    55,
+    66,
+    77,
+    88
+  ]
+}

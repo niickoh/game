@@ -2,7 +2,7 @@
 'use strict';
 
 /*
- * The Game Online - servidor de red local.
+ * Quien chucha revuelve - servidor de red local.
  * Sin dependencias: solo Node. Estado en memoria, sin base de datos.
  *
  *   node server.js            -> puerto 8080
@@ -33,6 +33,11 @@ const CHAT_MIN_MS = 400;     // anti-spam por jugador
 // efectos de sonido que un mensaje puede traer (lista cerrada: llega del cliente)
 const EFECTOS_CHAT = ['bum', 'aplausos', 'uh', 'tada'];
 const VOZ_MAX = 90;          // no se lee en voz alta nada más largo que esto
+// Cartas dobles: al colocarlas, la pila queda obligada y hay que poner otra
+// carta ahí en ese turno o en el siguiente, o se pierde.
+const DOBLES = [22, 33, 44, 55, 66, 77, 88];
+const esDoble = n => DOBLES.indexOf(n) !== -1;
+
 const PIN_INTENTOS = 8;      // intentos antes de bloquear una IP
 const PIN_BLOQUEO_MS = 60000;
 const AVISO_MIN_MS = 1500;
@@ -55,10 +60,12 @@ function getRoom(raw) {
       clients: new Set(), // respuestas SSE abiertas
       game: null,
       adminId: null,      // manda la sala: reparte, reinicia y puede sacar gente
+      modo: 'clasico',    // 'clasico' o 'duro' (las cartas dobles obligan)
       pin: null,          // si la sala tiene PIN, hay que darlo para entrar
       intentos: new Map(),// IP -> intentos fallidos de PIN
       chat: [],
       log: [],
+      avisos: [],         // marcas de "no jueguen acá" pegadas a las pilas
       seq: 0,
       lastSeen: Date.now()
     });
@@ -99,12 +106,87 @@ function pinFallo(room, ip) {
   room.intentos.set(ip, e);
 }
 
-// El primero que llega manda; si se va, hereda el siguiente conectado.
+// Cuánto se espera antes de dar por ausente a quien se desconectó.
+const AUSENTE_MS = Number(process.env.TG_AUSENTE_MS || 20000);
+
+// El primero que llega manda; si se va de la sala, hereda el siguiente.
+// Un bache de conexión NO le quita la corona: de eso se encarga vigilarAusente,
+// que espera AUSENTE_MS antes de dar a alguien por ido. Si no, un simple F5 del
+// administrador se la entregaba a otro.
 function asegurarAdmin(room) {
   if (room.adminId && findPlayer(room, room.adminId)) return;
   const heredero = room.players.find(p => p.online > 0) || room.players[0];
   room.adminId = heredero ? heredero.id : null;
   if (heredero) sistema(room, heredero.name + ' quedó a cargo de la sala');
+}
+
+// La corona no puede quedarse con quien ya no está: si no, nadie reparte.
+function coronaSiAusente(room, player) {
+  if (room.adminId !== player.id || player.online > 0) return;
+  const heredero = room.players.find(p => p.online > 0);
+  if (!heredero || heredero.id === room.adminId) return;
+  room.adminId = heredero.id;
+  sistema(room, heredero.name + ' quedó a cargo de la sala');
+}
+
+// Un solo temporizador por jugador: reconectarse lo cancela, y volver a
+// desconectarse lo reemplaza. Antes se acumulaban y uno viejo podía quitarle
+// el turno a alguien que llevaba un segundo ausente.
+function vigilarAusente(room, player) {
+  if (!player || player.online > 0) return;
+  olvidarAusente(player);
+  player.tAusente = setTimeout(() => {
+    player.tAusente = null;
+    if (player.online > 0 || !findPlayer(room, player.id)) return;
+    pasarTurnoSiAusente(room, player);
+    coronaSiAusente(room, player);
+    arrancarSiPasaronTodos(room);
+    broadcast(room);
+  }, AUSENTE_MS);
+}
+
+function olvidarAusente(player) {
+  if (player && player.tAusente) { clearTimeout(player.tAusente); player.tAusente = null; }
+}
+
+// Si ya nadie queda por decidir, arranca con quien manda la sala. Vive aparte
+// de la acción "paso" porque el último indeciso puede irse en vez de decidir.
+function arrancarSiPasaronTodos(room) {
+  const g = room.game;
+  if (!g || g.phase !== 'eligiendo' || !g.seats.length) return;
+  if (!g.pasaron) g.pasaron = [];
+  if (g.seats.some(id => !g.pasaron.includes(id))) return;
+  const iAdmin = g.seats.indexOf(room.adminId);
+  const i = iAdmin !== -1 ? iAdmin : 0;
+  const quien = findPlayer(room, g.seats[i]);
+  g.current = i;
+  g.phase = 'play';
+  if (quien) room.avisos = room.avisos.filter(a => a.jugador !== quien.id);
+  sistema(room, 'Pasaron todos: parte ' + (quien ? quien.name : 'el administrador'));
+  pushLog(room, { tipo: 'parte', jugador: quien ? quien.name : '' });
+  checkLoss(room);
+}
+
+// Si quien tiene el turno se desconecta y no vuelve, el turno pasa al siguiente
+// que esté presente. Sus cartas se quedan con él: sigue en la partida.
+function pasarTurnoSiAusente(room, player) {
+  const g = room.game;
+  if (!g || g.phase !== 'play') return;
+  if (g.seats[g.current] !== player.id || player.online > 0) return;
+  const hayAlguien = g.seats.some(id => {
+    const p = findPlayer(room, id);
+    return p && p.online > 0;
+  });
+  if (!hayAlguien) return;                 // no hay a quién pasárselo
+  g.turn = [];
+  for (let i = 0; i < g.seats.length; i++) {
+    g.current = (g.current + 1) % g.seats.length;
+    const p = findPlayer(room, g.seats[g.current]);
+    if (p && p.online > 0) break;
+  }
+  const quien = findPlayer(room, g.seats[g.current]);
+  sistema(room, player.name + ' se desconectó: el turno pasa a ' + (quien ? quien.name : 'el siguiente'));
+  checkLoss(room);
 }
 
 /* --------------------------------------------------------- chat e historial */
@@ -129,14 +211,18 @@ const sistema = (room, texto) => pushChat(room, { tipo: 'sistema', texto });
 
 /* ------------------------------------------------------------- reglas */
 
-function newDeck() {
-  const d = [];
-  for (let n = MIN_CARD; n <= MAX_CARD; n++) d.push(n);
+function barajar(d) {
   for (let i = d.length - 1; i > 0; i--) {
     const j = crypto.randomInt(i + 1);
     [d[i], d[j]] = [d[j], d[i]];
   }
   return d;
+}
+
+function newDeck() {
+  const d = [];
+  for (let n = MIN_CARD; n <= MAX_CARD; n++) d.push(n);
+  return barajar(d);
 }
 
 const topOf = pile => pile.cards[pile.cards.length - 1];
@@ -158,7 +244,7 @@ function seatedPlayers(room) {
 
 function turnPlayer(room) {
   const g = room.game;
-  if (!g) return null;
+  if (!g || g.phase === 'eligiendo') return null;
   return findPlayer(room, g.seats[g.current]);
 }
 
@@ -171,6 +257,38 @@ function cardsLeft(room) {
 function hasMove(room, player) {
   if (!player || !room.game) return false;
   return player.hand.some(c => room.game.piles.some(p => canPlay(c, p)));
+}
+
+/*
+ * Alguien deja la mesa con la partida andando: sus cartas vuelven al mazo
+ * barajadas, se libera su asiento y el juego sigue con los que quedan.
+ */
+function sacarDeLaPartida(room, player) {
+  const g = room.game;
+  if (!g || g.phase === 'over') return;
+  const idx = g.seats.indexOf(player.id);
+  if (idx === -1) return;
+
+  if (player.hand.length) {
+    g.deck.push(...player.hand);
+    barajar(g.deck);
+    pushLog(room, { tipo: 'devuelve', jugador: player.name, cartas: player.hand.length });
+    sistema(room, player.name + ' dejó la mesa: sus ' + player.hand.length + ' cartas vuelven al mazo');
+    player.hand = [];
+  }
+
+  const eraSuTurno = g.seats[g.current] === player.id;
+  g.seats.splice(idx, 1);
+
+  if (!g.seats.length) { endGame(room, false, 'sinjugadores'); return; }
+
+  if (idx < g.current) g.current--;
+  else if (eraSuTurno) g.turn = [];       // su turno se acaba ahí; el asiento lo toma el siguiente
+  if (g.current >= g.seats.length) g.current = 0;
+  if (g.pasaron) g.pasaron = g.pasaron.filter(id => g.seats.includes(id));
+
+  arrancarSiPasaronTodos(room);
+  checkLoss(room);
 }
 
 // Si el asiento del turno quedó sin jugador (alguien fue expulsado), avanza al siguiente válido.
@@ -201,7 +319,9 @@ function startGame(room) {
     if (p) p.hand.sort((a, b) => a - b);
   });
 
+  room.avisos = [];
   room.game = {
+    modo: room.modo,
     seats,
     deck,
     piles: [
@@ -211,8 +331,10 @@ function startGame(room) {
       { dir: 'down', cards: [100] }
     ],
     current: 0,
-    turn: [],          // [{ card, pile }] jugadas del turno en curso
-    phase: 'play',
+    turn: [],          // [{ card, pile, obl }] jugadas del turno en curso
+    phase: 'eligiendo',// nadie parte hasta que alguien se ofrezca
+    pasaron: [],       // quienes dijeron 'paso': si pasan todos, parte el admin
+    obligada: null,    // { pila, carta, quien, nombre, turnos }
     over: null
   };
 }
@@ -221,37 +343,41 @@ function startGame(room) {
 function checkLoss(room) {
   const g = room.game;
   if (!g || g.phase !== 'play') return false;
+  if (!turnPlayer(room)) return false;
   if (g.turn.length >= minPlay(g)) return false;
   if (hasMove(room, turnPlayer(room))) return false;
   endGame(room, false);
   return true;
 }
 
-function endGame(room, won) {
+function endGame(room, won, motivo) {
   const g = room.game;
   let left = g.deck.slice();
   seatedPlayers(room).forEach(p => { left = left.concat(p.hand); });
   left.sort((a, b) => a - b);
-  g.over = { won, left, placed: TOTAL_CARDS - left.length };
+  g.over = { won, left, placed: TOTAL_CARDS - left.length, motivo: motivo || null };
   g.phase = 'over';
-  pushLog(room, { tipo: 'fin', won, fuera: left.length, colocadas: g.over.placed });
+  pushLog(room, { tipo: 'fin', won, fuera: left.length, colocadas: g.over.placed, motivo: motivo || null });
   sistema(room, won
     ? 'Partida perfecta: las 98 cartas colocadas'
-    : 'Fin de la partida: quedaron ' + left.length + ' cartas fuera');
+    : (motivo === 'obligada'
+        ? 'Nadie pudo cubrir la pila obligada: se acabó la partida'
+        : 'Fin de la partida: quedaron ' + left.length + ' cartas fuera'));
 }
 
 /* ------------------------------------------------------------ acciones */
 
 const actions = {
-  start(room, player) {
+  start(room, player, data) {
     if (!esAdmin(room, player)) return;
     if (room.game && room.game.phase === 'play') return;
+    if (data && (data.modo === 'duro' || data.modo === 'clasico')) room.modo = data.modo;
     startGame(room);
     if (!room.game) return;
     room.log.length = 0;
     pushLog(room, { tipo: 'inicio', jugador: player.name, jugadores: room.game.seats.length });
-    sistema(room, player.name + ' repartió. Cada uno con ' + HAND_SIZE + ' cartas');
-    checkLoss(room);
+    sistema(room, player.name + ' repartió en modo ' +
+      (room.modo === 'duro' ? 'duro' : 'clásico') + '. Miren sus cartas: parte el que quiera');
   },
 
   play(room, player, data) {
@@ -267,10 +393,25 @@ const actions = {
 
     const desde = topOf(pile);
     const salto = isJump(card, pile);
+    const oblAntes = g.obligada ? Object.assign({}, g.obligada) : null;
 
     player.hand.splice(handIdx, 1);
     pile.cards.push(card);
-    g.turn.push({ card, pile: pileIdx });
+    g.turn.push({ card, pile: pileIdx, obl: oblAntes });
+
+    // primero cubre la pila obligada, si esta jugada cae ahí...
+    let cubrio = false;
+    if (g.obligada && g.obligada.pila === pileIdx) {
+      g.obligada = null;
+      cubrio = true;
+      pushLog(room, { tipo: 'cubre', jugador: player.name, pila: pileIdx, carta: card });
+    }
+    // ...y después puede dejar obligada una pila nueva
+    if (g.modo === 'duro' && esDoble(card)) {
+      g.obligada = { pila: pileIdx, carta: card, quien: player.id, nombre: player.name, turnos: 1 };
+      pushLog(room, { tipo: 'obliga', jugador: player.name, pila: pileIdx, carta: card });
+      sistema(room, player.name + ' puso el ' + card + ': hay que cubrir esa pila ya');
+    }
 
     pushLog(room, {
       tipo: 'jugada',
@@ -280,6 +421,8 @@ const actions = {
       dir: pile.dir,
       desde,
       salto,
+      doble: esDoble(card),
+      cubrio,
       distancia: pile.dir === 'up' ? card - desde : desde - card
     });
 
@@ -295,6 +438,7 @@ const actions = {
     g.piles[last.pile].cards.pop();
     player.hand.push(last.card);
     player.hand.sort((a, b) => a - b);
+    g.obligada = last.obl || null;      // la obligación vuelve a como estaba
     pushLog(room, { tipo: 'deshacer', jugador: player.name, carta: last.card, pila: last.pile });
   },
 
@@ -311,9 +455,27 @@ const actions = {
 
     if (cardsLeft(room) === 0) { endGame(room, true); return; }
 
+    // La pila obligada aguanta el turno de quien puso la doble y el del siguiente.
+    if (g.obligada) {
+      if (g.obligada.turnos > 0) {
+        g.obligada.turnos--;
+      } else {
+        endGame(room, false, 'obligada');
+        return;
+      }
+    }
+
     g.current = (g.current + 1) % g.seats.length;
     asientoValido(room);
     g.turn = [];
+    // el turno puede caer en alguien que ya estaba desconectado: se le da la
+    // misma ventana de gracia, si no la sala se congela en su asiento
+    const porLlegar = turnPlayer(room);
+    if (porLlegar && porLlegar.online === 0) vigilarAusente(room, porLlegar);
+
+    // al que le toca se le borran sus propios avisos: ya puede jugar ahí
+    const entrante = turnPlayer(room);
+    if (entrante) room.avisos = room.avisos.filter(a => a.jugador !== entrante.id);
 
     const siguiente = turnPlayer(room);
     pushLog(room, {
@@ -327,13 +489,62 @@ const actions = {
     checkLoss(room);
   },
 
-  // Aviso puntual: avisa a todos y se va solo. No bloquea ni marca la pila.
+  modo(room, player, data) {
+    if (!esAdmin(room, player)) return;
+    if (room.game && room.game.phase === 'play') return;   // no se cambia a mitad de partida
+    const m = data.modo === 'duro' ? 'duro' : 'clasico';
+    if (m === room.modo) return;
+    room.modo = m;
+    if (room.game && room.game.phase === 'eligiendo') room.game.modo = m;
+    sistema(room, m === 'duro'
+      ? player.name + ' activó el modo duro: las cartas dobles obligan a cubrir la pila'
+      : player.name + ' volvió al modo clásico');
+    pushLog(room, { tipo: 'modo', jugador: player.name, modo: m });
+  },
+
+  // Alguien se ofrece a partir despues de mirar sus cartas.
+  partir(room, player) {
+    const g = room.game;
+    if (!g || g.phase !== 'eligiendo') return;
+    const i = g.seats.indexOf(player.id);
+    if (i === -1) return;                      // los que miran no parten
+    g.current = i;
+    g.phase = 'play';
+    room.avisos = room.avisos.filter(a => a.jugador !== player.id);
+    pushLog(room, { tipo: 'parte', jugador: player.name });
+    sistema(room, player.name + ' parte');
+    checkLoss(room);
+  },
+
+  // "Paso": no se ofrece a partir. Si pasan todos, parte el administrador.
+  paso(room, player) {
+    const g = room.game;
+    if (!g || g.phase !== 'eligiendo') return;
+    if (!g.seats.includes(player.id)) return;   // los que miran no eligen
+    if (!g.pasaron) g.pasaron = [];
+    if (g.pasaron.includes(player.id)) return;  // ya habia pasado
+    g.pasaron.push(player.id);
+    pushLog(room, { tipo: 'paso', jugador: player.name });
+    arrancarSiPasaronTodos(room);
+  },
+
+  // Aviso pegado a la pila: dura hasta que le toque el turno o hasta que lo saque.
   aviso(room, player, data) {
     const idx = Number(data.pile);
     if (!(idx >= 0 && idx < 4)) return;
+
+    const puesto = room.avisos.findIndex(a => a.pila === idx && a.jugador === player.id);
+    if (puesto !== -1) {                       // ya lo tenía: lo saca
+      room.avisos.splice(puesto, 1);
+      pushLog(room, { tipo: 'desaviso', jugador: player.name, pila: idx });
+      return;
+    }
+
     const ahora = Date.now();
     if (ahora - (player.ultimoAviso || 0) < AVISO_MIN_MS) return;
     player.ultimoAviso = ahora;
+
+    room.avisos.push({ pila: idx, jugador: player.id, nombre: player.name });
 
     const pila = room.game ? room.game.piles[idx] : null;
     pushChat(room, {
@@ -370,6 +581,7 @@ const actions = {
   reset(room, player) {
     if (!esAdmin(room, player)) return;
     room.game = null;
+    room.avisos = [];
     room.players.forEach(p => { p.hand = []; });
     pushLog(room, { tipo: 'reinicio', jugador: player.name });
     sistema(room, player.name + ' reinició la sala');
@@ -379,9 +591,10 @@ const actions = {
     if (!esAdmin(room, player)) return;
     const objetivo = findPlayer(room, String(data.id || ''));
     if (!objetivo || objetivo.id === player.id) return;
+    sacarDeLaPartida(room, objetivo);
     room.players = room.players.filter(p => p.id !== objetivo.id);
+    room.avisos = room.avisos.filter(a => a.jugador !== objetivo.id);
     sistema(room, player.name + ' sacó a ' + objetivo.name + ' de la sala');
-    if (room.game) { asientoValido(room); checkLoss(room); }
     asegurarAdmin(room);
   },
 
@@ -411,11 +624,11 @@ const actions = {
     player.name = name;
   },
 
+  // Irse a mitad de partida ya no la rompe: las cartas vuelven al mazo.
   leave(room, player) {
-    const g = room.game;
-    const sentado = g && g.seats.includes(player.id);
-    if (g && g.phase === 'play' && sentado) return; // no se abandona a mitad de partida
+    sacarDeLaPartida(room, player);
     room.players = room.players.filter(p => p.id !== player.id);
+    room.avisos = room.avisos.filter(a => a.jugador !== player.id);
     sistema(room, player.name + ' salió de la sala');
     asegurarAdmin(room);
   }
@@ -439,6 +652,9 @@ function view(room, pid) {
     maxPlayers: MAX_PLAYERS,
     chat: room.chat.slice(-CHAT_VISIBLE),
     log: room.log.slice(-LOG_VISIBLE),
+    avisos: room.avisos.map(a => ({ pila: a.pila, nombre: a.nombre, mio: a.jugador === pid })),
+    dobles: DOBLES,
+    modo: (g && g.modo) || room.modo,
     players: room.players.map(p => ({
       id: p.id,
       name: p.name,
@@ -460,7 +676,8 @@ function view(room, pid) {
       ],
       deck: 0, left: TOTAL_CARDS, placed: 0,
       hand: [], turn: [], min: 2,
-      yourTurn: false, turnName: null, over: null
+      yourTurn: false, turnName: null, over: null,
+      obligada: null, puedoPartir: false
     });
   }
 
@@ -474,7 +691,16 @@ function view(room, pid) {
     min: minPlay(g),
     yourTurn: !!(me && turnP && turnP.id === me.id && g.phase === 'play'),
     turnName: turnP ? turnP.name : null,
-    over: g.over
+    over: g.over,
+    obligada: g.obligada ? {
+      pila: g.obligada.pila,
+      carta: g.obligada.carta,
+      nombre: g.obligada.nombre,
+      ultima: g.obligada.turnos === 0      // ya no queda otro turno: hay que cubrirla ahora
+    } : null,
+    puedoPartir: !!(me && g.phase === 'eligiendo' && g.seats.includes(me.id)),
+    yaPase: !!(me && (g.pasaron || []).includes(me.id)),
+    pasaron: (g.pasaron || []).filter(id => g.seats.includes(id)).length
   });
 }
 
@@ -521,6 +747,10 @@ const MIME = {
   '.css': 'text/css; charset=utf-8',
   '.svg': 'image/svg+xml',
   '.png': 'image/png',
+  '.webp': 'image/webp',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.gif': 'image/gif',
   '.woff2': 'font/woff2',
   '.ico': 'image/x-icon'
 };
@@ -629,6 +859,7 @@ const server = http.createServer(async (req, res) => {
     const client = { res, pid: player.id };
     room.clients.add(client);
     player.online++;
+    olvidarAusente(player);
     asegurarAdmin(room);
     broadcast(room);
 
@@ -640,6 +871,9 @@ const server = http.createServer(async (req, res) => {
       clearInterval(beat);
       room.clients.delete(client);
       player.online = Math.max(0, player.online - 1);
+      // Con partida en curso nadie pierde el puesto, pero la sala no puede
+      // quedar trabada: la corona y el turno pasan a alguien que esté presente.
+      if (player.online === 0 && room.game) vigilarAusente(room, player);
       // En el lobby, quien cierra la pestaña deja de ocupar un puesto.
       if (player.online === 0 && !room.game) {
         setTimeout(() => {
@@ -663,6 +897,77 @@ const server = http.createServer(async (req, res) => {
     const player = auth(room, body.id, body.token);
     if (!player) return sendJSON(res, 401, { error: 'sesión no válida' });
     return sendJSON(res, 200, { ok: true, name: player.name });
+  }
+
+  /*
+   * Qué imágenes de mazo hay puestas en public/assets/mazos. Se consulta una
+   * vez y así el navegador no va pidiendo archivos que no existen.
+   */
+  if (route === '/api/assets' && req.method === 'GET') {
+    const base = path.join(PUBLIC_DIR, 'assets', 'mazos');
+    const out = {};
+
+    const buscar = (dir, nombres) => {
+      for (const n of nombres) {
+        for (const ext of ['png', 'webp', 'jpg', 'jpeg']) {
+          if (fs.existsSync(path.join(dir, n + '.' + ext))) return n + '.' + ext;
+        }
+      }
+      // tambien se acepta dentro de una subcarpeta con el mismo nombre
+      for (const n of nombres) {
+        const sub = path.join(dir, n);
+        try {
+          if (fs.statSync(sub).isDirectory()) {
+            const img = fs.readdirSync(sub).find(x => /\.(png|webp|jpe?g)$/i.test(x));
+            if (img) return n + '/' + img;
+          }
+        } catch (e) { /* no existe */ }
+      }
+      return null;
+    };
+
+    try {
+      for (const mazo of fs.readdirSync(base, { withFileTypes: true })) {
+        if (!mazo.isDirectory()) continue;
+        const dir = path.join(base, mazo.name);
+        const info = { palette: null, shell: {}, playmat: null, cards: {} };
+
+        // la paleta define colores, tipografía y hasta el nombre del mazo
+        try {
+          const j = fs.readFileSync(path.join(dir, 'palette.json'), 'utf8');
+          info.palette = JSON.parse(j);
+        } catch (e) { /* sin paleta: se usa la del tema */ }
+
+        info.playmat = buscar(dir, ['playmat']);
+        info.shell.normal = buscar(dir, ['card-normal', 'card', 'cascara']);
+        info.shell.duro = buscar(dir, ['card-duro', 'card-hard', 'cascara-duro']);
+
+        // cartas sueltas, si alguien quiere arte por número
+        const cartas = path.join(dir, 'cards');
+        const meter = (grupo, archivo) => {
+          const m = /^(\d{1,3})\.(png|webp|jpg|jpeg)$/i.exec(archivo);
+          if (!m) return;
+          const n = Number(m[1]);
+          if (n < MIN_CARD || n > MAX_CARD) return;
+          if (!info.cards[grupo]) info.cards[grupo] = {};
+          info.cards[grupo][n] = archivo;
+        };
+        if (fs.existsSync(cartas)) {
+          for (const e of fs.readdirSync(cartas, { withFileTypes: true })) {
+            if (e.isDirectory()) {
+              for (const f of fs.readdirSync(path.join(cartas, e.name))) meter(e.name, f);
+            } else {
+              meter('normal', e.name);
+            }
+          }
+        }
+
+        if (info.palette || info.playmat || info.shell.normal || Object.keys(info.cards).length) {
+          out[mazo.name] = info;
+        }
+      }
+    } catch (e) { /* sin carpeta de assets: se juega con los diseños de siempre */ }
+    return sendJSON(res, 200, out);
   }
 
   // ¿existe la sala y pide PIN? No la crea: solo mira.
@@ -700,7 +1005,7 @@ function lanAddresses() {
 server.listen(PORT, '0.0.0.0', () => {
   const lines = [
     '',
-    '  The Game Online  ·  servidor listo',
+    '  Quien chucha revuelve  ·  servidor listo',
     '  ----------------------------------------',
     '  En este equipo:   http://localhost:' + PORT
   ];

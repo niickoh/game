@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="dark">
-<title>The Game</title>
+<title>¿Quién chucha revuelve?</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>%F0%9F%94%A5</text></svg>">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bangers&family=Bricolage+Grotesque:wght@700;800&family=Cinzel:wght@700;900&family=Orbitron:wght@700;900&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700;800&display=swap">
 <script src="/vendor/tailwind.js"></script>
 <script>
   tailwind.config = {
@@ -95,7 +95,7 @@
 
   @keyframes fx-deal{
     from{opacity:0;transform:translateY(38px) rotate(var(--giro,-6deg)) scale(.86)}
-    to{opacity:1;transform:none}
+    to{opacity:1;transform:rotate(var(--giro-ab,0deg)) translateY(var(--sube-ab,0px))}
   }
   .card-hand.entrando{animation:fx-deal .42s cubic-bezier(.22,1,.36,1) backwards;animation-delay:var(--retardo,0ms)}
 
@@ -116,6 +116,38 @@
 
   @keyframes fx-aviso-pila{0%,100%{box-shadow:0 20px 40px -15px rgba(0,0,0,.8)}50%{box-shadow:0 0 34px 4px rgba(239,68,68,.65)}}
   .pile-target.avisada{animation:fx-aviso-pila .7s ease-in-out 3;border-color:#ef4444}
+
+  /* pila obligada por una carta doble: hay que cubrirla */
+  @keyframes fx-obliga{0%,100%{box-shadow:0 0 22px -6px rgba(245,158,11,.55)}50%{box-shadow:0 0 44px 4px rgba(245,158,11,.9)}}
+  @keyframes fx-obliga-ya{0%,100%{box-shadow:0 0 24px -4px rgba(239,68,68,.6)}50%{box-shadow:0 0 48px 6px rgba(239,68,68,.95)}}
+  .pile-target.obligada{border-color:#fbbf24;animation:fx-obliga 1.1s ease-in-out infinite}
+  .pile-target.obligada.ya{border-color:#f87171;animation:fx-obliga-ya .7s ease-in-out infinite}
+  .cinta-obliga{
+    position:absolute;top:0;left:0;right:0;z-index:20;
+    padding:3px 6px;
+    font-size:9.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
+    text-align:center;line-height:1.25;
+    background:linear-gradient(90deg,rgba(245,158,11,.95),rgba(249,115,22,.95));
+    color:#1c1300;
+    border-radius:12px 12px 0 0;
+  }
+  .pile-target.obligada.ya .cinta-obliga{
+    background:linear-gradient(90deg,rgba(239,68,68,.97),rgba(190,18,60,.97));color:#fff;
+  }
+  .pile-target.obligada{padding-top:26px}
+
+  /* avisos de "no jueguen acá" pegados a la pila */
+  .avisos{display:flex;flex-wrap:wrap;gap:3px;justify-content:center;min-height:0}
+  .aviso-chip{
+    display:inline-flex;align-items:center;gap:3px;
+    font-size:9.5px;font-weight:700;line-height:1;
+    padding:2px 6px;border-radius:999px;
+    background:rgba(69,10,10,.9);border:1px solid rgba(248,113,113,.6);color:#fecaca;
+    max-width:100%;
+  }
+  .aviso-chip.mio{background:rgba(120,53,15,.9);border-color:rgba(251,191,36,.7);color:#fde68a}
+  .aviso-chip b{font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:74px}
+  .veto-btn.activo{background:#b91c1c;border-color:#fca5a5;color:#fff}
 
   /* el número grande, con rodillo al cambiar */
   .pile-num{position:relative;display:block;overflow:hidden;line-height:1}
@@ -275,6 +307,7 @@
     .card-hand:hover,.pile-target.jugable:hover{transform:none}
   }
 </style>
+<link rel="stylesheet" href="/mazos.css">
 </head>
 <body class="h-full board-grid-pattern flex flex-col font-sans overflow-x-hidden antialiased">
 
@@ -282,18 +315,22 @@
 <div id="fx" aria-hidden="true"></div>
 
 <!-- ======================= barra superior ======================= -->
-<header class="w-full border-b border-slate-800/80 bg-[#0b1019]/90 backdrop-blur-md px-3 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3 sticky top-0 z-40" style="top:var(--safe-t)">
+<header class="w-full border-b ui-barra backdrop-blur-md px-3 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3 sticky top-0 z-40" style="top:var(--safe-t)">
   <div class="flex items-center gap-3 flex-wrap">
     <div class="flex items-center gap-2">
       <span class="text-xl leading-none">🔥</span>
-      <h1 class="text-xl sm:text-2xl font-black tracking-tight flex items-center">
-        <span class="tracking-wider bg-gradient-to-r from-amber-400 via-orange-300 to-rose-400 bg-clip-text text-transparent font-cinzel">The Game</span>
+      <h1 class="font-black tracking-tight flex items-center min-w-0">
+        <span class="titulo-juego font-cinzel leading-none text-base sm:text-xl">¿Quién chucha revuelve?</span>
       </h1>
     </div>
     <span class="text-slate-600 text-lg font-light hidden sm:inline">·</span>
     <span class="text-slate-300 font-medium text-xs sm:text-sm flex items-center gap-1.5">
       sala <span id="room-tag" class="text-amber-300 font-bold tracking-widest uppercase px-2 py-0.5 rounded bg-slate-900/90 border border-amber-500/30 text-xs font-mono shadow-inner">—</span>
     </span>
+    <div id="modo-sel" class="modo-sel hidden" role="group" aria-label="Dificultad">
+      <button type="button" class="modo-pill" data-modo="clasico">🃏 <span class="larga">Clásico</span></button>
+      <button type="button" class="modo-pill" data-modo="duro">💀 <span class="larga">Hard mode</span></button>
+    </div>
     <div id="conn" class="flex items-center gap-1.5 bg-slate-900/60 border border-slate-700 px-2.5 py-0.5 rounded-full text-[11px] font-semibold text-slate-400">
       <span id="conn-dot" class="w-2 h-2 rounded-full bg-slate-500"></span>
       <span id="conn-txt">conectando</span>
@@ -301,11 +338,6 @@
   </div>
 
   <div class="flex items-center gap-2 flex-wrap">
-    <button id="btn-sound" type="button" aria-pressed="false"
-      class="px-3 py-1.5 rounded-lg border text-xs sm:text-sm font-bold transition active:scale-95 flex items-center gap-1.5 whitespace-nowrap">
-      <span class="ico text-base leading-none">🔇</span><span class="txt">Activar sonido</span>
-    </button>
-
     <div class="flex items-center bg-slate-900/90 border border-slate-700/80 px-3 py-1 rounded-lg shadow-inner" title="Cartas que quedan en el mazo">
       <span id="c-deck" class="text-lg font-black text-amber-300 mr-1.5 tabular-nums font-mono">0</span>
       <span class="text-[9px] font-extrabold tracking-widest text-slate-400 uppercase">Mazo</span>
@@ -322,6 +354,10 @@
     <button onclick="abrirModal('modal-rules')" type="button"
       class="px-3.5 py-1.5 rounded-lg bg-board-surface hover:bg-slate-800 border border-slate-700 text-xs sm:text-sm font-semibold text-slate-200 transition active:scale-95 flex items-center gap-1.5">
       <span>📜</span><span class="hidden sm:inline">Reglas</span>
+    </button>
+    <button onclick="abrirModal('modal-mazo')" type="button" id="btn-mazo" title="Cambiar el estilo del mazo y de la mesa"
+      class="px-3.5 py-1.5 rounded-lg bg-board-surface hover:bg-slate-800 border border-slate-700 text-xs sm:text-sm font-semibold text-slate-200 transition active:scale-95 flex items-center gap-1.5">
+      <span id="btn-mazo-emoji">🔮</span><span class="hidden sm:inline">Mazo</span>
     </button>
     <button onclick="abrirModal('modal-room')" type="button"
       class="px-3.5 py-1.5 rounded-lg bg-board-surface hover:bg-slate-800 border border-slate-700 text-xs sm:text-sm font-semibold text-slate-200 transition active:scale-95 flex items-center gap-1.5">
@@ -340,31 +376,31 @@
   <div class="flex-1 w-full flex flex-col gap-4 min-w-0">
 
     <!-- pilas -->
-    <section aria-label="Montones centrales" class="w-full max-w-4xl mx-auto space-y-4">
-      <div class="space-y-2 bg-[#0e141f]/70 p-3 sm:p-4 rounded-2xl border border-orange-500/20 shadow-lg relative overflow-hidden">
+    <section id="mesa-tapete" aria-label="Montones centrales" class="w-full max-w-4xl mx-auto space-y-4">
+      <div class="grupo-up space-y-2 p-3 sm:p-4 rounded-2xl border shadow-lg relative overflow-hidden">
         <div class="absolute -top-10 left-1/4 w-72 h-24 bg-orange-600/10 blur-3xl pointer-events-none rounded-full"></div>
-        <div class="flex items-center justify-between px-1 relative z-10 gap-2 flex-wrap">
+        <div class="grupo-cab flex items-center justify-between px-1 relative z-10 gap-2 flex-wrap">
           <div class="flex items-center gap-2">
-            <span class="grid place-items-center w-6 h-6 rounded-full bg-gradient-to-tr from-amber-600 to-orange-500 text-slate-950 font-black text-xs shadow-md">▲</span>
-            <span class="text-xs font-black uppercase tracking-wider bg-gradient-to-r from-orange-400 to-amber-300 bg-clip-text text-transparent font-cinzel">Montones ascendentes</span>
-            <span class="text-[11px] font-mono font-bold text-orange-300 bg-orange-950/60 px-2 py-0.5 rounded border border-orange-500/30">1 → 99</span>
+            <span class="grupo-marca grid place-items-center w-6 h-6 rounded-full text-slate-950 font-black text-xs shadow-md">▲</span>
+            <span class="grupo-tinta text-xs font-black uppercase tracking-wider font-cinzel">Montones ascendentes</span>
+            <span class="grupo-rango text-[11px] font-mono font-bold px-2 py-0.5 rounded border">1 → 99</span>
           </div>
-          <span class="text-xs text-orange-200/70 hidden sm:flex items-center gap-1">
+          <span class="grupo-tinta text-xs opacity-70 hidden sm:flex items-center gap-1">
             <span>Sube en valor</span><span class="text-orange-400 font-mono font-bold">o salto −10</span>
           </span>
         </div>
         <div class="grid grid-cols-2 gap-3 sm:gap-5 relative z-10" id="piles-up"></div>
       </div>
 
-      <div class="space-y-2 bg-[#0d1622]/70 p-3 sm:p-4 rounded-2xl border border-cyan-500/20 shadow-lg relative overflow-hidden">
+      <div class="grupo-down space-y-2 p-3 sm:p-4 rounded-2xl border shadow-lg relative overflow-hidden">
         <div class="absolute -top-10 right-1/4 w-72 h-24 bg-cyan-600/10 blur-3xl pointer-events-none rounded-full"></div>
-        <div class="flex items-center justify-between px-1 relative z-10 gap-2 flex-wrap">
+        <div class="grupo-cab flex items-center justify-between px-1 relative z-10 gap-2 flex-wrap">
           <div class="flex items-center gap-2">
-            <span class="grid place-items-center w-6 h-6 rounded-full bg-gradient-to-tr from-cyan-600 to-teal-400 text-slate-950 font-black text-xs shadow-md">▼</span>
-            <span class="text-xs font-black uppercase tracking-wider bg-gradient-to-r from-cyan-300 to-sky-400 bg-clip-text text-transparent font-cinzel">Montones descendentes</span>
-            <span class="text-[11px] font-mono font-bold text-cyan-300 bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-500/30">100 → 2</span>
+            <span class="grupo-marca grid place-items-center w-6 h-6 rounded-full text-slate-950 font-black text-xs shadow-md">▼</span>
+            <span class="grupo-tinta text-xs font-black uppercase tracking-wider font-cinzel">Montones descendentes</span>
+            <span class="grupo-rango text-[11px] font-mono font-bold px-2 py-0.5 rounded border">100 → 2</span>
           </div>
-          <span class="text-xs text-cyan-200/70 hidden sm:flex items-center gap-1">
+          <span class="grupo-tinta text-xs opacity-70 hidden sm:flex items-center gap-1">
             <span>Baja en valor</span><span class="text-cyan-400 font-mono font-bold">o salto +10</span>
           </span>
         </div>
@@ -384,9 +420,22 @@
           <h2 id="turn-name" class="text-lg sm:text-2xl font-black text-white tracking-tight">—</h2>
           <span id="turn-req" class="text-slate-400 font-medium text-xs sm:text-sm bg-slate-900/80 px-2.5 py-1 rounded-md border border-slate-800"></span>
         </div>
-        <span id="hand-label" class="text-xs font-semibold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
-          <span class="w-2 h-2 rounded-full bg-amber-400"></span> Tu mano
-        </span>
+        <div class="flex items-center gap-2 flex-wrap">
+          <span id="hand-label" class="text-xs font-semibold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-amber-400"></span> Tu mano
+          </span>
+          <div id="mano-ops" class="flex items-center gap-1.5">
+            <div class="mano-seg" role="group" aria-label="Orden de tu mano">
+              <button type="button" class="mano-btn" data-orden="asc"  title="De menor a mayor" aria-pressed="true">▲</button>
+              <button type="button" class="mano-btn" data-orden="desc" title="De mayor a menor" aria-pressed="false">▼</button>
+            </div>
+            <div class="mano-seg" role="group" aria-label="Cómo se acomodan tus cartas">
+              <button type="button" class="mano-btn" data-vista="rejilla" title="En rejilla" aria-pressed="true">Rejilla</button>
+              <button type="button" class="mano-btn" data-vista="fila"    title="En una fila, hacia los lados" aria-pressed="false">Fila</button>
+              <button type="button" class="mano-btn" data-vista="abanico" title="En abanico, estilo yugi" aria-pressed="false">Abanico</button>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div id="hand" class="grid grid-cols-3 sm:grid-cols-6 gap-2.5 sm:gap-3.5 min-h-[10rem]"></div>
@@ -407,6 +456,10 @@
             class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-slate-950 font-black text-sm transition shadow-lg active:scale-95 flex items-center gap-2">
             <span>🎴</span><span id="btn-deal-txt">Repartir</span>
           </button>
+          <button id="btn-partir" type="button" hidden
+            class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-black text-sm transition shadow-lg active:scale-95 flex items-center gap-2 animate-pulse">
+            <span>🚀</span><span>Yo parto</span>
+          </button>
         </div>
         <span id="note" class="text-slate-400 text-xs sm:text-sm font-medium bg-slate-900/60 px-3 py-1.5 rounded-lg border border-slate-800 flex items-center gap-2"></span>
       </div>
@@ -415,13 +468,19 @@
 
   <!-- ======================= panel lateral: chat e historial ======================= -->
   <aside id="side-panel"
-    class="hidden lg:flex w-full lg:w-80 xl:w-96 flex-col bg-[#0f1522]/95 border border-slate-800/90 rounded-2xl shadow-2xl h-[540px] lg:h-[calc(100vh-130px)] lg:sticky lg:top-24 overflow-hidden shrink-0">
-    <div class="p-3 border-b border-slate-800/90 bg-[#141d2d] flex items-center justify-between gap-2">
+    class="hidden lg:flex w-full lg:w-80 xl:w-96 flex-col ui-panel border rounded-2xl shadow-2xl h-[540px] lg:h-[calc(100vh-130px)] lg:sticky lg:top-24 overflow-hidden shrink-0">
+    <div class="p-3 border-b ui-panel2 flex items-center justify-between gap-2">
       <div class="flex gap-1 bg-slate-900/80 p-1 rounded-xl border border-slate-800">
         <button type="button" data-tab="chat" class="tab-btn px-3 py-1.5 rounded-lg text-xs font-bold transition">💬 Chat</button>
         <button type="button" data-tab="log" class="tab-btn px-3 py-1.5 rounded-lg text-xs font-bold transition">📜 Historial</button>
       </div>
-      <button onclick="togglePanel()" type="button" class="lg:hidden text-slate-400 hover:text-white text-base leading-none p-1">✕</button>
+      <div class="flex items-center gap-1.5 shrink-0">
+        <button id="btn-sound" type="button" aria-pressed="false"
+          class="px-2.5 py-1.5 rounded-lg border text-[11px] font-bold transition active:scale-95 flex items-center gap-1.5 whitespace-nowrap">
+          <span class="ico text-sm leading-none">🔇</span><span class="txt">Activar sonido</span>
+        </button>
+        <button onclick="togglePanel()" type="button" class="lg:hidden text-slate-400 hover:text-white text-base leading-none p-1">✕</button>
+      </div>
     </div>
 
     <!-- chat -->
@@ -431,7 +490,7 @@
       </div>
       <div class="px-3 py-2 border-b border-slate-800/60 bg-slate-900/40 flex flex-wrap items-center gap-1.5" id="frases"></div>
       <div id="chat-messages" class="flex-1 p-3 space-y-3 overflow-y-auto custom-scrollbar text-xs"></div>
-      <form id="chat-form" class="p-2.5 bg-[#141d2d] border-t border-slate-800 flex items-center gap-2">
+      <form id="chat-form" class="p-2.5 ui-panel2 border-t flex items-center gap-2">
         <input id="chat-input" type="text" maxlength="240" autocomplete="off"
           placeholder="Escribe al equipo (sin números)…"
           class="flex-1 min-w-0 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400">
@@ -455,8 +514,9 @@
 
 <!-- ======================= modales ======================= -->
 <div id="modal-join" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 modal-fondo">
-  <div class="bg-board-surface border border-slate-700 max-w-md w-full rounded-2xl shadow-2xl p-6 modal-panel">
-    <h2 class="text-2xl font-black text-white font-cinzel mb-1">The Game</h2>
+  <div class="ui-panel border max-w-md w-full rounded-2xl shadow-2xl p-6 modal-panel">
+    <h2 class="text-2xl font-black text-white font-cinzel mb-0.5 leading-tight">¿Quién chucha revuelve?</h2>
+    <p class="text-amber-300/90 text-[11px] font-semibold italic mb-3">El primer juego de cartas donde no revuelves :D</p>
     <p class="text-slate-400 text-sm mb-5">Cooperativo: entre todos hay que colocar las 98 cartas en cuatro montones. Se gana o se pierde en equipo.</p>
     <label class="block text-[11px] uppercase font-bold text-slate-400 mb-1.5" for="in-name">Tu nombre</label>
     <input id="in-name" type="text" maxlength="18" autocomplete="nickname" placeholder="Felipe"
@@ -480,9 +540,9 @@
 </div>
 
 <div id="modal-rules" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 modal-fondo">
-  <div class="bg-board-surface border border-slate-700 max-w-lg w-full rounded-2xl shadow-2xl p-6 modal-panel">
+  <div class="ui-panel border max-w-lg w-full rounded-2xl shadow-2xl p-6 modal-panel">
     <div class="flex items-center justify-between border-b border-slate-700/60 pb-3 mb-4">
-      <h3 class="text-lg font-bold text-white flex items-center gap-2 font-cinzel"><span>📜</span> Reglas de The Game</h3>
+      <h3 class="text-lg font-bold text-white flex items-center gap-2 font-cinzel"><span>📜</span> Cómo se juega</h3>
       <button onclick="cerrarModal('modal-rules')" type="button" class="text-slate-400 hover:text-white text-xl leading-none p-1">×</button>
     </div>
     <div class="space-y-3 text-slate-300 text-sm leading-relaxed max-h-[65vh] overflow-y-auto custom-scrollbar pr-1">
@@ -495,6 +555,14 @@
         <li><strong class="text-rose-300">Comunicación:</strong> puedes decir «no juegues ahí» o «tengo algo bueno», pero <em>jamás números exactos</em>. El botón ⛔ de cada pila avisa a todos.</li>
         <li><strong>Se gana</strong> colocando las 98. Se pierde apenas alguien no pueda cumplir el mínimo. Bajo 10 cartas fuera ya es buen resultado.</li>
       </ul>
+      <div class="mt-2 p-3 rounded-xl bg-rose-950/40 border border-rose-500/30">
+        <p class="text-rose-200 font-bold text-sm mb-1">💀 Hard mode · para jugar duro 👄</p>
+        <p class="text-slate-300 text-sm">Las cartas <strong class="font-mono">22, 33, 44, 55, 66, 77 y 88</strong> son
+        obligatorias: apenas alguien coloca una, esa pila queda marcada y <strong>hay que poner otra carta encima</strong>
+        — en el mismo turno de quien la puso, o en el del siguiente. Si ninguno de los dos puede,
+        <strong class="text-rose-300">se pierde la partida al tiro</strong>, sin importar cuántas cartas queden.</p>
+        <p class="text-slate-400 text-xs mt-2">Lo activa el administrador desde el botón <strong>Sala</strong>, antes de repartir.</p>
+      </div>
       <p class="text-xs text-slate-500 pt-2">Juego original de Steffen Benndorf (Nürnberger-Spielkarten-Verlag).</p>
     </div>
     <div class="mt-5 pt-3 border-t border-slate-700/60 flex justify-end">
@@ -504,11 +572,19 @@
 </div>
 
 <div id="modal-room" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 modal-fondo">
-  <div class="bg-board-surface border border-slate-700 max-w-md w-full rounded-2xl shadow-2xl p-6 modal-panel">
+  <div class="ui-panel border max-w-md w-full rounded-2xl shadow-2xl p-6 modal-panel">
     <div class="flex items-center justify-between border-b border-slate-700/60 pb-3 mb-4">
       <h3 class="text-lg font-bold text-white flex items-center gap-2 font-cinzel"><span>🌐</span> Sala de partida</h3>
       <button onclick="cerrarModal('modal-room')" type="button" class="text-slate-400 hover:text-white text-xl leading-none p-1">×</button>
     </div>
+    <label class="block text-[11px] uppercase font-bold text-slate-400 mb-1" for="in-nick">Tu nombre</label>
+    <div class="flex gap-2 mb-4">
+      <input id="in-nick" type="text" maxlength="18" autocomplete="nickname"
+        class="w-full min-w-0 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-400">
+      <button id="btn-nick" type="button"
+        class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-semibold text-xs rounded-xl whitespace-nowrap transition active:scale-95">Cambiar</button>
+    </div>
+
     <label class="block text-[11px] uppercase font-bold text-slate-400 mb-1">Enlace para unirse (red local)</label>
     <div class="flex gap-2 mb-4">
       <input id="room-url" type="text" readonly
@@ -529,8 +605,16 @@
       <span class="block text-[11px] uppercase font-bold text-slate-400 mb-1.5">En la mesa <span id="seats-count" class="font-mono"></span></span>
       <div id="seats" class="space-y-1.5 max-h-56 overflow-y-auto custom-scrollbar"></div>
     </div>
+    <div class="border-t border-slate-700/60 pt-4 mb-4">
+      <button id="btn-salir" type="button"
+        class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-rose-900 border border-slate-700 hover:border-rose-600 text-slate-300 hover:text-rose-200 text-xs font-bold transition active:scale-95">Salirme de la mesa</button>
+      <p class="text-[11px] text-slate-500 mt-1.5">Si hay partida en curso, tus cartas vuelven al mazo y los demás siguen jugando.</p>
+    </div>
+
     <div id="admin-box" class="hidden border-t border-slate-700/60 pt-4">
       <span class="block text-[11px] uppercase font-bold text-amber-400 mb-2">👑 Eres el administrador</span>
+
+
       <div class="flex gap-2 flex-wrap">
         <button id="btn-reset" type="button" class="px-4 py-2 rounded-xl bg-rose-900/60 hover:bg-rose-800 border border-rose-600/50 text-rose-200 text-xs font-bold transition active:scale-95">Reiniciar la sala</button>
         <button id="btn-deal2" type="button" class="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-slate-950 text-xs font-black transition active:scale-95">Repartir ahora</button>
@@ -540,8 +624,42 @@
   </div>
 </div>
 
+<!-- Antes de la primera jugada cada uno mira sus cartas y decide si parte. -->
+<div id="modal-partir" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 modal-fondo">
+  <div class="ui-panel border max-w-xl w-full rounded-2xl shadow-2xl p-6 modal-panel">
+    <div class="border-b ui-borde pb-3 mb-4">
+      <h3 class="text-xl font-bold ui-txt flex items-center gap-2 font-cinzel"><span>🎴</span> ¿Quieres partir?</h3>
+      <p class="ui-txt2 text-sm mt-2">Estas son tus cartas. El primero que se ofrezca parte la partida;
+        si pasan todos, parte quien administra la sala.</p>
+    </div>
+    <div id="partir-mano" class="grid grid-cols-3 sm:grid-cols-6 gap-2 mb-4"></div>
+    <p id="partir-estado" class="ui-txt3 text-xs mb-4"></p>
+    <div class="flex justify-end gap-2">
+      <button id="btn-paso" type="button"
+        class="px-5 py-2 ui-caja border rounded-xl text-sm font-semibold transition active:scale-95">Paso</button>
+      <button id="btn-partir-si" type="button"
+        class="btn-primario px-5 py-2 rounded-xl text-sm transition active:scale-95">Yo quiero iniciar</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-mazo" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 modal-fondo">
+  <div class="ui-panel border max-w-lg w-full rounded-2xl shadow-2xl p-6 modal-panel">
+    <div class="flex items-center justify-between border-b ui-borde pb-3 mb-4">
+      <h3 class="text-lg font-bold ui-txt flex items-center gap-2 font-cinzel"><span>🎴</span> Elige tu mazo</h3>
+      <button onclick="cerrarModal('modal-mazo')" type="button" class="ui-txt2 hover:opacity-70 text-xl leading-none p-1">×</button>
+    </div>
+    <p class="ui-txt2 text-sm mb-4">Cambia las cartas, la mesa y el tono de todo. <strong class="ui-txt">Es solo tuyo</strong>:
+      cada jugador ve el que eligió, y lo puedes cambiar cuando quieras, incluso a mitad de partida.</p>
+    <div id="mazos" class="mazos-grid"></div>
+    <div class="mt-5 pt-3 border-t ui-borde flex justify-end">
+      <button onclick="cerrarModal('modal-mazo')" type="button" class="px-5 py-2 ui-caja border rounded-xl text-sm font-semibold transition active:scale-95">Listo</button>
+    </div>
+  </div>
+</div>
+
 <div id="modal-over" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 modal-fondo">
-  <div class="bg-board-surface border border-slate-700 max-w-md w-full rounded-2xl shadow-2xl p-6 modal-panel">
+  <div class="ui-panel border max-w-md w-full rounded-2xl shadow-2xl p-6 modal-panel">
     <div id="over-score" class="font-mono font-black text-6xl leading-none mb-2 tabular-nums">0</div>
     <h3 id="over-title" class="text-2xl font-black text-white font-cinzel mb-1">Fin</h3>
     <p id="over-msg" class="text-slate-400 text-sm mb-4"></p>
@@ -552,6 +670,7 @@
   </div>
 </div>
 
+<script src="/mazos.js"></script>
 <script src="/fx.js"></script>
 <script src="/fx-sound.js"></script>
 <script src="/app.js"></script>

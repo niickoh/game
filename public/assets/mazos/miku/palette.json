@@ -1,0 +1,117 @@
+{
+  "id": "miku",
+  "name": "Miku",
+  "emoji": "🎤",
+  "description": "Estilo Hatsune Miku con escenario idol virtual, twin-tails turquesa, equalizer holográfico, notas musicales, luces cyan/magenta y marco cyber. La variante dura usa expresión seria, glitch, lasers rojos y sobrecarga de concierto.",
+  "assets": {
+    "normal": "card-normal.png",
+    "hard": "card-duro.png",
+    "playmat": "playmat.png"
+  },
+  "card": {
+    "aspectRatio": "2:3",
+    "recommendedRenderSize": {
+      "width": 1024,
+      "height": 1536
+    },
+    "safeArea": {
+      "leftPercent": 6,
+      "topPercent": 5,
+      "rightPercent": 94,
+      "bottomPercent": 95
+    }
+  },
+  "hardCards": [
+    22,
+    33,
+    44,
+    55,
+    66,
+    77,
+    88
+  ],
+  "numberLayer": {
+    "fontFamily": "Orbitron, Rajdhani, Eurostile, Arial Black, sans-serif",
+    "fontWeight": 900,
+    "fontStyle": "normal",
+    "letterSpacing": "-0.055em",
+    "lineHeight": 0.88,
+    "textTransform": "none",
+    "color": "#f8ffff",
+    "strokeColor": "#04262c",
+    "strokeWidth": "0.012em",
+    "shadow": "0 0 8px rgba(34, 211, 238, 0.95), 0 0 22px rgba(45, 212, 191, 0.75), 0 0 34px rgba(236, 72, 153, 0.45), 0 6px 10px rgba(0, 0, 0, 0.7)",
+    "blendMode": "normal"
+  },
+  "hardNumberLayer": {
+    "fontFamily": "Orbitron, Rajdhani, Eurostile, Arial Black, sans-serif",
+    "fontWeight": 900,
+    "fontStyle": "normal",
+    "letterSpacing": "-0.055em",
+    "lineHeight": 0.88,
+    "textTransform": "none",
+    "color": "#ffffff",
+    "strokeColor": "#071013",
+    "strokeWidth": "0.014em",
+    "shadow": "0 0 8px rgba(34, 211, 238, 0.95), 0 0 22px rgba(236, 72, 153, 0.82), 0 0 34px rgba(239, 68, 68, 0.72), 0 7px 12px rgba(0, 0, 0, 0.78)",
+    "blendMode": "normal"
+  },
+  "numberPlacement": {
+    "main": {
+      "xPercent": 50,
+      "yPercent": 61,
+      "fontSizePercentOfHeight": 22.5,
+      "maxWidthPercent": 57,
+      "rotationDeg": 0,
+      "align": "center",
+      "baseline": "middle"
+    },
+    "corners": [
+      {
+        "name": "top-left",
+        "xPercent": 11.5,
+        "yPercent": 8.2,
+        "fontSizePercentOfHeight": 6.8,
+        "maxWidthPercent": 15,
+        "rotationDeg": 0,
+        "align": "center",
+        "baseline": "middle"
+      },
+      {
+        "name": "bottom-right",
+        "xPercent": 88.3,
+        "yPercent": 91.5,
+        "fontSizePercentOfHeight": 6.8,
+        "maxWidthPercent": 15,
+        "rotationDeg": 0,
+        "align": "center",
+        "baseline": "middle"
+      }
+    ]
+  },
+  "palette": {
+    "mikuTeal": "#39d6d8",
+    "cyanGlow": "#22d3ee",
+    "aquaLight": "#a7ffff",
+    "magenta": "#ec4899",
+    "hotPink": "#ff2fb3",
+    "blackGlass": "#061014",
+    "deepStage": "#08111f",
+    "softWhite": "#f8ffff",
+    "hardRed": "#ef4444",
+    "hardLaser": "#ff174d",
+    "speakerDark": "#111827"
+  },
+  "visualMotifs": [
+    "Hatsune Miku",
+    "turquoise twin-tails",
+    "virtual idol concert",
+    "holographic equalizer",
+    "waveform rings",
+    "music notes",
+    "glow stick crowd",
+    "cyan and magenta lights",
+    "red glitch hard mode"
+  ],
+  "notes": "Para cartas normales usar numberLayer. Para 22,33,44,55,66,77,88 usar hardNumberLayer y card-duro.png. Los números se renderizan sobre la cáscara, no vienen incluidos en la imagen. La variante dura debe sentirse más seria e intensa."
+}

@@ -1,0 +1,74 @@
+{
+  "id": "warlock",
+  "name": "Warlock",
+  "assets": {
+    "normal": "card-normal.png",
+    "hard": "card-duro.png",
+    "playmat": "playmat.png"
+  },
+  "card": {
+    "aspectRatio": "2:3",
+    "numberLayer": {
+      "fontFamily": "Cinzel, Georgia, serif",
+      "fontWeight": 900,
+      "fontStyle": "normal",
+      "letterSpacing": "-0.04em",
+      "lineHeight": 0.92,
+      "color": "#fff6ff",
+      "strokeColor": "#ff9bea",
+      "strokeWidth": "0.006em",
+      "shadow": "0 0 10px #ff33ca, 0 0 26px #ff33ca, 0 0 48px rgba(255,51,202,.75)",
+      "blendMode": "normal"
+    },
+    "hardNumberLayer": {
+      "color": "#fff6ff",
+      "strokeColor": "#ff9bab",
+      "strokeWidth": "0.006em",
+      "shadow": "0 0 10px #ff235f, 0 0 28px #ff235f, 0 0 55px rgba(255,35,95,.8)"
+    },
+    "mainNumber": {
+      "anchor": "center",
+      "xPercent": 50,
+      "yPercent": 53,
+      "fontSizePercentOfHeight": 29,
+      "maxWidthPercent": 62,
+      "rotationDeg": 0
+    },
+    "cornerNumbers": [
+      {
+        "anchor": "top-left",
+        "xPercent": 12,
+        "yPercent": 9,
+        "fontSizePercentOfHeight": 8.4,
+        "rotationDeg": 0
+      },
+      {
+        "anchor": "bottom-right",
+        "xPercent": 88,
+        "yPercent": 91,
+        "fontSizePercentOfHeight": 8.4,
+        "rotationDeg": 0
+      }
+    ]
+  },
+  "palette": {
+    "background": "#12041f",
+    "normalPrimary": "#ff33ca",
+    "normalSecondary": "#2b0b38",
+    "hardPrimary": "#ff235f",
+    "hardSecondary": "#8a061f",
+    "number": "#fff6ff",
+    "numberGlow": "#ff33ca",
+    "hardNumberGlow": "#ff235f",
+    "accent": "#22d3ee"
+  },
+  "hardCards": [
+    22,
+    33,
+    44,
+    55,
+    66,
+    77,
+    88
+  ]
+}

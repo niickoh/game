@@ -1,0 +1,86 @@
+{
+  "id": "espanol",
+  "name": "Espa\u00f1ol",
+  "assets": {
+    "normal": "card-normal.png",
+    "hard": "card-duro.png",
+    "playmat": "playmat.png"
+  },
+  "card": {
+    "aspectRatio": "2:3",
+    "numberLayer": {
+      "fontFamily": "Cinzel, Georgia, serif",
+      "fontWeight": 900,
+      "fontStyle": "normal",
+      "letterSpacing": "-0.055em",
+      "lineHeight": 0.9,
+      "color": "#3b2410",
+      "strokeColor": "#d4a017",
+      "strokeWidth": "0.012em",
+      "shadow": "0 2px 0 rgba(255,235,170,.55), 0 0 2px rgba(70,35,10,.55)",
+      "blendMode": "multiply"
+    },
+    "hardNumberLayer": {
+      "color": "#2b160c",
+      "strokeColor": "#8b0000",
+      "strokeWidth": "0.014em",
+      "shadow": "0 2px 0 rgba(255,220,150,.38), 0 0 4px rgba(110,0,0,.55)",
+      "blendMode": "multiply"
+    },
+    "mainNumber": {
+      "anchor": "center",
+      "xPercent": 50,
+      "yPercent": 52,
+      "fontSizePercentOfHeight": 28,
+      "maxWidthPercent": 58,
+      "rotationDeg": 0
+    },
+    "cornerNumbers": [
+      {
+        "anchor": "top-left",
+        "xPercent": 11,
+        "yPercent": 8,
+        "fontSizePercentOfHeight": 7.8,
+        "rotationDeg": 0
+      },
+      {
+        "anchor": "bottom-right",
+        "xPercent": 89,
+        "yPercent": 92,
+        "fontSizePercentOfHeight": 7.8,
+        "rotationDeg": 0
+      }
+    ]
+  },
+  "palette": {
+    "background": "#f1d9a8",
+    "normalPrimary": "#c0392b",
+    "normalSecondary": "#d4a017",
+    "hardPrimary": "#8b0000",
+    "hardSecondary": "#4a0503",
+    "number": "#3b2410",
+    "numberStroke": "#d4a017",
+    "edgeInk": "#1e1710",
+    "parchment": "#f3dfb5",
+    "greenPatina": "#245044",
+    "gold": "#d4a017",
+    "blood": "#7f0704",
+    "hardAccent": "#b51a10"
+  },
+  "motifs": [
+    "oros",
+    "copas",
+    "espadas",
+    "bastos"
+  ],
+  "hardCards": [
+    22,
+    33,
+    44,
+    55,
+    66,
+    77,
+    88
+  ],
+  "notes": "Hard mode uses the blood-stained Spanish shell; draw numbers over it with hardNumberLayer."
+}
