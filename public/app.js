@@ -19,6 +19,9 @@
   var vistoChat = 0, vistoLog = 0;
   var pestana = 'chat';
   var sinLeer = 0;
+  var chatListo = false;      // la primera pintada trae el historial: eso no avisa
+  // en celular el chat es una hoja que se abre encima de la mesa
+  var movil = window.matchMedia('(max-width: 1023px)');
 
   /* ------------------------------------------------------------ sesión
      El asiento va en sessionStorage, que es POR PESTAÑA: así dos personas en
@@ -601,6 +604,8 @@
     var cont = $('chat-messages');
     var abajo = cerca(cont);
     var yo = estado.you ? estado.you.id : null;
+    var avisa = chatListo;
+    chatListo = true;
 
     estado.chat.forEach(function(m){
       if(m.id <= vistoChat) return;
@@ -633,7 +638,10 @@
               '<span class="text-[9px] text-slate-500">' + hora + '</span></div>' +
               '<div class="bg-slate-800/80 rounded-2xl rounded-tl-none px-3 py-1.5 text-slate-200 border border-slate-700/60 leading-relaxed break-words">' + esc(m.texto) + '</div>' +
             '</div>';
-        if(!mio && pestana !== 'chat') marcarSinLeer();
+        if(!mio && avisa && !chatALaVista()){
+          marcarSinLeer();
+          avisarMensaje(m);
+        }
       }
       cont.appendChild(el);
     });
@@ -667,6 +675,7 @@
                                '</span>: hay que cubrir ' + pilaTxt(e.pila, e.pila < 2 ? 'up' : 'down'), 'text-amber-300'];
       case 'cubre':    return ['✔', '<strong>' + esc(e.jugador) + '</strong> cubrió con el <span class="font-mono font-bold">' + e.carta + '</span>', 'text-emerald-300'];
       case 'desaviso': return ['⛔', '<strong>' + esc(e.jugador) + '</strong> sacó su aviso de ' + pilaTxt(e.pila, e.pila < 2 ? 'up' : 'down'), 'text-slate-500'];
+      case 'salta':    return ['⏭', '<strong>' + esc(e.jugador) + '</strong> no estaba: el turno pasó a ' + esc(e.siguiente || 'el siguiente'), 'text-slate-400'];
       case 'devuelve': return ['↩', '<strong>' + esc(e.jugador) + '</strong> dejó la mesa: ' + e.cartas + ' cartas vuelven al mazo', 'text-slate-400'];
       case 'fin':      return [e.won ? '🏆' : '🏁',
                                e.won ? '<strong>Las 98 colocadas</strong>'
@@ -699,6 +708,38 @@
     var b = $('chat-badge');
     b.textContent = sinLeer > 9 ? '9+' : sinLeer;
     b.classList.remove('hidden');
+    var fab = $('chat-fab');
+    fab.classList.remove('nuevo'); void fab.offsetWidth; fab.classList.add('nuevo');
+    fab.setAttribute('aria-label', 'Abrir chat, ' + sinLeer + ' sin leer');
+  }
+
+  function leido(){
+    sinLeer = 0;
+    $('chat-badge').classList.add('hidden');
+    $('chat-fab').setAttribute('aria-label', 'Abrir chat');
+  }
+
+  function chatAbierto(){ return !movil.matches || $('side-panel').classList.contains('abierto'); }
+  function chatALaVista(){ return pestana === 'chat' && chatAbierto(); }
+
+  /* En celular, con la hoja cerrada, cada mensaje asoma arriba unos segundos.
+     Tocarlo abre el chat. Nunca más de tres a la vez. */
+  function avisarMensaje(m){
+    if(chatAbierto()) return;
+    var cont = $('chat-avisos');
+    var el = document.createElement('button');
+    el.type = 'button';
+    el.className = 'chat-aviso';
+    el.innerHTML = '<span class="ini">' + esc(m.nombre).slice(0, 2).toUpperCase() + '</span>' +
+      '<span class="min-w-0"><span class="quien">' + esc(m.nombre) + '</span>' +
+      '<span class="que">' + esc(m.texto) + '</span></span>';
+    el.onclick = function(){ verPestana('chat'); togglePanel(true); };
+    cont.appendChild(el);
+    while(cont.children.length > 3) cont.removeChild(cont.firstChild);
+    setTimeout(function(){
+      el.classList.add('sale');
+      setTimeout(function(){ if(el.parentNode) el.parentNode.removeChild(el); }, 260);
+    }, 4500);
   }
 
   /* ============================================================ cabecera y controles */
@@ -745,9 +786,12 @@
         : 'Mazo agotado: basta <strong class="text-white">1</strong> · llevas <strong class="text-cyan-400 font-mono">' + estado.turn.length + '</strong>';
     }
 
-    $('hand-label').innerHTML = estado.hand.length
-      ? '<span class="w-2 h-2 rounded-full bg-amber-400"></span> Tu mano (' + estado.hand.length + ')'
-      : '<span class="w-2 h-2 rounded-full bg-slate-600"></span> Sin cartas';
+    var etq = $('hand-label');
+    etq.innerHTML = '<svg viewBox="0 0 12 15" aria-hidden="true"><rect x=".75" y=".75" width="10.5" height="13.5" rx="2" ' +
+      'fill="color-mix(in srgb, var(--acento1) 25%, transparent)" stroke="var(--acento1)" stroke-width="1.5"/></svg>' +
+      estado.hand.length;
+    etq.classList.toggle('vacia', !estado.hand.length);
+    etq.setAttribute('aria-label', estado.hand.length ? 'Tu mano: ' + estado.hand.length + ' cartas' : 'Sin cartas');
 
     $('btn-end').disabled = !estado.yourTurn || falta > 0;
     $('btn-undo').disabled = !estado.yourTurn || estado.turn.length === 0;
@@ -1048,13 +1092,26 @@
   };
   window.cerrarModal = function(id){ $(id).classList.add('hidden'); };
 
-  window.togglePanel = function(){
+  // abre o cierra la hoja del chat en celular; sin argumento, alterna
+  window.togglePanel = function(abrir){
     var p = $('side-panel');
-    var oculto = p.classList.contains('hidden');
-    p.classList.toggle('hidden', !oculto);
-    p.classList.toggle('flex', oculto);
-    if(oculto){ sinLeer = 0; $('chat-badge').classList.add('hidden'); }
+    if(typeof abrir !== 'boolean') abrir = !p.classList.contains('abierto');
+    p.classList.toggle('abierto', abrir);
+    document.body.classList.toggle('chat-abierto', abrir);
+    $('chat-fab').setAttribute('aria-expanded', abrir ? 'true' : 'false');
+    if(!abrir) return;
+    $('chat-avisos').innerHTML = '';
+    if(pestana === 'chat'){
+      leido();
+      var c = $('chat-messages'); c.scrollTop = c.scrollHeight;
+    }
   };
+  document.addEventListener('keydown', function(ev){
+    if(ev.key === 'Escape' && $('side-panel').classList.contains('abierto')) togglePanel(false);
+  });
+  // si la ventana crece a escritorio con la hoja abierta, se suelta el bloqueo del scroll
+  var alCambiarAncho = function(){ if(!movil.matches) togglePanel(false); };
+  if(movil.addEventListener) movil.addEventListener('change', alCambiarAncho);
 
   function verPestana(cual){
     pestana = cual;
@@ -1068,7 +1125,7 @@
         (on ? 'bg-slate-700 text-white' : 'text-slate-400 hover:text-slate-200');
     });
     if(cual === 'chat'){
-      sinLeer = 0; $('chat-badge').classList.add('hidden');
+      if(chatAbierto()) leido();
       var c = $('chat-messages'); c.scrollTop = c.scrollHeight;
     } else {
       var l = $('log-list'); l.scrollTop = l.scrollHeight;
@@ -1376,6 +1433,42 @@
     if(!$('modal-partir').classList.contains('hidden')) pintarPartir();
   };
 
+  /* ============================================================ service worker
+     Guarda la app y el arte para que abra al tiro. Solo corre en https o en
+     localhost: por la IP de la oficina (http) el navegador no lo permite, y
+     el juego anda igual, sin caché propia. */
+  function registrarSW(){
+    if(!('serviceWorker' in navigator)) return;
+    var seguro = location.protocol === 'https:' ||
+                 location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+    if(!seguro) return;
+
+    var habiaUno = !!navigator.serviceWorker.controller;
+    navigator.serviceWorker.addEventListener('controllerchange', function(){
+      if(!habiaUno){ habiaUno = true; return; }    // primera instalación: nada que avisar
+      // sin partida andando se recarga solo; jugando, se pregunta
+      if(!sesion || !estado || estado.phase !== 'play'){ location.reload(); return; }
+      avisarVersion();
+    });
+
+    navigator.serviceWorker.register('/sw.js').then(function(reg){
+      // las partidas son largas: cada media hora se mira si hay versión nueva
+      setInterval(function(){ reg.update().catch(function(){}); }, 30 * 60 * 1000);
+    }).catch(function(){ /* sin service worker se juega igual */ });
+  }
+
+  function avisarVersion(){
+    if($('aviso-version')) return;
+    var el = document.createElement('div');
+    el.id = 'aviso-version';
+    el.setAttribute('role', 'status');
+    el.innerHTML = '<span>✨ Hay una versión nueva del juego.</span>' +
+      '<button type="button">Actualizar</button>';
+    el.querySelector('button').onclick = function(){ location.reload(); };
+    document.body.appendChild(el);
+  }
+
+  registrarSW();
   crearPilas();
   montarFrases();
   MAZOS.construirSelector($('mazos'));

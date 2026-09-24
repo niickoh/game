@@ -1,6 +1,14 @@
 {
   "id": "ninja",
   "name": "Ninja",
+  "tagline": "Aldea nocturna y chakra naranja",
+  "swatches": [
+    { "color": "#07172f", "nombre": "Noche" },
+    { "color": "#93c5fd", "nombre": "Luna" },
+    { "color": "#f97316", "nombre": "Chakra" },
+    { "color": "#d8b98a", "nombre": "Pergamino" },
+    { "color": "#dc2626", "nombre": "Chakra rojo", "duro": true }
+  ],
   "emoji": "🥷",
   "description": "Estilo ninja/anime con aldea nocturna, chakra naranja, pergaminos, kunai, shuriken, humo e ink brush. La variante dura usa chakra rojo oscuro, sellos rotos y grietas de energía.",
   "assets": {

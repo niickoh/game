@@ -318,6 +318,25 @@ window.MAZOS = (function(){
   }
 
   /* ===================================================== selector */
+
+  /* La tira de colores sale del propio arte: 'swatches' del palette.json,
+     en orden de cuánto pesa cada tono en las imágenes. El de la carta dura
+     va al final, separado. Sin swatches se usan los tres de mazos.css. */
+  function tonos(p){
+    var sw = Array.isArray(p.swatches) ? p.swatches.filter(function(s){
+      return s && /^#[0-9a-f]{3,8}$/i.test(s.color);
+    }) : [];
+    if(!sw.length){
+      return '<span class="mazo-tonos" aria-hidden="true"><i class="t1"></i><i class="t2"></i><i class="t3"></i></span>';
+    }
+    var nombres = sw.map(function(s){ return s.nombre || s.color; }).join(', ');
+    return '<span class="mazo-tonos" role="img" aria-label="Paleta: ' + esc(nombres) + '">' +
+      sw.map(function(s){
+        return '<i' + (s.duro ? ' class="duro"' : '') + ' style="background:' + s.color + '" title="' +
+               esc((s.nombre || s.color) + (s.duro ? ' · modo duro' : '')) + '"></i>';
+      }).join('') + '</span>';
+  }
+
   function construirSelector(cont, alElegir){
     if(!cont) return;
     cont.innerHTML = '';
@@ -334,36 +353,35 @@ window.MAZOS = (function(){
       var tipo = ((p.card || {}).numberLayer || {}).fontFamily;
       var est = '';
       if(pal.normalSecondary) est += '--pv-carta:' + pal.normalSecondary + ';';
-      if(pal.normalPrimary)   est += '--pv-borde:' + pal.normalPrimary + ';--pv-t1:' + pal.normalPrimary + ';';
-      if(pal.hardPrimary)     est += '--pv-dura:' + pal.hardPrimary + ';--pv-t3:' + pal.hardPrimary + ';';
-      if(pal.accent)          est += '--pv-t2:' + pal.accent + ';';
+      if(pal.normalPrimary)   est += '--pv-borde:' + pal.normalPrimary + ';';
+      if(pal.hardPrimary)     est += '--pv-dura:' + pal.hardPrimary + ';';
       if(pal.number)          est += '--pv-num:' + pal.number + ';';
-      if(pal.background)      est += '--pv-bg:' + pal.background + ';';
       if(tipo)                est += '--pv-tipo:' + tipo + ';';
       if(est) b.setAttribute('style', est);
 
       // dos caras: la normal y la del modo duro, que es la que cambia
       var cara = function(arte, clase, num){
         return '<span class="mazo-cara ' + clase + '">' +
-                 (arte ? '<img src="/assets/mazos/' + m.id + '/' + arte + '" alt="" loading="lazy">'
+                 (arte ? '<img src="/assets/mazos/' + m.id + '/' + arte + '" alt="" loading="lazy" decoding="async">'
                        : String(num)) +
                '</span>';
       };
       var tapete = rutaTapete(m.id);
 
       b.innerHTML =
-        (tapete ? '<span class="mazo-tapete" style="background-image:url(&quot;' + tapete + '&quot;)"></span>' : '') +
-        '<span class="mazo-velo"></span>' +
-        '<span class="mazo-caras">' +
-          cara(cascara(m.id, false), '', 7) +
-          cara(cascara(m.id, true), 'dura', 88) +
+        '<span class="mazo-escena">' +
+          (tapete ? '<span class="mazo-tapete" style="background-image:url(&quot;' + tapete + '&quot;)"></span>' : '') +
+          '<span class="mazo-caras">' +
+            cara(cascara(m.id, false), '', 7) +
+            cara(cascara(m.id, true), 'dura', 88) +
+          '</span>' +
+          '<span class="mazo-tick" aria-hidden="true">✓</span>' +
         '</span>' +
         '<span class="mazo-txt">' +
           '<span class="mazo-nombre">' + m.emoji + ' ' + esc(m.nombre) + '</span>' +
           '<span class="mazo-desc">' + esc(m.desc || '') + '</span>' +
-          '<span class="mazo-tonos" aria-hidden="true"><i class="t1"></i><i class="t2"></i><i class="t3"></i></span>' +
-        '</span>' +
-        '<span class="mazo-tick" aria-hidden="true">✓</span>';
+          tonos(p) +
+        '</span>';
 
       b.addEventListener('click', function(){
         aplicar(m.id);
@@ -435,7 +453,9 @@ window.MAZOS = (function(){
             if(p.nombre || p.name) m.nombre = p.nombre || p.name;
             if(p.emoji) m.emoji = p.emoji;
             // 'description' es como lo escriben los palette.json generados
-            var d = p.desc || p.descripcion || p.description;
+            // 'tagline' es la línea corta para la ficha; 'description' suele ser
+            // el texto largo con que se generó el arte
+            var d = p.tagline || p.desc || p.descripcion || p.description;
             if(d) m.desc = d;
             } catch(e){ /* un mazo torcido se salta; los demas siguen */ }
           });

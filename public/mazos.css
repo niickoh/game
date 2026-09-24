@@ -431,23 +431,25 @@
    los montones que suben y la plata en los que bajan.
    Los colores salen de assets/mazos/paladin/palette.json. */
 [data-mazo="paladin"]{
-  --mesa-bg:#07152f;
+  --mesa-bg:#0b1433;
   --mesa-img:
-    linear-gradient(180deg, rgba(255,241,168,.14) 0%, transparent 36%),
-    radial-gradient(circle at 50% 96%, rgba(245,196,81,.12) 0%, transparent 48%),
-    radial-gradient(rgba(219,228,239,.04) 1px, transparent 1px);
-  --mesa-size:100% 100%, 100% 100%, 30px 30px;
+    radial-gradient(ellipse 70% 42% at 50% -6%, rgba(255,226,138,.34) 0%, rgba(245,196,81,.10) 45%, transparent 70%),
+    linear-gradient(180deg, transparent 0%, transparent 30%, rgba(11,20,51,.92) 78%),
+    repeating-conic-gradient(from 160deg at 50% -12%, rgba(255,241,168,.075) 0deg, transparent 3deg, transparent 8deg, rgba(255,241,168,.075) 11deg),
+    radial-gradient(ellipse 55% 35% at 50% 106%, rgba(255,241,168,.10) 0%, transparent 70%),
+    linear-gradient(180deg, #16275a 0%, #0b1433 50%, #070c24 100%);
+  --mesa-size:100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%;
 
-  --ui-barra:rgba(7,17,38,.92);
-  --ui-panel:rgba(11,24,50,.96);
-  --ui-panel2:#12294f;
-  --ui-caja:#0c1d3d;
-  --ui-borde:#2c4e8a;
-  --ui-borde2:#1b3560;
+  --ui-barra:rgba(13,22,52,.9);
+  --ui-panel:rgba(14,24,58,.95);
+  --ui-panel2:#16275a;
+  --ui-caja:#0f1c44;
+  --ui-borde:#6b5a2c;
+  --ui-borde2:#3a3a3e;
   --ui-texto:#fff8e7;
-  --ui-texto2:#c3d2e8;
-  --ui-texto3:#8ea3c2;
-  --ui-campo:#061229;
+  --ui-texto2:#d8cfb8;
+  --ui-texto3:#9c9580;
+  --ui-campo:#0a1330;
 
   --acento1:#f5c451;
   --acento2:#fff1a8;
@@ -751,23 +753,24 @@
 }
 
 [data-mazo="ninja"]{
-  --mesa-bg:#07172f;
+  --mesa-bg:#0a0c18;
   --mesa-img:
-    linear-gradient(180deg, rgba(249,115,22,.12) 0%, transparent 34%),
-    radial-gradient(circle at 50% 98%, rgba(255,179,92,.12) 0%, transparent 46%),
-    radial-gradient(rgba(147,197,253,.04) 1px, transparent 1px);
-  --mesa-size:100% 100%, 100% 100%, 30px 30px;
+    radial-gradient(ellipse 85% 45% at 50% 108%, rgba(249,115,22,.30) 0%, rgba(220,38,38,.10) 45%, transparent 70%),
+    radial-gradient(circle at 86% 9%, rgba(226,236,255,.20) 0, rgba(147,197,253,.10) 7%, transparent 24%),
+    radial-gradient(ellipse 45% 35% at 6% 75%, rgba(220,38,38,.14) 0%, transparent 70%),
+    linear-gradient(180deg, #0c1630 0%, #0a0c18 55%, #140c0e 100%);
+  --mesa-size:100% 100%, 100% 100%, 100% 100%, 100% 100%;
 
-  --ui-barra:rgba(5,12,26,.92);
-  --ui-panel:rgba(8,20,40,.96);
-  --ui-panel2:#0e2444;
-  --ui-caja:#091a35;
-  --ui-borde:#2b4a75;
-  --ui-borde2:#1a3055;
-  --ui-texto:#e8dbc2;
-  --ui-texto2:#b3c2d6;
-  --ui-texto3:#8494ab;
-  --ui-campo:#051325;
+  --ui-barra:rgba(10,11,22,.9);
+  --ui-panel:rgba(13,14,26,.95);
+  --ui-panel2:#171522;
+  --ui-caja:#110f1c;
+  --ui-borde:#4a2e22;
+  --ui-borde2:#2c1d1a;
+  --ui-texto:#f1e4cc;
+  --ui-texto2:#c9b8a0;
+  --ui-texto3:#8f7f6c;
+  --ui-campo:#0b0a14;
 
   --acento1:#f97316;
   --acento2:#ffb35c;
@@ -882,12 +885,25 @@ body{ background-color:var(--mesa-bg); color:var(--ui-texto); }
   display:inline-flex; align-items:stretch; gap:1px; padding:2px;
   border-radius:9px; background:var(--ui-panel2); border:1px solid var(--ui-borde);
 }
+/* solo íconos: antes decía 'font:800 10px/1 inherit', que no es CSS válido,
+   el navegador botaba la regla y los botones salían con la letra grande */
 .mano-btn{
-  font:800 10px/1 inherit; letter-spacing:.06em; text-transform:uppercase;
-  padding:4px 7px; border-radius:7px; cursor:pointer;
+  display:grid; place-items:center; width:28px; height:24px; padding:0;
+  border-radius:7px; cursor:pointer;
   color:var(--ui-texto3); background:transparent; border:0;
   transition:background-color .15s ease, color .15s ease;
 }
+.mano-btn svg{ width:15px; height:15px; fill:currentColor; stroke:color-mix(in srgb, var(--ui-panel2) 70%, transparent); stroke-width:.6 }
+.mano-btn[aria-pressed="true"] svg{ color:var(--acento1) }
+
+/* cuántas cartas tienes: una ficha chica con una carta dibujada */
+.mano-cuenta{
+  display:inline-flex; align-items:center; gap:5px; height:26px; padding:0 8px 0 6px;
+  border-radius:9px; background:var(--ui-panel2); border:1px solid var(--ui-borde);
+  color:var(--ui-texto); font-size:12px; font-weight:800; font-variant-numeric:tabular-nums;
+}
+.mano-cuenta svg{ width:12px; height:15px }
+.mano-cuenta.vacia{ color:var(--ui-texto3) }
 .mano-btn:hover{ color:var(--ui-texto); }
 .mano-btn[aria-pressed="true"]{
   background:color-mix(in srgb, var(--acento1) 24%, var(--ui-panel2));
@@ -998,82 +1014,134 @@ body{ background-color:var(--mesa-bg); color:var(--ui-texto); }
 /* ==========================================================================
    Selector de mazo
    ========================================================================== */
-.mazos-grid{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px }
-@media (max-width:520px){ .mazos-grid{ grid-template-columns:1fr } }
+.mazos-grid{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px }
+@media (min-width:720px){ .mazos-grid{ grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px } }
+@media (max-width:340px){ .mazos-grid{ grid-template-columns:1fr } }
 
-/* Ficha compacta: de un vistazo se ve el tapete, la carta normal, la dura y
-   los tonos del mazo. Cada ficha se pinta con la paleta del mazo que muestra,
-   nunca con la del mazo activo: si no, la mitad quedaría ilegible. */
+/* Ficha: arriba la escena (el tapete con la carta normal y la dura en
+   abanico), abajo el nombre y la tira con los colores de su arte. Cada ficha
+   se pinta con la paleta del mazo que muestra, nunca con la del mazo activo:
+   si no, la mitad quedaría ilegible. */
 .mazo-op{
   position:relative; overflow:hidden; isolation:isolate;
-  display:flex; align-items:center; gap:10px;
-  padding:9px 10px; border-radius:14px; cursor:pointer; text-align:left;
-  border:2px solid var(--ui-borde);
+  display:flex; flex-direction:column;
+  border-radius:16px; cursor:pointer; text-align:left;
+  border:2px solid color-mix(in srgb, var(--pv-luz,var(--ui-borde)) 30%, transparent);
   background:var(--pv-bg,var(--ui-campo));
-  transition:transform .15s ease, border-color .15s ease, box-shadow .15s ease;
+  box-shadow:0 10px 24px -14px rgba(0,0,0,.9);
+  transition:transform .18s ease, border-color .18s ease, box-shadow .18s ease;
 }
-.mazo-op:hover{ transform:translateY(-2px) }
-.mazo-op.elegido{ border-color:var(--acento1); box-shadow:0 0 0 3px color-mix(in srgb, var(--acento1) 25%, transparent) }
-
-.mazo-tapete{ position:absolute; inset:0; z-index:-2; background-size:cover; background-position:center }
-/* velo del color del mazo: el arte se intuye y el texto se sigue leyendo */
-.mazo-velo{
-  position:absolute; inset:0; z-index:-1;
-  background:linear-gradient(90deg,
-    var(--pv-bg,var(--ui-campo)) 34%,
-    color-mix(in srgb, var(--pv-bg,var(--ui-campo)) 62%, transparent) 100%);
+.mazo-op:hover,
+.mazo-op:focus-visible{
+  transform:translateY(-3px);
+  border-color:color-mix(in srgb, var(--pv-luz,var(--acento1)) 70%, transparent);
+  box-shadow:0 16px 30px -14px color-mix(in srgb, var(--pv-luz,#000) 55%, #000);
+}
+.mazo-op:focus-visible{ outline:2px solid var(--pv-luz,var(--acento1)); outline-offset:2px }
+.mazo-op.elegido{
+  border-color:var(--pv-luz,var(--acento1));
+  box-shadow:0 0 0 3px color-mix(in srgb, var(--pv-luz,var(--acento1)) 30%, transparent),
+             0 16px 30px -14px color-mix(in srgb, var(--pv-luz,#000) 60%, #000);
 }
 
-.mazo-caras{ display:flex; gap:4px; flex:none }
+.mazo-escena{
+  position:relative; display:block; aspect-ratio:16/10; overflow:hidden;
+  background:var(--pv-bg,var(--ui-campo));
+}
+.mazo-tapete{
+  position:absolute; inset:0; background-size:cover; background-position:center;
+  transform:scale(1.04); transition:transform .5s ease, filter .5s ease;
+  filter:saturate(.9) brightness(.8);
+}
+.mazo-op:hover .mazo-tapete,
+.mazo-op.elegido .mazo-tapete{ transform:scale(1.1); filter:none }
+/* la escena se funde con el pie de la ficha */
+.mazo-escena::after{
+  content:''; position:absolute; inset:0; pointer-events:none;
+  background:linear-gradient(180deg, transparent 45%, var(--pv-bg,var(--ui-campo)) 100%);
+}
+
+.mazo-caras{
+  position:absolute; left:50%; top:47%; z-index:1; height:80%;
+  display:flex; transform:translate(-50%,-50%);
+}
 .mazo-cara{
-  width:36px; aspect-ratio:2/3; border-radius:5px; overflow:hidden;
+  height:100%; aspect-ratio:2/3; border-radius:7px; overflow:hidden;
   display:grid; place-items:center;
   border:1.5px solid var(--pv-borde,rgba(148,163,184,.55));
   background:var(--pv-carta,#1e2a3a);
   color:var(--pv-num,#fff);
-  font-family:var(--pv-tipo,inherit); font-weight:800; font-size:12px; line-height:1;
-  box-shadow:0 5px 12px -5px rgba(0,0,0,.8);
+  font-family:var(--pv-tipo,inherit); font-weight:800; font-size:18px; line-height:1;
+  box-shadow:0 10px 18px -6px rgba(0,0,0,.85);
+  transform:rotate(-7deg); transform-origin:50% 100%;
+  transition:transform .25s cubic-bezier(.2,.9,.3,1.2);
 }
-.mazo-cara.dura{ border-color:var(--pv-dura,var(--pv-borde,rgba(148,163,184,.55))) }
+.mazo-cara.dura{
+  margin-left:-26%;
+  border-color:var(--pv-dura,var(--pv-borde,rgba(148,163,184,.55)));
+  transform:rotate(7deg) translateY(4%);
+}
+.mazo-op:hover .mazo-cara,
+.mazo-op.elegido .mazo-cara{ transform:rotate(-11deg) translateX(-8%) }
+.mazo-op:hover .mazo-cara.dura,
+.mazo-op.elegido .mazo-cara.dura{ transform:rotate(11deg) translate(8%,4%) }
+/* con arte, el marco lo pone la imagen */
+.mazo-cara:has(img){ border:0; background:none }
 .mazo-cara img{ width:100%; height:100%; object-fit:cover; display:block }
 
-.mazo-txt{ display:flex; flex-direction:column; gap:2px; min-width:0; padding-right:12px }
+.mazo-txt{ display:flex; flex-direction:column; gap:3px; min-width:0; padding:4px 11px 11px }
 .mazo-nombre{
-  font-weight:800; font-size:13px; line-height:1.2; color:var(--pv-texto,var(--ui-texto));
+  font-weight:800; font-size:13.5px; line-height:1.2; color:var(--pv-texto,var(--ui-texto));
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
 }
 /* dos lineas como maximo: la ficha no puede crecer por el texto */
 .mazo-desc{
-  font-size:10.5px; line-height:1.25; color:var(--pv-texto2,var(--ui-texto2));
+  font-size:11px; line-height:1.3; min-height:2.6em; color:var(--pv-texto2,var(--ui-texto2));
   display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden;
 }
-.mazo-tonos{ display:flex; gap:3px; margin-top:3px }
-.mazo-tonos i{ width:15px; height:5px; border-radius:999px; box-shadow:inset 0 0 0 1px rgba(0,0,0,.25) }
+
+/* la paleta del arte: una tira continua; el tono del modo duro, aparte */
+.mazo-tonos{ display:flex; gap:2px; margin-top:5px; height:9px }
+.mazo-tonos i{
+  flex:1; min-width:0; border-radius:2px;
+  box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--pv-texto,#fff) 30%, transparent);
+}
+.mazo-tonos i:first-child{ border-radius:999px 2px 2px 999px }
+.mazo-tonos i:last-child{ border-radius:2px 999px 999px 2px }
+.mazo-tonos i.duro{ flex:.7; margin-left:5px; border-radius:999px }
 .mazo-tonos .t1{ background:var(--pv-t1,#f97316) }
 .mazo-tonos .t2{ background:var(--pv-t2,#06b6d4) }
 .mazo-tonos .t3{ background:var(--pv-t3,#ef4444) }
 
 .mazo-tick{
-  position:absolute; top:5px; right:8px; font-size:12px; font-weight:900;
-  color:var(--acento1); opacity:0; transition:opacity .15s ease;
+  position:absolute; top:7px; right:7px; z-index:2;
+  width:22px; height:22px; border-radius:999px; display:grid; place-items:center;
+  font-size:12px; font-weight:900; line-height:1;
+  color:var(--pv-bg,#000); background:var(--pv-luz,var(--acento1));
+  box-shadow:0 2px 8px rgba(0,0,0,.6);
+  opacity:0; transform:scale(.6); transition:opacity .15s ease, transform .2s ease;
 }
-.mazo-op.elegido .mazo-tick{ opacity:1 }
+.mazo-op.elegido .mazo-tick{ opacity:1; transform:none }
 
-/* Fondo y tinta de cada ficha: pareja elegida contra su propio arte, no
-   contra su tema de interfaz (el tapete de Original es oscuro aunque su
-   mesa sea clara, y el Espanol al reves). */
-.mazo-op[data-mazo="warlock"]{ --pv-bg:#12041f; --pv-texto:#f7ebff; --pv-texto2:#c9a5e0;
-  --pv-t1:#ff33ca; --pv-t2:#22d3ee; --pv-t3:#ff235f }
-.mazo-op[data-mazo="original"]{ --pv-bg:#15120f; --pv-texto:#f4efe3; --pv-texto2:#bdb3a2;
-  --pv-t1:#c0392b; --pv-t2:#2471a3; --pv-t3:#f4a300 }
-.mazo-op[data-mazo="espanol"]{ --pv-bg:#f1d9a8; --pv-texto:#3b2410; --pv-texto2:#7a5a2e;
-  --pv-t1:#c0392b; --pv-t2:#245044; --pv-t3:#d4a017 }
-.mazo-op[data-mazo="ninja"]{ --pv-bg:#07172f; --pv-texto:#e8dbc2; --pv-texto2:#b3c2d6;
-  --pv-t1:#f97316; --pv-t2:#93c5fd; --pv-t3:#dc2626 }
-.mazo-op[data-mazo="paladin"]{ --pv-bg:#07152f; --pv-texto:#fff8e7; --pv-texto2:#c3d2e8;
-  --pv-t1:#f5c451; --pv-t2:#8fb6ee; --pv-t3:#e11d1d }
-.mazo-op[data-mazo="neon"]{ --pv-bg:#08031f; --pv-texto:#eef2ff; --pv-texto2:#b7a6e8;
-  --pv-t1:#ec4899; --pv-t2:#22d3ee; --pv-t3:#ff174f }
+@media (prefers-reduced-motion: reduce){
+  .mazo-op:hover .mazo-cara, .mazo-op.elegido .mazo-cara{ transform:rotate(-7deg) }
+  .mazo-op:hover .mazo-cara.dura, .mazo-op.elegido .mazo-cara.dura{ transform:rotate(7deg) translateY(4%) }
+  .mazo-op:hover .mazo-tapete, .mazo-op.elegido .mazo-tapete{ transform:scale(1.04) }
+}
+
+/* Fondo, tinta y luz de cada ficha, sacados de su propio arte y no de su
+   tema de interfaz (el tapete de Original es oscuro aunque su mesa sea
+   clara, y el Espanol al reves). --pv-luz es el tono que mas brilla en las
+   imagenes: borde, sombra y marca de elegido. */
+.mazo-op[data-mazo="warlock"]{ --pv-bg:#12041f; --pv-texto:#f7ebff; --pv-texto2:#c9a5e0; --pv-luz:#ff33ca }
+.mazo-op[data-mazo="original"]{ --pv-bg:#15120f; --pv-texto:#f4efe3; --pv-texto2:#bdb3a2; --pv-luz:#e0552f }
+.mazo-op[data-mazo="espanol"]{ --pv-bg:#f1d9a8; --pv-texto:#3b2410; --pv-texto2:#6f5129; --pv-luz:#c0392b }
+.mazo-op[data-mazo="neon"]{ --pv-bg:#0b0226; --pv-texto:#eef2ff; --pv-texto2:#b7a6e8; --pv-luz:#e81cb0 }
+.mazo-op[data-mazo="berserk"]{ --pv-bg:#0a0a0a; --pv-texto:#e8dfd6; --pv-texto2:#a8a29e; --pv-luz:#dc2626 }
+.mazo-op[data-mazo="dragonball"]{ --pv-bg:#1d1207; --pv-texto:#fff2cf; --pv-texto2:#d9c49a; --pv-luz:#f8c44f }
+.mazo-op[data-mazo="miku"]{ --pv-bg:#07131f; --pv-texto:#f8ffff; --pv-texto2:#9fd4dc; --pv-luz:#39d6d8 }
+.mazo-op[data-mazo="ninja"]{ --pv-bg:#07172f; --pv-texto:#e8dbc2; --pv-texto2:#b3c2d6; --pv-luz:#f97316 }
+.mazo-op[data-mazo="paladin"]{ --pv-bg:#101430; --pv-texto:#fff8e7; --pv-texto2:#c3d2e8; --pv-luz:#f5c451 }
 /* ningun panel debe pasarse de la pantalla: si no cabe, se desplaza */
 .modal-panel{ max-height:calc(100vh - 2rem); overflow-y:auto; overscroll-behavior:contain }
 @supports (height:100dvh){ .modal-panel{ max-height:calc(100dvh - 2rem) } }
@@ -1353,4 +1421,127 @@ body{ background-color:var(--mesa-bg); color:var(--ui-texto); }
 .con-cascara .card-hand:not(.fallo) > *:not(.carta-img):not(.carta-capa):not(.brillo){
   opacity:0;
   transition:opacity .15s ease;
+}
+
+/* ==========================================================================
+   Ninja y Paladín: su arte es de los más cargados, y con solo variables los
+   montones quedaban como cajas planas. Acá cada uno toma lo suyo del arte.
+   ========================================================================== */
+
+/* --- Ninja: tinta, chakra encendido desde abajo y luna desde arriba --- */
+[data-mazo="ninja"] .pile-target{
+  border-radius:6px 18px 6px 18px;
+  box-shadow:0 18px 34px -16px rgba(0,0,0,.9), inset 0 0 0 1px rgba(0,0,0,.35);
+}
+[data-mazo="ninja"] .pile-target.up{
+  background:
+    radial-gradient(120% 70% at 50% 118%, rgba(249,115,22,.55) 0%, rgba(220,38,38,.18) 45%, transparent 70%),
+    linear-gradient(180deg, rgba(10,14,26,.9), rgba(18,12,14,.92));
+  border-color:rgba(249,115,22,.7);
+}
+[data-mazo="ninja"] .pile-target.down{
+  background:
+    radial-gradient(90% 60% at 78% -12%, rgba(147,197,253,.42) 0%, transparent 62%),
+    linear-gradient(180deg, rgba(7,23,47,.9), rgba(5,10,22,.93));
+  border-color:rgba(147,197,253,.6);
+}
+/* brasas que suben: solo en los que suben, y quietas si se pidió menos movimiento */
+[data-mazo="ninja"] .pile-target.up::after{
+  content:''; position:absolute; inset:0; pointer-events:none; opacity:.55;
+  background-image:
+    radial-gradient(1.6px 1.6px at 20% 80%, #ffb35c 50%, transparent 51%),
+    radial-gradient(1.2px 1.2px at 65% 90%, #f97316 50%, transparent 51%),
+    radial-gradient(1.8px 1.8px at 82% 70%, #ffd29a 50%, transparent 51%),
+    radial-gradient(1.2px 1.2px at 40% 60%, #f97316 50%, transparent 51%);
+  background-size:100% 100%;
+  animation:ninja-brasas 3.6s linear infinite;
+}
+@keyframes ninja-brasas{
+  from{ background-position:0 0, 0 0, 0 0, 0 0; opacity:.6 }
+  to{ background-position:6px -90px, -8px -120px, 4px -80px, -5px -100px; opacity:0 }
+}
+[data-mazo="ninja"] .pile-target .pile-num{
+  -webkit-text-stroke:1.5px #1a0a02;
+  paint-order:stroke fill;
+}
+[data-mazo="ninja"] .pile-target.up .pile-num{
+  color:#ffe7b8; text-shadow:0 0 22px rgba(249,115,22,.85), 4px 4px 0 #2a0f03;
+}
+[data-mazo="ninja"] .pile-target.down .pile-num{
+  color:#eef5ff; text-shadow:0 0 22px rgba(147,197,253,.7), 4px 4px 0 #04101f;
+}
+/* la chapa como tira de pergamino, cortada a pincel */
+[data-mazo="ninja"] .pile-target .chapa,
+[data-mazo="ninja"] .grupo-rango{
+  border-radius:2px; transform:skewX(-10deg);
+}
+[data-mazo="ninja"] .pile-target .chapa > span,
+[data-mazo="ninja"] .grupo-rango{ letter-spacing:.06em }
+[data-mazo="ninja"] .pile-target.up .chapa{
+  color:#2a0f03; background:linear-gradient(90deg,#f97316,#ffb35c); border-color:#ffb35c;
+}
+[data-mazo="ninja"] .pile-target.down .chapa{
+  color:#07172f; background:linear-gradient(90deg,#93c5fd,#dbeafe); border-color:#dbeafe;
+}
+[data-mazo="ninja"] .grupo-marca{ border-radius:3px; transform:rotate(45deg) }
+[data-mazo="ninja"] .grupo-marca > *{ transform:rotate(-45deg) }
+[data-mazo="ninja"] .pile-target.up.jugable{
+  box-shadow:0 0 34px -2px rgba(249,115,22,.75), 0 20px 40px -15px rgba(0,0,0,.8);
+}
+[data-mazo="ninja"] .pile-target.down.jugable{
+  box-shadow:0 0 34px -2px rgba(147,197,253,.65), 0 20px 40px -15px rgba(0,0,0,.8);
+}
+
+/* --- Paladín: marco dorado, luz de vitral desde arriba, números de oro --- */
+[data-mazo="paladin"] .pile-target{
+  border-color:transparent; border-width:3px;
+  box-shadow:0 18px 34px -16px rgba(0,0,0,.85), 0 0 26px -10px rgba(245,196,81,.55);
+}
+[data-mazo="paladin"] .pile-target.up{
+  background:
+    radial-gradient(80% 65% at 50% -8%, rgba(255,241,168,.42) 0%, transparent 62%) padding-box,
+    linear-gradient(180deg, rgba(23,60,120,.62), rgba(9,22,52,.8)) padding-box,
+    linear-gradient(135deg,#ffe28a,#b8801f 28%,#fff3c4 50%,#a86f16 72%,#f5c451) border-box;
+}
+[data-mazo="paladin"] .pile-target.down{
+  background:
+    radial-gradient(80% 65% at 50% -8%, rgba(219,228,239,.32) 0%, transparent 62%) padding-box,
+    linear-gradient(180deg, rgba(16,40,84,.62), rgba(7,17,40,.8)) padding-box,
+    linear-gradient(135deg,#ffffff,#7d93b4 28%,#eef3f9 50%,#6a80a3 72%,#dbe4ef) border-box;
+}
+/* la estrella del escudo, arriba al centro */
+[data-mazo="paladin"] .pile-target::after{
+  content:'✦'; position:absolute; top:4px; left:50%; transform:translateX(-50%);
+  font-size:18px; line-height:1; pointer-events:none;
+  color:#fff1a8; text-shadow:0 0 10px rgba(245,196,81,.9);
+}
+[data-mazo="paladin"] .pile-target.down::after{ color:#eef3f9; text-shadow:0 0 10px rgba(143,182,238,.9) }
+[data-mazo="paladin"] .pile-target .pile-num > span{
+  background:linear-gradient(180deg,#fffbea 0%,#f5c451 55%,#b07a1e 100%);
+  -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 3px 0 rgba(20,10,0,.6)) drop-shadow(0 0 14px rgba(245,196,81,.35));
+}
+[data-mazo="paladin"] .pile-target.down .pile-num > span{
+  background:linear-gradient(180deg,#ffffff 0%,#cfdcee 55%,#7f93b3 100%);
+  -webkit-background-clip:text; background-clip:text;
+  filter:drop-shadow(0 3px 0 rgba(0,8,20,.6)) drop-shadow(0 0 14px rgba(143,182,238,.35));
+}
+[data-mazo="paladin"] .pile-target.up .chapa{
+  color:#2b1a02; background:linear-gradient(180deg,#fff1a8,#d9a53a); border-color:#fff1a8;
+}
+[data-mazo="paladin"] .pile-target.down .chapa{
+  color:#0b1a38; background:linear-gradient(180deg,#ffffff,#b8c8de); border-color:#ffffff;
+}
+[data-mazo="paladin"] .grupo-marca{
+  box-shadow:0 0 0 2px rgba(255,241,168,.35), 0 0 14px rgba(245,196,81,.6);
+}
+/* jugable: el filo se enciende en vez de cambiar de color */
+[data-mazo="paladin"] .pile-target.jugable{
+  box-shadow:0 0 36px -2px rgba(255,241,168,.75), 0 20px 40px -15px rgba(0,0,0,.8);
+}
+[data-mazo="paladin"] .pile-target.up.jugable,
+[data-mazo="paladin"] .pile-target.down.jugable{ border-color:transparent }
+
+@media (prefers-reduced-motion: reduce){
+  [data-mazo="ninja"] .pile-target.up::after{ animation:none }
 }

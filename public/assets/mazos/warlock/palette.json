@@ -1,6 +1,14 @@
 {
   "id": "warlock",
   "name": "Warlock",
+  "tagline": "Runas y alquimia en magenta de conjuro",
+  "swatches": [
+    { "color": "#12041f", "nombre": "Violeta abismo" },
+    { "color": "#9a1282", "nombre": "Magenta profundo" },
+    { "color": "#ff33ca", "nombre": "Magenta de conjuro" },
+    { "color": "#ff9bea", "nombre": "Brillo rosa" },
+    { "color": "#c02362", "nombre": "Carmesí", "duro": true }
+  ],
   "assets": {
     "normal": "card-normal.webp",
     "hard": "card-duro.webp",

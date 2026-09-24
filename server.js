@@ -41,6 +41,7 @@ const esDoble = n => DOBLES.indexOf(n) !== -1;
 const PIN_INTENTOS = 8;      // intentos antes de bloquear una IP
 const PIN_BLOQUEO_MS = 60000;
 const AVISO_MIN_MS = 1500;
+const SALTOS_MAX = 2;        // turnos saltados por ausencia antes de soltar sus cartas
 
 /* ------------------------------------------------------------------ salas */
 
@@ -168,24 +169,35 @@ function arrancarSiPasaronTodos(room) {
 }
 
 // Si quien tiene el turno se desconecta y no vuelve, el turno pasa al siguiente
-// que esté presente. Sus cartas se quedan con él: sigue en la partida.
+// que esté presente. A la segunda vez que se le salta, sus cartas vuelven al
+// mazo y deja la mesa (queda mirando): si no, con el mazo agotado nadie más
+// podría colocar esas cartas y la partida ya no se podría ganar.
 function pasarTurnoSiAusente(room, player) {
   const g = room.game;
   if (!g || g.phase !== 'play') return;
   if (g.seats[g.current] !== player.id || player.online > 0) return;
-  const hayAlguien = g.seats.some(id => {
-    const p = findPlayer(room, id);
-    return p && p.online > 0;
-  });
+  const hayAlguien = g.seats.some(id => id !== player.id && asientoJugable(room, id, true));
   if (!hayAlguien) return;                 // no hay a quién pasárselo
+
+  player.saltados = (player.saltados || 0) + 1;
+  if (player.saltados >= SALTOS_MAX) {
+    sistema(room, player.name + ' no volvió: deja la mesa');
+    sacarDeLaPartida(room, player);
+    return;
+  }
+
+  // el turno saltado cuenta para la pila obligada, pero no la hace perder:
+  // el siguiente igual tiene su oportunidad de cubrirla
+  if (g.obligada && g.obligada.turnos > 0) g.obligada.turnos--;
   g.turn = [];
   for (let i = 0; i < g.seats.length; i++) {
     g.current = (g.current + 1) % g.seats.length;
-    const p = findPlayer(room, g.seats[g.current]);
-    if (p && p.online > 0) break;
+    if (asientoJugable(room, g.seats[g.current], true)) break;
   }
-  const quien = findPlayer(room, g.seats[g.current]);
+  prepararTurno(room);
+  const quien = turnPlayer(room);
   sistema(room, player.name + ' se desconectó: el turno pasa a ' + (quien ? quien.name : 'el siguiente'));
+  pushLog(room, { tipo: 'salta', jugador: player.name, siguiente: quien ? quien.name : null });
   checkLoss(room);
 }
 
@@ -259,6 +271,44 @@ function hasMove(room, player) {
   return player.hand.some(c => room.game.piles.some(p => canPlay(c, p)));
 }
 
+// Roba hasta completar la mano, si queda mazo. Devuelve cuántas robó.
+function robar(g, player) {
+  let n = 0;
+  while (player.hand.length < HAND_SIZE && g.deck.length) { player.hand.push(g.deck.pop()); n++; }
+  player.hand.sort((a, b) => a - b);
+  return n;
+}
+
+// Un asiento puede tomar el turno si le quedan cartas o si todavía puede robar.
+function asientoJugable(room, id, soloPresentes) {
+  const p = findPlayer(room, id);
+  if (!p || (soloPresentes && !(p.online > 0))) return false;
+  return p.hand.length > 0 || room.game.deck.length > 0;
+}
+
+/*
+ * Deja el turno en el primer asiento que pueda jugar, partiendo por el actual.
+ * Con el mazo agotado, quien ya colocó todas sus cartas se salta: ya no juega,
+ * pero eso no hace perder la partida.
+ */
+function prepararTurno(room) {
+  const g = room.game;
+  if (!g || g.phase !== 'play' || !g.seats.length) return;
+  for (let i = 0; i < g.seats.length; i++) {
+    if (asientoJugable(room, g.seats[g.current])) break;
+    g.current = (g.current + 1) % g.seats.length;
+  }
+  const p = turnPlayer(room);
+  if (!p) return;
+  // quedó sin cartas pero el mazo volvió a tener (alguien dejó la mesa): roba
+  if (!p.hand.length) robar(g, p);
+  // al que le toca se le borran sus propios avisos: ya puede jugar ahí
+  room.avisos = room.avisos.filter(a => a.jugador !== p.id);
+  // el turno puede caer en alguien que ya estaba desconectado: se le da la
+  // misma ventana de gracia, si no la sala se congela en su asiento
+  if (p.online === 0) vigilarAusente(room, p);
+}
+
 /*
  * Alguien deja la mesa con la partida andando: sus cartas vuelven al mazo
  * barajadas, se libera su asiento y el juego sigue con los que quedan.
@@ -283,30 +333,29 @@ function sacarDeLaPartida(room, player) {
   if (!g.seats.length) { endGame(room, false, 'sinjugadores'); return; }
 
   if (idx < g.current) g.current--;
-  else if (eraSuTurno) g.turn = [];       // su turno se acaba ahí; el asiento lo toma el siguiente
   if (g.current >= g.seats.length) g.current = 0;
   if (g.pasaron) g.pasaron = g.pasaron.filter(id => g.seats.includes(id));
+
+  // su turno se acaba ahí y cuenta para la pila obligada; el asiento lo toma el siguiente
+  if (eraSuTurno && g.phase === 'play') {
+    g.turn = [];
+    if (g.obligada && g.obligada.turnos > 0) g.obligada.turnos--;
+    prepararTurno(room);
+  }
 
   arrancarSiPasaronTodos(room);
   checkLoss(room);
 }
 
-// Si el asiento del turno quedó sin jugador (alguien fue expulsado), avanza al siguiente válido.
-function asientoValido(room) {
-  const g = room.game;
-  if (!g || !g.seats.length) return;
-  for (let i = 0; i < g.seats.length; i++) {
-    if (findPlayer(room, g.seats[g.current])) return;
-    g.current = (g.current + 1) % g.seats.length;
-  }
-}
-
 function startGame(room) {
-  const seats = room.players.slice(0, MAX_PLAYERS).map(p => p.id);
+  // solo reciben cartas los que están conectados: quien cerró la pestaña no
+  // puede quedar con una mano que nadie va a jugar
+  const presentes = room.players.filter(p => p.online > 0);
+  const seats = (presentes.length ? presentes : room.players).slice(0, MAX_PLAYERS).map(p => p.id);
   if (!seats.length) return;
 
   const deck = newDeck();
-  room.players.forEach(p => { p.hand = []; });
+  room.players.forEach(p => { p.hand = []; p.saltados = 0; });
 
   for (let k = 0; k < HAND_SIZE; k++) {
     for (const id of seats) {
@@ -449,9 +498,7 @@ const actions = {
     if (g.turn.length < minPlay(g)) return;
 
     const jugadas = g.turn.length;
-    let robadas = 0;
-    while (player.hand.length < HAND_SIZE && g.deck.length) { player.hand.push(g.deck.pop()); robadas++; }
-    player.hand.sort((a, b) => a - b);
+    const robadas = robar(g, player);
 
     if (cardsLeft(room) === 0) { endGame(room, true); return; }
 
@@ -466,16 +513,8 @@ const actions = {
     }
 
     g.current = (g.current + 1) % g.seats.length;
-    asientoValido(room);
     g.turn = [];
-    // el turno puede caer en alguien que ya estaba desconectado: se le da la
-    // misma ventana de gracia, si no la sala se congela en su asiento
-    const porLlegar = turnPlayer(room);
-    if (porLlegar && porLlegar.online === 0) vigilarAusente(room, porLlegar);
-
-    // al que le toca se le borran sus propios avisos: ya puede jugar ahí
-    const entrante = turnPlayer(room);
-    if (entrante) room.avisos = room.avisos.filter(a => a.jugador !== entrante.id);
+    prepararTurno(room);
 
     const siguiente = turnPlayer(room);
     pushLog(room, {
@@ -756,17 +795,69 @@ const MIME = {
 };
 
 function serveStatic(req, res, urlPath) {
-  const rel = urlPath === '/' ? 'index.html' : decodeURIComponent(urlPath).replace(/^\/+/, '');
+  let rel;
+  try { rel = urlPath === '/' ? 'index.html' : decodeURIComponent(urlPath).replace(/^\/+/, ''); }
+  catch (e) { res.writeHead(400).end('400'); return; }
   const file = path.join(PUBLIC_DIR, path.normalize(rel));
   if (!file.startsWith(PUBLIC_DIR)) { res.writeHead(403).end('403'); return; }
 
-  fs.readFile(file, (err, buf) => {
-    if (err) { res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' }).end('No encontrado'); return; }
-    res.writeHead(200, {
+  // no-cache obliga a preguntar, pero con ETag la respuesta es un 304 vacío
+  // cuando el archivo no cambió: el arte no se vuelve a bajar en cada visita
+  fs.stat(file, (err, st) => {
+    if (err || !st.isFile()) { res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' }).end('No encontrado'); return; }
+    const etag = 'W/"' + st.size.toString(16) + '-' + Math.floor(st.mtimeMs).toString(16) + '"';
+    const cabeceras = {
       'Content-Type': MIME[path.extname(file).toLowerCase()] || 'application/octet-stream',
-      'Cache-Control': 'no-cache'
+      'Cache-Control': 'no-cache',
+      'ETag': etag
+    };
+    if (req.headers['if-none-match'] === etag) { res.writeHead(304, cabeceras).end(); return; }
+    fs.readFile(file, (err2, buf) => {
+      if (err2) { res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' }).end('No encontrado'); return; }
+      res.writeHead(200, cabeceras);
+      res.end(buf);
     });
-    res.end(buf);
+  });
+}
+
+/*
+ * Huellas de lo que hay en public/, para versionar el service worker. Se
+ * arman con nombre, tamaño y fecha de cada archivo (sin leerlos), así que
+ * cuestan casi nada y se pueden calcular en cada pedido de /sw.js: un deploy
+ * que cambie algo cambia la huella, aunque el proceso no se haya reiniciado.
+ * El arte va aparte para que un cambio de código no invalide las imágenes.
+ */
+function huellas() {
+  const app = crypto.createHash('sha1');
+  const arte = crypto.createHash('sha1');
+  const recorrer = dir => {
+    let items;
+    try { items = fs.readdirSync(dir, { withFileTypes: true }); } catch (e) { return; }
+    items.sort((a, b) => (a.name < b.name ? -1 : 1));
+    for (const it of items) {
+      const full = path.join(dir, it.name);
+      if (it.isDirectory()) { recorrer(full); continue; }
+      const rel = path.relative(PUBLIC_DIR, full).split(path.sep).join('/');
+      if (rel === 'sw.js') continue;
+      let st;
+      try { st = fs.statSync(full); } catch (e) { continue; }
+      (rel.startsWith('assets/') ? arte : app).update(rel + ':' + st.size + ':' + Math.floor(st.mtimeMs) + '\n');
+    }
+  };
+  recorrer(PUBLIC_DIR);
+  return { app: app.digest('hex').slice(0, 10), arte: arte.digest('hex').slice(0, 10) };
+}
+
+function serveServiceWorker(res) {
+  fs.readFile(path.join(PUBLIC_DIR, 'sw.js'), 'utf8', (err, src) => {
+    if (err) { res.writeHead(404).end(); return; }
+    const v = huellas();
+    res.writeHead(200, {
+      'Content-Type': MIME['.js'],
+      // el navegador tiene que ver siempre el sw.js del momento
+      'Cache-Control': 'no-cache, no-store, must-revalidate'
+    });
+    res.end(src.replace('__V_APP__', v.app).replace('__V_ARTE__', v.arte));
   });
 }
 
@@ -859,6 +950,7 @@ const server = http.createServer(async (req, res) => {
     const client = { res, pid: player.id };
     room.clients.add(client);
     player.online++;
+    player.saltados = 0;
     olvidarAusente(player);
     asegurarAdmin(room);
     broadcast(room);
@@ -870,6 +962,7 @@ const server = http.createServer(async (req, res) => {
     req.on('close', () => {
       clearInterval(beat);
       room.clients.delete(client);
+      room.lastSeen = Date.now();   // la media hora para limpiar la sala corre desde aquí
       player.online = Math.max(0, player.online - 1);
       // Con partida en curso nadie pierde el puesto, pero la sala no puede
       // quedar trabada: la corona y el turno pasan a alguien que esté presente.
@@ -986,6 +1079,7 @@ const server = http.createServer(async (req, res) => {
   if (route === '/api/salud') return sendJSON(res, 200, { ok: true, salas: rooms.size });
 
   if (req.method !== 'GET') { res.writeHead(405).end('405'); return; }
+  if (route === '/sw.js') return serveServiceWorker(res);
   serveStatic(req, res, route);
 });
 
@@ -1002,7 +1096,8 @@ function lanAddresses() {
   return out;
 }
 
-server.listen(PORT, '0.0.0.0', () => {
+// Los tests cargan este archivo para probar las reglas sin abrir el puerto.
+if (!process.env.TG_SIN_ESCUCHAR) server.listen(PORT, '0.0.0.0', () => {
   const lines = [
     '',
     '  Quien chucha revuelve  ·  servidor listo',
@@ -1034,12 +1129,19 @@ server.on('error', err => {
   process.exit(1);
 });
 
-// Limpia salas vacías cada 10 minutos.
-setInterval(() => {
-  const ahora = Date.now();
+// Borra las salas donde no hay nadie conectado hace media hora, aunque haya
+// quedado una partida abierta con jugadores que se fueron sin salir.
+function limpiarSalas(ahora) {
   for (const [code, room] of rooms) {
-    if (!room.clients.size && !room.players.length && ahora - room.lastSeen > 30 * 60 * 1000) {
+    if (!room.clients.size && ahora - room.lastSeen > 30 * 60 * 1000) {
+      room.players.forEach(olvidarAusente);
       rooms.delete(code);
     }
   }
-}, 10 * 60 * 1000).unref();
+}
+setInterval(() => limpiarSalas(Date.now()), 10 * 60 * 1000).unref();
+
+module.exports = {
+  rooms, getRoom, actions, view, startGame, turnPlayer,
+  pasarTurnoSiAusente, olvidarAusente, limpiarSalas
+};

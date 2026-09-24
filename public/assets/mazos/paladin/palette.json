@@ -1,6 +1,14 @@
 {
   "id": "paladin",
   "name": "Paladin",
+  "tagline": "Catedral de mármol, oro y azul real",
+  "swatches": [
+    { "color": "#151836", "nombre": "Azul profundo" },
+    { "color": "#173c78", "nombre": "Azul real" },
+    { "color": "#f5c451", "nombre": "Oro sagrado" },
+    { "color": "#e9dfca", "nombre": "Mármol" },
+    { "color": "#e11d1d", "nombre": "Grieta", "duro": true }
+  ],
   "emoji": "🛡️",
   "description": "Estilo sagrado con escudo, martillo divino, catedral, mármol, oro, azul real y luz intensa. La variante dura usa escudo quebrado, grietas rojas y fuego sagrado crimson.",
   "assets": {
