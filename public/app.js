@@ -656,6 +656,7 @@
     };
     switch(e.tipo){
       case 'inicio':   return ['🎴', '<strong>' + esc(e.jugador) + '</strong> repartió · ' + e.jugadores + ' jugadores', 'text-amber-300'];
+      case 'revancha': return ['🔁', '<strong>' + esc(e.jugador) + '</strong> pidió revancha · ' + e.jugadores + ' jugadores', 'text-amber-300'];
       case 'jugada':   return [e.salto ? '⚡' : '▪',
                                '<strong>' + esc(e.jugador) + '</strong> puso <span class="font-mono font-bold">' + e.carta + '</span> en ' + pilaTxt(e.pila, e.dir) +
                                (e.salto ? ' <span class="text-amber-300 font-bold">salto de 10</span>' : ''),
@@ -922,6 +923,80 @@
     $('over-left').innerHTML = o.left.map(function(c){
       return '<span class="font-mono text-[11px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">' + c + '</span>';
     }).join('');
+    pintarResumen(o);
+    pintarStats(estado.stats, o.record);
+    pintarBotonesFin();
+  }
+
+  function nombrePila(i, dir){
+    return (dir === 'up' ? '▲' : '▼') + ' ' + (i % 2 === 0 ? 'izq' : 'der');
+  }
+
+  // Lo que dejó la partida: lo calcula el servidor con el historial completo.
+  function pintarResumen(o){
+    var r = o.resumen;
+    var caja = $('over-resumen');
+    caja.classList.toggle('hidden', !r || !r.turnos);
+    if(!r || !r.turnos) return;
+    var fila = function(icono, html, color){
+      return '<li class="flex items-start gap-2 ' + color + '"><span class="w-5 shrink-0 text-center">' + icono +
+        '</span><span class="leading-snug min-w-0">' + html + '</span></li>';
+    };
+    var num = function(n){ return '<span class="font-mono font-bold">' + n + '</span>'; };
+    var html = '';
+
+    var s = r.mejorSalto;
+    html += s
+      ? fila('⚡', 'Mejor salto: <strong>' + esc(s.jugador) + '</strong> llevó el ' + nombrePila(s.pila, s.dir) +
+          ' de ' + num(s.desde) + ' a ' + num(s.carta) + ' <span class="text-slate-500">(turno ' + s.turno +
+          (r.saltos > 1 ? ' · ' + r.saltos + ' saltos en total' : '') + ')</span>', 'text-amber-300')
+      : fila('⚡', 'Ningún salto de 10 esta vez', 'text-slate-500');
+
+    var m = r.masCartas;
+    if(m){
+      var quienes = m.jugadores.map(function(n){ return '<strong>' + esc(n) + '</strong>'; });
+      html += fila('🃏', 'Más cartas: ' + (quienes.length > 1
+        ? quienes.slice(0, -1).join(', ') + ' y ' + quienes[quienes.length - 1] + ', ' + num(m.cartas) + ' cada uno'
+        : quienes[0] + ' con ' + num(m.cartas)), 'text-slate-300');
+    }
+
+    var t = r.peorTurno;
+    if(o.won){
+      html += fila('🏆', 'No hubo turno que la echara a perder', 'text-emerald-300');
+    } else if(t){
+      var cartas = t.cartas.map(function(c){ return num(c.carta) + ' en ' + nombrePila(c.pila, c.dir); }).join(', ');
+      html += fila('💥', 'Se echó a perder en el turno ' + t.n + ' de <strong>' + esc(t.jugador) + '</strong>: quemó ' +
+        num(t.quemado) + ' de espacio <span class="text-slate-500">(' + cartas + ')</span>', 'text-rose-300');
+    }
+    $('over-resumen-list').innerHTML = html;
+  }
+
+  function pintarStats(st, record){
+    var caja = $('over-stats');
+    caja.classList.toggle('hidden', !st);
+    if(!st) return;
+    var ficha = function(valor, etiqueta, nota, color){
+      return '<div class="rounded-xl bg-slate-900/70 border border-slate-800 px-2 py-2 text-center">' +
+        '<div class="font-mono font-black text-2xl leading-none tabular-nums ' + color + '">' + valor + '</div>' +
+        '<div class="text-[11px] font-bold text-slate-300 mt-1">' + etiqueta + '</div>' +
+        '<div class="text-[10px] text-slate-500 leading-tight">' + nota + '</div></div>';
+    };
+    var mejor = st.mejor ? st.mejor.fuera : '—';
+    $('over-stats-grid').innerHTML =
+      ficha(mejor, record ? '¡Récord!' : 'Mejor', 'cartas fuera', record ? 'text-amber-300' : 'text-emerald-400') +
+      ficha(String(st.promedio).replace('.', ','), 'Promedio', 'en ' + st.partidas + (st.partidas === 1 ? ' partida' : ' partidas'), 'text-slate-200') +
+      ficha(st.racha, 'Racha', 'hasta ' + st.umbral + ' fuera · récord ' + st.mejorRacha, st.racha ? 'text-cyan-300' : 'text-slate-500');
+  }
+
+  // Los botones dependen de quién manda y de quién sigue conectado, que puede
+  // cambiar con el modal abierto: se repintan en cada estado.
+  function pintarBotonesFin(){
+    var conectados = estado.players.filter(function(p){ return p.online; }).length;
+    var rev = $('btn-revancha');
+    rev.hidden = !estado.soyAdmin;
+    rev.disabled = !conectados;
+    rev.textContent = 'Revancha · ' + conectados + (conectados === 1 ? ' conectado' : ' conectados');
+    $('over-espera').classList.toggle('hidden', !!estado.soyAdmin);
     $('btn-again').textContent = estado.soyAdmin ? 'Volver a la sala' : 'Cerrar';
   }
 
@@ -1069,6 +1144,7 @@
 
     var fin = estado.phase === 'over';
     if(fin && (!prev || prev.phase !== 'over')){ pintarFin(); abrirModal('modal-over'); }
+    else if(fin) pintarBotonesFin();
     if(!fin) cerrarModal('modal-over');
 
     // mientras se elige quien parte, el popup manda; se cierra solo al decidir.
@@ -1239,6 +1315,8 @@
     cerrarModal('modal-over');
     if(estado && estado.soyAdmin) enviar('reset');
   };
+  // el modal se cierra solo cuando llega el reparto nuevo
+  $('btn-revancha').onclick = function(){ elegida = null; enviar('revancha'); };
 
   Array.prototype.forEach.call(document.querySelectorAll('.modo-pill'), function(b){
     b.onclick = function(){
@@ -1318,7 +1396,7 @@
   document.addEventListener('keydown', function(ev){
     if(ev.target && /^(INPUT|TEXTAREA)$/.test(ev.target.tagName)) return;
     if(ev.key === 'Escape'){
-      ['modal-rules','modal-room'].forEach(cerrarModal);
+      ['modal-rules','modal-room','modal-mazo'].forEach(cerrarModal);
       if(elegida !== null){ elegida = null; pintarMano(); pintarPilas(); }
       return;
     }

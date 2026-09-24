@@ -794,17 +794,17 @@
 </div>
 
 <div id="modal-mazo" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 modal-fondo">
-  <div class="ui-panel border max-w-3xl w-full rounded-2xl shadow-2xl p-6 modal-panel">
-    <div class="flex items-center justify-between border-b ui-borde pb-3 mb-4">
-      <h3 class="text-lg font-bold ui-txt flex items-center gap-2 font-cinzel"><span>🎴</span> Elige tu mazo</h3>
-      <button onclick="cerrarModal('modal-mazo')" type="button" class="ui-txt2 hover:opacity-70 text-xl leading-none p-1">×</button>
+  <div class="ui-panel border max-w-2xl w-full rounded-2xl shadow-2xl p-3.5 sm:p-5 modal-panel">
+    <div class="flex items-center justify-between gap-3 mb-3">
+      <div class="min-w-0">
+        <h3 class="text-base sm:text-lg font-bold ui-txt flex items-center gap-2 font-cinzel leading-tight"><span>🎴</span> Elige tu mazo</h3>
+        <p class="ui-txt2 text-[11px] sm:text-xs leading-snug">Solo lo ves tú, y lo cambias cuando quieras.</p>
+      </div>
+      <button onclick="cerrarModal('modal-mazo')" type="button" class="shrink-0 px-4 py-1.5 ui-caja border rounded-xl text-sm font-semibold transition active:scale-95">Listo</button>
     </div>
-    <p class="ui-txt2 text-sm mb-4">Cambia las cartas, la mesa y el tono de todo. <strong class="ui-txt">Es solo tuyo</strong>:
-      cada jugador ve el que eligió, y lo puedes cambiar cuando quieras, incluso a mitad de partida.</p>
     <div id="mazos" class="mazos-grid"></div>
-    <div class="mt-5 pt-3 border-t ui-borde flex justify-end">
-      <button onclick="cerrarModal('modal-mazo')" type="button" class="px-5 py-2 ui-caja border rounded-xl text-sm font-semibold transition active:scale-95">Listo</button>
-    </div>
+    <!-- la descripción del mazo que se apunta o se elige: una línea para todos -->
+    <p id="mazos-leyenda" class="mazos-leyenda" aria-live="polite"></p>
   </div>
 </div>
 
@@ -814,7 +814,18 @@
     <h3 id="over-title" class="text-2xl font-black text-white font-cinzel mb-1">Fin</h3>
     <p id="over-msg" class="text-slate-400 text-sm mb-4"></p>
     <span class="block text-[11px] uppercase font-bold text-slate-400 mb-1.5">Cartas que quedaron fuera</span>
-    <div id="over-left" class="flex flex-wrap gap-1 mb-5 max-h-32 overflow-y-auto custom-scrollbar"></div>
+    <div id="over-left" class="flex flex-wrap gap-1 mb-4 max-h-32 overflow-y-auto custom-scrollbar"></div>
+    <div id="over-resumen" class="hidden mb-4">
+      <span class="block text-[11px] uppercase font-bold text-slate-400 mb-1.5">Resumen</span>
+      <ul id="over-resumen-list" class="space-y-1.5 text-sm"></ul>
+    </div>
+    <div id="over-stats" class="hidden mb-5">
+      <span class="block text-[11px] uppercase font-bold text-slate-400 mb-1.5">Esta sala</span>
+      <div id="over-stats-grid" class="grid grid-cols-3 gap-2"></div>
+    </div>
+    <button id="btn-revancha" type="button" hidden
+      class="w-full mb-2 px-5 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-sm transition active:scale-95">Revancha</button>
+    <p id="over-espera" class="hidden text-center text-xs text-slate-500 mb-2">Esperando que el administrador pida revancha</p>
     <button id="btn-again" type="button"
       class="w-full px-5 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm transition active:scale-95">Volver a la sala</button>
   </div>

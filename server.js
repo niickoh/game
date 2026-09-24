@@ -216,10 +216,95 @@ function pushLog(room, entrada) {
   entrada.t = Date.now();
   room.log.push(entrada);
   if (room.log.length > MAX_LOG) room.log.splice(0, room.log.length - MAX_LOG);
+  // copia sin recortar de la partida en curso: el resumen del final la
+  // necesita entera, y room.log se come las primeras jugadas pasadas las 160
+  if (room.game && room.game.hist) room.game.hist.push(entrada);
   return entrada;
 }
 
 const sistema = (room, texto) => pushChat(room, { tipo: 'sistema', texto });
+
+/* ------------------------------------------------------------ estadísticas */
+
+/*
+ * Resultados por sala, guardados en disco para que sobrevivan a un reinicio.
+ * Se escriben solo al terminar una partida, así que un archivo chico y síncrono
+ * basta. TG_STATS_FILE='' las deja solo en memoria.
+ */
+const STATS_FILE = process.env.TG_STATS_FILE !== undefined
+  ? process.env.TG_STATS_FILE
+  : path.join(__dirname, 'data', 'estadisticas.json');
+const BUEN_RESULTADO = 10;   // hasta 10 cartas fuera cuenta como buena partida (y alarga la racha)
+
+const stats = cargarStats();
+
+function cargarStats() {
+  if (!STATS_FILE) return {};
+  try {
+    const j = JSON.parse(fs.readFileSync(STATS_FILE, 'utf8'));
+    return j && typeof j.salas === 'object' && j.salas ? j.salas : {};
+  } catch (e) {
+    if (e.code === 'ENOENT') return {};
+    // archivo dañado: se aparta en vez de pisarlo con la primera partida
+    const aparte = STATS_FILE + '.danado-' + Date.now();
+    try { fs.renameSync(STATS_FILE, aparte); } catch (e2) { /* ignora */ }
+    console.error('  Estadísticas ilegibles, se apartaron en ' + aparte);
+    return {};
+  }
+}
+
+function guardarStats() {
+  if (!STATS_FILE) return;
+  try {
+    fs.mkdirSync(path.dirname(STATS_FILE), { recursive: true });
+    // se escribe al lado y se renombra: un corte a medias no deja el JSON roto
+    const tmp = STATS_FILE + '.tmp';
+    fs.writeFileSync(tmp, JSON.stringify({ salas: stats }, null, 2));
+    fs.renameSync(tmp, STATS_FILE);
+  } catch (e) {
+    console.error('  No se pudieron guardar las estadísticas: ' + e.message);
+  }
+}
+
+const statsDe = code => (Object.prototype.hasOwnProperty.call(stats, code) ? stats[code] : null);
+
+function registrarStats(room, g) {
+  const o = g.over;
+  const fuera = o.left.length;
+  const s = statsDe(room.code) || (stats[room.code] = {
+    partidas: 0, ganadas: 0, sumaFuera: 0, mejor: null, racha: 0, mejorRacha: 0
+  });
+  s.partidas++;
+  if (o.won) s.ganadas++;
+  s.sumaFuera += fuera;
+  if (!s.mejor || fuera < s.mejor.fuera) {
+    s.mejor = {
+      fuera,
+      modo: g.modo,
+      fecha: new Date().toISOString(),
+      jugadores: g.seats.map(id => findPlayer(room, id)).filter(Boolean).map(p => p.name)
+    };
+    o.record = s.partidas > 1;        // mejoró una marca anterior, no solo la primera
+  }
+  s.racha = fuera <= BUEN_RESULTADO ? s.racha + 1 : 0;
+  s.mejorRacha = Math.max(s.mejorRacha, s.racha);
+  s.ultima = new Date().toISOString();
+  guardarStats();
+}
+
+function vistaStats(code) {
+  const s = statsDe(code);
+  if (!s || !s.partidas) return null;
+  return {
+    partidas: s.partidas,
+    ganadas: s.ganadas,
+    promedio: Math.round((s.sumaFuera / s.partidas) * 10) / 10,
+    mejor: s.mejor,
+    racha: s.racha,
+    mejorRacha: s.mejorRacha,
+    umbral: BUEN_RESULTADO
+  };
+}
 
 /* ------------------------------------------------------------- reglas */
 
@@ -399,19 +484,102 @@ function checkLoss(room) {
   return true;
 }
 
+/*
+ * Lo que dejó la partida, sacado del historial:
+ *  - el mejor salto de 10: el que se hizo con el montón más avanzado, que es
+ *    cuando más espacio devuelve (un 87 -> 77 vale más que un 15 -> 5);
+ *  - quién colocó más cartas (descontando las que deshizo);
+ *  - el turno donde se echó a perder: el que más espacio quemó. Cada carta
+ *    idealmente avanza 1 su montón; lo que avanza de más es espacio perdido,
+ *    y un salto de 10 lo devuelve.
+ */
+function resumenPartida(hist, won) {
+  const turnos = [];
+  let actual = null;
+  const abrir = jugador => { actual = { n: turnos.length + 1, jugador, jugadas: [] }; turnos.push(actual); };
+
+  for (const e of hist) {
+    if (e.tipo === 'parte') abrir(e.jugador);
+    else if ((e.tipo === 'turno' || e.tipo === 'salta') && e.siguiente) abrir(e.siguiente);
+    else if (e.tipo === 'jugada') {
+      // si alguien dejó la mesa el turno cambia de manos sin quedar anotado
+      if (!actual) abrir(e.jugador);
+      else if (actual.jugador !== e.jugador) {
+        if (actual.jugadas.length) abrir(e.jugador); else actual.jugador = e.jugador;
+      }
+      actual.jugadas.push(e);
+    } else if (e.tipo === 'deshacer' && actual) {
+      for (let i = actual.jugadas.length - 1; i >= 0; i--) {
+        if (actual.jugadas[i].carta === e.carta && actual.jugadas[i].pila === e.pila) { actual.jugadas.splice(i, 1); break; }
+      }
+    }
+  }
+
+  const porJugador = {};
+  let mejorSalto = null, saltos = 0, peorTurno = null;
+  for (const t of turnos) {
+    let quemado = 0;
+    for (const j of t.jugadas) {
+      porJugador[j.jugador] = (porJugador[j.jugador] || 0) + 1;
+      quemado += j.distancia - 1;
+      if (!j.salto) continue;
+      saltos++;
+      const avance = j.dir === 'up' ? j.desde - 1 : 100 - j.desde;
+      if (!mejorSalto || avance > mejorSalto.avance) {
+        mejorSalto = { jugador: j.jugador, carta: j.carta, desde: j.desde, pila: j.pila, dir: j.dir, turno: t.n, avance };
+      }
+    }
+    if (t.jugadas.length && quemado > 0 && (!peorTurno || quemado > peorTurno.quemado)) {
+      peorTurno = {
+        n: t.n, jugador: t.jugador, quemado,
+        cartas: t.jugadas.map(j => ({ carta: j.carta, pila: j.pila, dir: j.dir, desde: j.desde }))
+      };
+    }
+  }
+
+  const tope = Math.max(0, ...Object.values(porJugador));
+  const masCartas = tope ? {
+    cartas: tope,
+    jugadores: Object.keys(porJugador).filter(n => porJugador[n] === tope)
+  } : null;
+
+  return {
+    turnos: turnos.length,
+    saltos,
+    mejorSalto,
+    masCartas,
+    // si ganaron no hubo nada que se echara a perder
+    peorTurno: won ? null : peorTurno
+  };
+}
+
 function endGame(room, won, motivo) {
   const g = room.game;
   let left = g.deck.slice();
   seatedPlayers(room).forEach(p => { left = left.concat(p.hand); });
   left.sort((a, b) => a - b);
   g.over = { won, left, placed: TOTAL_CARDS - left.length, motivo: motivo || null };
+  g.over.resumen = resumenPartida(g.hist || [], won);
   g.phase = 'over';
+  // si se fueron todos no hubo partida que medir
+  if (motivo !== 'sinjugadores') registrarStats(room, g);
   pushLog(room, { tipo: 'fin', won, fuera: left.length, colocadas: g.over.placed, motivo: motivo || null });
   sistema(room, won
     ? 'Partida perfecta: las 98 cartas colocadas'
     : (motivo === 'obligada'
         ? 'Nadie pudo cubrir la pila obligada: se acabó la partida'
         : 'Fin de la partida: quedaron ' + left.length + ' cartas fuera'));
+}
+
+// Reparte una partida nueva y abre su historial. Devuelve false si no hubo a quién.
+function repartir(room, player, tipo) {
+  const antes = room.game;
+  startGame(room);
+  if (!room.game || room.game === antes) return false;
+  room.game.hist = [];
+  room.log.length = 0;
+  pushLog(room, { tipo, jugador: player.name, jugadores: room.game.seats.length });
+  return true;
 }
 
 /* ------------------------------------------------------------ acciones */
@@ -421,12 +589,23 @@ const actions = {
     if (!esAdmin(room, player)) return;
     if (room.game && room.game.phase === 'play') return;
     if (data && (data.modo === 'duro' || data.modo === 'clasico')) room.modo = data.modo;
-    startGame(room);
-    if (!room.game) return;
-    room.log.length = 0;
-    pushLog(room, { tipo: 'inicio', jugador: player.name, jugadores: room.game.seats.length });
+    if (!repartir(room, player, 'inicio')) return;
     sistema(room, player.name + ' repartió en modo ' +
       (room.modo === 'duro' ? 'duro' : 'clásico') + '. Miren sus cartas: parte el que quiera');
+  },
+
+  // Revancha desde la pantalla final, sin volver al lobby: se reparte a los que
+  // siguen conectados, mismo modo. Solo con la partida terminada, así un doble
+  // clic no vuelve a barajar la que acaba de empezar.
+  revancha(room, player) {
+    if (!esAdmin(room, player)) return;
+    if (!room.game || room.game.phase !== 'over') return;
+    if (!repartir(room, player, 'revancha')) return;
+    const g = room.game;
+    const nombres = seatedPlayers(room).map(p => p.name);
+    const mirando = room.players.filter(p => !g.seats.includes(p.id)).map(p => p.name);
+    sistema(room, player.name + ' pidió revancha: juegan ' + nombres.join(', ') +
+      (mirando.length ? ' (quedan mirando: ' + mirando.join(', ') + ')' : '') + '. Parte el que quiera');
   },
 
   play(room, player, data) {
@@ -694,6 +873,7 @@ function view(room, pid) {
     avisos: room.avisos.map(a => ({ pila: a.pila, nombre: a.nombre, mio: a.jugador === pid })),
     dobles: DOBLES,
     modo: (g && g.modo) || room.modo,
+    stats: vistaStats(room.code),
     players: room.players.map(p => ({
       id: p.id,
       name: p.name,
@@ -1096,8 +1276,7 @@ function lanAddresses() {
   return out;
 }
 
-// Los tests cargan este archivo para probar las reglas sin abrir el puerto.
-if (!process.env.TG_SIN_ESCUCHAR) server.listen(PORT, '0.0.0.0', () => {
+server.listen(PORT, '0.0.0.0', () => {
   const lines = [
     '',
     '  Quien chucha revuelve  ·  servidor listo',
@@ -1140,8 +1319,3 @@ function limpiarSalas(ahora) {
   }
 }
 setInterval(() => limpiarSalas(Date.now()), 10 * 60 * 1000).unref();
-
-module.exports = {
-  rooms, getRoom, actions, view, startGame, turnPlayer,
-  pasarTurnoSiAusente, olvidarAusente, limpiarSalas
-};

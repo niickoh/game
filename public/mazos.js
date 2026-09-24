@@ -383,14 +383,30 @@ window.MAZOS = (function(){
           tonos(p) +
         '</span>';
 
+      if(m.desc) b.title = m.desc;
       b.addEventListener('click', function(){
         aplicar(m.id);
         marcar(cont);
+        leyenda(m.id);
         if(alElegir) alElegir(m.id);
       });
+      // al apuntar uno se lee su descripción; al soltarlo vuelve la del elegido
+      b.addEventListener('mouseenter', function(){ leyenda(m.id); });
+      b.addEventListener('focus', function(){ leyenda(m.id); });
+      b.addEventListener('mouseleave', function(){ leyenda(actual); });
+      b.addEventListener('blur', function(){ leyenda(actual); });
       cont.appendChild(b);
     });
     marcar(cont);
+    leyenda(actual);
+  }
+
+  function leyenda(id){
+    var el = document.getElementById('mazos-leyenda');
+    var m = porId[id];
+    if(!el || !m) return;
+    el.innerHTML = '<strong>' + m.emoji + ' ' + esc(m.nombre) + '</strong>' +
+      (m.desc ? ' · ' + esc(m.desc) : '') + (id === actual ? ' <span class="en-uso">en uso</span>' : '');
   }
 
   function marcar(cont){
