@@ -3,9 +3,9 @@
   "name": "Neón",
   "emoji": "🌆",
   "assets": {
-    "normal": "card-normal.png",
-    "hard": "card-duro.png",
-    "playmat": "playmat.png"
+    "normal": "card-normal.webp",
+    "hard": "card-duro.webp",
+    "playmat": "playmat.webp"
   },
   "card": {
     "aspectRatio": "2:3",

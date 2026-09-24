@@ -4,9 +4,9 @@
   "emoji": "⚔️",
   "description": "Estilo oscuro inspirado en Berserk con Guts como foco central, la Dragon Slayer, armadura negra, lluvia, eclipse, marca maldita y tinta de manga. La variante dura usa Griffith/Femto centrado, alas negras, eclipse rojo, estética God Hand y aura siniestra.",
   "assets": {
-    "normal": "card-normal.png",
-    "hard": "card-duro.png",
-    "playmat": "playmat.png"
+    "normal": "card-normal.webp",
+    "hard": "card-duro.webp",
+    "playmat": "playmat.webp"
   },
   "card": {
     "aspectRatio": "2:3",
@@ -117,5 +117,5 @@
     "Griffith/Femto hard mode",
     "God Hand nightmare aura"
   ],
-  "notes": "Para cartas normales usar numberLayer. Para 22,33,44,55,66,77,88 usar hardNumberLayer y card-duro.png. Los números se renderizan sobre la cáscara, no vienen incluidos en la imagen. Cartas actualizadas a la versión v2 aprobada; playmat entregado por el usuario."
+  "notes": "Para cartas normales usar numberLayer. Para 22,33,44,55,66,77,88 usar hardNumberLayer y card-duro.webp. Los números se renderizan sobre la cáscara, no vienen incluidos en la imagen. Cartas actualizadas a la versión v2 aprobada; playmat entregado por el usuario."
 }

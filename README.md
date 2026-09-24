@@ -6,6 +6,8 @@ Versión para jugar entre varios un juego de cartas cooperativo, inspirado en **
 Uno levanta el servidor en su computador, el resto entra desde el navegador con la dirección
 que aparece en pantalla. Cada uno ve **solo sus cartas**.
 
+🎮 **Jugar online:** <https://the-game.sportspherecenter.com/>
+
 ---
 
 ## Levantarlo

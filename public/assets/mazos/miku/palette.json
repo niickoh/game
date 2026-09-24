@@ -4,9 +4,9 @@
   "emoji": "🎤",
   "description": "Estilo Hatsune Miku con escenario idol virtual, twin-tails turquesa, equalizer holográfico, notas musicales, luces cyan/magenta y marco cyber. La variante dura usa expresión seria, glitch, lasers rojos y sobrecarga de concierto.",
   "assets": {
-    "normal": "card-normal.png",
-    "hard": "card-duro.png",
-    "playmat": "playmat.png"
+    "normal": "card-normal.webp",
+    "hard": "card-duro.webp",
+    "playmat": "playmat.webp"
   },
   "card": {
     "aspectRatio": "2:3",
@@ -113,5 +113,5 @@
     "cyan and magenta lights",
     "red glitch hard mode"
   ],
-  "notes": "Para cartas normales usar numberLayer. Para 22,33,44,55,66,77,88 usar hardNumberLayer y card-duro.png. Los números se renderizan sobre la cáscara, no vienen incluidos en la imagen. La variante dura debe sentirse más seria e intensa."
+  "notes": "Para cartas normales usar numberLayer. Para 22,33,44,55,66,77,88 usar hardNumberLayer y card-duro.webp. Los números se renderizan sobre la cáscara, no vienen incluidos en la imagen. La variante dura debe sentirse más seria e intensa."
 }

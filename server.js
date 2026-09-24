@@ -909,7 +909,7 @@ const server = http.createServer(async (req, res) => {
 
     const buscar = (dir, nombres) => {
       for (const n of nombres) {
-        for (const ext of ['png', 'webp', 'jpg', 'jpeg']) {
+        for (const ext of ['webp', 'png', 'jpg', 'jpeg']) {
           if (fs.existsSync(path.join(dir, n + '.' + ext))) return n + '.' + ext;
         }
       }
