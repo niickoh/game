@@ -1106,7 +1106,7 @@ body{ background-color:var(--mesa-bg); color:var(--ui-texto); }
 @media (max-width:640px){ .modo-pill .larga{ display:none } }
 
 /* ==========================================================================
-   Cartas con imagen propia (public/assets/mazos/<id>/cards/NNN.png)
+   Cartas con imagen propia (public/assets/mazos/<id>/cards/NNN.webp)
    ========================================================================== */
 .card-hand .carta-img,
 .mini-carta .carta-img{

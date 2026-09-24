@@ -4,9 +4,9 @@
   "emoji": "🛡️",
   "description": "Estilo sagrado con escudo, martillo divino, catedral, mármol, oro, azul real y luz intensa. La variante dura usa escudo quebrado, grietas rojas y fuego sagrado crimson.",
   "assets": {
-    "normal": "card-normal.png",
-    "hard": "card-duro.png",
-    "playmat": "playmat.png"
+    "normal": "card-normal.webp",
+    "hard": "card-duro.webp",
+    "playmat": "playmat.webp"
   },
   "card": {
     "aspectRatio": "2:3",
@@ -113,5 +113,5 @@
     "gold trim",
     "crimson cracked hard mode"
   ],
-  "notes": "Para cartas normales usar numberLayer. Para 22,33,44,55,66,77,88 usar hardNumberLayer y card-duro.png. Los números se renderizan sobre la cáscara, no vienen incluidos en la imagen."
+  "notes": "Para cartas normales usar numberLayer. Para 22,33,44,55,66,77,88 usar hardNumberLayer y card-duro.webp. Los números se renderizan sobre la cáscara, no vienen incluidos en la imagen."
 }
